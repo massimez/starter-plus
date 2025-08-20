@@ -1,0 +1,131 @@
+{
+	"HomePage": {
+		"title": "Hallo Welt!",
+		"about": "Zur Über-Seite gehen"
+	},
+	"Hero": {
+		"badge": "Produktionsbereites Starter-Kit",
+		"badgeNew": "NEU",
+		"title": "NextKit",
+		"subtitle": "Das ultimative Starter-Kit",
+		"description": "Überspringe die Einrichtung und beginne direkt mit dem Bauen. Ein produktionsreifes Next.js-Starter-Kit mit allem, was du brauchst, um dein nächstes Projekt schneller als je zuvor zu veröffentlichen.",
+		"cta": {
+			"getStarted": "Loslegen",
+			"github": "GitHub"
+		},
+		"stats": {
+			"downloads": "Downloads",
+			"downloadsValue": "10K+",
+			"stars": "GitHub-Sterne",
+			"starsValue": "2.5K+",
+			"contributors": "Mitwirkende",
+			"contributorsValue": "50+",
+			"happyDevelopers": "Zufriedene Entwickler",
+			"happyDevelopersValue": "1K+"
+		}
+	},
+	"Features": {
+		"heading": "Alles, was du brauchst, um großartige Apps zu bauen",
+		"subheading": "Sorgfältig entwickelte Komponenten und Tools, die die Entwicklung zum Vergnügen machen",
+		"features": {
+			"nextGenStack": {
+				"title": "Next-Gen Stack",
+				"description": "Angetrieben von Next.js 15, React 19, TypeScript und Tailwind CSS – entwickelt für Geschwindigkeit, Skalierbarkeit und Entwicklerzufriedenheit."
+			},
+			"advancedAuth": {
+				"title": "Erweitertes Authentifizierungssystem",
+				"description": "Moderne Authentifizierung mit Better Auth, Sitzungsbeständigkeit, Google OAuth und Multi-Provider-Verknüpfung."
+			},
+			"builtInSubscriptions": {
+				"title": "Integrierte Abonnements",
+				"description": "Nahtlose Abrechnung mit Polar.sh, Preisstufen, Webhook-Verarbeitung und Self-Service-Kundenportal."
+			},
+			"web3Ready": {
+				"title": "Web3-Bereit",
+				"description": "Integriere nahtlos Krypto-Wallets, Smart-Contract-Interaktionen und token-gesteuerte Funktionen in deine App."
+			},
+			"aiReadyDashboard": {
+				"title": "KI-bereites Dashboard",
+				"description": "Integrierter OpenAI-Chatbot mit Markdown-Unterstützung und Konversations-UI – bereit zur Steigerung der Nutzerbindung."
+			},
+			"beautifulUI": {
+				"title": "Wunderschöne UI-Komponenten",
+				"description": "Barrierefreie Komponenten mit shadcn/ui und Radix UI. Dunkel-/Hellmodus, Animationen und responsives Design."
+			},
+			"typeSafeBackend": {
+				"title": "Typensicheres Backend",
+				"description": "Drizzle ORM, Neon Postgres und Cloudflare R2 für skalierbaren Speicher ohne Egress und schema-sichere Abfragen."
+			},
+			"i18nReady": {
+				"title": "Internationalisierung bereit",
+				"description": "Lokalisierung mit next-intl, Unterstützung für RTL und dynamisches Sprachwechseln."
+			},
+			"productionGrade": {
+				"title": "Produktionsreife Einrichtung",
+				"description": "Mit ESLint, Prettier, Docker, TypeScript Strict Mode und Git-Hooks mit Pre-Commit-Prüfungen durch lint-staged."
+			}
+		}
+	},
+	"Testimonials": {
+		"heading": "Weltweit von Entwicklern geliebt",
+		"subheading": "Schließe dich tausenden Entwicklern an, die NextKit vertrauen",
+		"testimonials": [
+			{
+				"name": "Sarah Chen",
+				"role": "Frontend-Entwicklerin",
+				"company": "TechCorp",
+				"content": "Dieses Starter-Kit hat mir Wochen an Einrichtungszeit gespart. Die Codequalität ist außergewöhnlich!"
+			},
+			{
+				"name": "Ahmed Hassan",
+				"role": "Full Stack Engineer",
+				"company": "StartupXYZ",
+				"content": "Perfekte RTL-Unterstützung und i18n-Implementierung. Genau das, was wir für unsere globale App brauchten."
+			},
+			{
+				"name": "Maria Rodriguez",
+				"role": "Produktmanagerin",
+				"company": "InnovateLab",
+				"content": "Die Liebe zum Detail bei den UI-Komponenten ist herausragend. Unser Team liebt es!"
+			}
+		]
+	},
+	"CTA": {
+		"heading": "Bereit, etwas Großartiges zu bauen?",
+		"subheading": "Starte noch heute mit NextKit und veröffentliche dein nächstes Projekt in Rekordzeit.",
+		"cta": {
+			"github": "Auf GitHub ansehen"
+		}
+	},
+	"CodePreview": {
+		"heading": "Sauberer, moderner Code",
+		"subheading": "Gebaut nach Best Practices und modernen Mustern",
+		"filename": "components/ui/button.tsx"
+	},
+	"Footer": {
+		"brand": "NextKit",
+		"description": "Produktionsreifes Next.js-Starter-Kit mit modernen Tools und Best Practices.",
+		"quickLinks": {
+			"title": "Schnellzugriff",
+			"documentation": "Dokumentation",
+			"examples": "Beispiele",
+			"changelog": "Änderungsprotokoll",
+			"support": "Support"
+		},
+		"resources": {
+			"title": "Ressourcen",
+			"blog": "Blog",
+			"guides": "Anleitungen",
+			"templates": "Vorlagen",
+			"community": "Community"
+		},
+		"legal": {
+			"title": "Rechtliches",
+			"privacyPolicy": "Datenschutzrichtlinie",
+			"termsOfService": "Nutzungsbedingungen",
+			"cookiePolicy": "Cookie-Richtlinie",
+			"license": "Lizenz"
+		},
+		"copyright": "Alle Rechte vorbehalten."
+	}
+}

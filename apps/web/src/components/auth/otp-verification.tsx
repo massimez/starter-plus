@@ -1,0 +1,205 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import OTPInput, { type InputProps } from "@/components/ui/inputs/otp";
+import { DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
+
+interface OtpVerificationProps {
+	title?: string;
+	description?: string;
+	length?: number;
+	onComplete: (otp: string) => Promise<void>;
+	onSubmit: (otp: string) => Promise<void>;
+	onResend?: () => Promise<{
+		code?: string | undefined;
+		message?: string | undefined;
+		status: number;
+		statusText: string;
+	} | null>;
+	isLoading?: boolean;
+	isResending?: boolean;
+	resendTimeoutDuration?: number;
+	maxResendAttempts?: number;
+	onResendLimitReached?: () => void;
+}
+
+export function OtpVerification({
+	title = "OTP Verification",
+	description = "Please enter the one-time password sent to your device.",
+	length = 6,
+	onComplete,
+	onSubmit,
+	onResend,
+	isLoading = false,
+	isResending = false,
+	resendTimeoutDuration = 60, // Default 60 seconds
+	maxResendAttempts = 3, // Default max 3 attempts
+	onResendLimitReached,
+}: OtpVerificationProps) {
+	const [otp, setOtp] = useState("");
+	const [timeLeft, setTimeLeft] = useState(0);
+	const [resendAttempts, setResendAttempts] = useState(0);
+	const [isTimeoutActive, setIsTimeoutActive] = useState(false);
+
+	// Timer effect
+	useEffect(() => {
+		if (timeLeft <= 0) {
+			setIsTimeoutActive(false);
+			return;
+		}
+
+		const timer = setTimeout(() => {
+			setTimeLeft((prev) => prev - 1);
+		}, 1000);
+
+		return () => clearTimeout(timer);
+	}, [timeLeft]);
+
+	// Format time as MM:SS
+	const formatTime = useCallback((seconds: number): string => {
+		const mins = Math.floor(seconds / 60);
+		const secs = seconds % 60;
+		return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
+	}, []);
+
+	const handleOtpChange = (value: string) => {
+		setOtp(value);
+		if (value.length === length) {
+			onComplete(value);
+		}
+	};
+
+	const handleSubmit = async (e: React.FormEvent) => {
+		e.preventDefault();
+		if (otp.length === length) {
+			await onSubmit(otp);
+		}
+	};
+
+	const handleResend = async () => {
+		if (!onResend || isResending || isTimeoutActive) return;
+
+		try {
+			// Check if max attempts reached
+			if (resendAttempts >= maxResendAttempts) {
+				onResendLimitReached?.();
+				return;
+			}
+
+			const res = await onResend();
+			if (res) {
+				toast.error("Resend failed", { description: res?.code });
+				return;
+			}
+			// Start timeout and increment attempts
+			setTimeLeft(resendTimeoutDuration);
+			setIsTimeoutActive(true);
+			setResendAttempts((prev) => prev + 1);
+
+			// Clear current OTP
+			setOtp("");
+		} catch (error: unknown) {
+			if (error instanceof Error) {
+				toast.error("Resend failed", { description: error.message });
+			} else {
+				toast.error("Resend failed", { description: "Unknown error" });
+			}
+			console.error("Resend failed:", error);
+			// Don't increment attempts if resend failed
+		}
+	};
+
+	const renderInput = (inputProps: InputProps, index: number) => (
+		<Input
+			{...inputProps}
+			key={index}
+			className="h-14 w-10 text-center font-semibold text-xl md:w-12 md:text-3xl"
+		/>
+	);
+
+	// Determine if resend button should be disabled
+	const isResendDisabled =
+		isResending || isTimeoutActive || resendAttempts >= maxResendAttempts;
+
+	// Generate resend button text
+	const getResendButtonText = (): string => {
+		if (isResending) return "Sending...";
+		if (resendAttempts >= maxResendAttempts) return "Max attempts reached";
+		if (isTimeoutActive) return `Resend in ${formatTime(timeLeft)}`;
+		return "Resend OTP";
+	};
+
+	// Generate helper text for resend attempts
+	const getResendHelperText = (): string | null => {
+		if (maxResendAttempts && resendAttempts > 0) {
+			const remaining = maxResendAttempts - resendAttempts;
+			if (remaining > 0) {
+				return `${remaining} resend attempt${remaining === 1 ? "" : "s"} remaining`;
+			}
+			return "No more resend attempts available";
+		}
+		return null;
+	};
+
+	return (
+		<>
+			<DialogHeader className="text-center">
+				<DialogTitle>{title}</DialogTitle>
+				<DialogDescription>{description}</DialogDescription>
+			</DialogHeader>
+			<form onSubmit={handleSubmit} className="space-y-6">
+				<div className="flex justify-center">
+					<OTPInput
+						numInputs={length}
+						value={otp}
+						onChange={handleOtpChange}
+						renderInput={renderInput}
+						shouldAutoFocus
+						allowedCharacterSet="numeric"
+						containerStyle={"gap-1"}
+						renderMiddleSeparator
+					/>
+				</div>
+
+				<Button
+					type="submit"
+					className="w-full"
+					disabled={otp.length !== length || isLoading}
+				>
+					{isLoading ? "Verifying..." : "Verify"}
+				</Button>
+
+				{onResend && (
+					<div className="space-y-2">
+						<Button
+							type="button"
+							variant="link"
+							className="w-full"
+							onClick={handleResend}
+							disabled={isResendDisabled}
+						>
+							{getResendButtonText()}
+						</Button>
+
+						{/* Helper text for resend attempts */}
+						{getResendHelperText() && (
+							<p className="text-center text-muted-foreground text-xs">
+								{getResendHelperText()}
+							</p>
+						)}
+
+						{/* Additional timeout info */}
+						{isTimeoutActive && (
+							<p className="text-center text-muted-foreground text-xs">
+								Please wait before requesting a new code
+							</p>
+						)}
+					</div>
+				)}
+			</form>
+		</>
+	);
+}

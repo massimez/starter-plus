@@ -1,0 +1,35 @@
+{
+	"name": "starter-plus-server",
+	"main": "src/index.ts",
+	"type": "module",
+	"scripts": {
+		"build": "tsdown",
+		"check-types": "tsc -b",
+		"compile": "bun build --compile --minify --sourcemap --bytecode ./src/index.ts --outfile server",
+		"dev": "bun run --hot src/index.ts",
+		"start": "bun run dist/index.js",
+		"build-ts": "tsc"
+	},
+	"exports": {
+		"./hc": {
+			"types": "./dist/hc.d.ts",
+			"import": "./dist/hc.js",
+			"require": "./dist/hc.js"
+		},
+		"./schema": {
+			"types": "./dist/schema.d.ts",
+			"require": "./dist/schema.js",
+			"import": "./dist/schema.mjs"
+		}
+	},
+	"dependencies": {
+		"dotenv": "^17.2.1",
+		"hono": "^4.8.12",
+		"starter-db": "workspace:^"
+	},
+	"devDependencies": {
+		"tsdown": "^0.12.9",
+		"typescript": "^5.8.2",
+		"@types/bun": "^1.2.6"
+	}
+}

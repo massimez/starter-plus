@@ -1,0 +1,208 @@
+{
+	"common": {
+		"sidebar": {
+			"title": "Sidebar",
+			"description": "Displays the mobile sidebar.",
+			"toggle": "Toggle Sidebar"
+		},
+		"loading": "Loading...",
+		"error": "An error occurred",
+		"notFound": "Page not found",
+		"backToHome": "Back to Home",
+		"more": "More",
+		"next": "Next",
+		"previous": "Previous",
+		"search": "Search",
+		"close": "Close",
+		"save": "Save",
+		"cancel": "Cancel",
+		"delete": "Delete",
+		"edit": "Edit",
+		"update": "Update",
+		"create": "Create",
+		"submit": "Submit",
+		"confirm": "Confirm",
+		"yes": "Yes",
+		"no": "No",
+		"ok": "OK",
+		"view": "View",
+		"download": "Download",
+		"upload": "Upload",
+		"select": "Select",
+		"selectAll": "Select All",
+		"clear": "Clear",
+		"apply": "Apply",
+		"reset": "Reset",
+		"filter": "Filter",
+		"sort": "Sort",
+		"sortBy": "Sort by",
+		"sortAsc": "Sort Ascending",
+		"sortDesc": "Sort Descending",
+		"page": "Page",
+		"of": "of",
+		"noResults": "No results found",
+		"loadingMore": "Loading more...",
+		"loadMore": "Load More",
+		"welcome": "Welcome",
+		"profile": "Profile",
+		"settings": "Settings",
+		"notifications": "Notifications",
+		"language": "Language",
+		"theme": "Theme",
+		"darkMode": "Dark Mode",
+		"lightMode": "Light Mode",
+		"systemDefault": "System Default",
+		"privacy": "Privacy",
+		"terms": "Terms of Service",
+		"help": "Help",
+		"support": "Support",
+		"contactUs": "Contact Us",
+		"feedback": "Feedback",
+		"reportIssue": "Report an Issue",
+		"about": "About",
+		"version": "Version",
+		"documentation": "Documentation",
+		"forum": "Forum",
+		"blog": "Blog",
+		"resources": "Resources",
+		"guides": "Guides",
+		"examples": "Examples",
+		"templates": "Templates",
+		"tools": "Tools",
+		"integrations": "Integrations",
+		"thirdParty": "Third-Party Services",
+		"status": "Status",
+		"maintenance": "Maintenance",
+		"maintenanceMode": "Maintenance Mode",
+		"comingSoon": "Coming Soon"
+	},
+	"HomePage": {
+		"title": "Hello world!",
+		"about": "Go to the about page"
+	},
+	"Hero": {
+		"badge": "Production Ready Starter Kit",
+		"badgeNew": "NEW",
+		"title": "NextKit",
+		"subtitle": "The Ultimate Starter",
+		"description": "Skip the setup, start building. A production-ready Next.js starter kit with everything you need to ship your next project faster than ever.",
+		"cta": {
+			"getStarted": "Get Started",
+			"github": "Github"
+		},
+		"stats": {
+			"downloads": "Downloads",
+			"downloadsValue": "10K+",
+			"stars": "GitHub Stars",
+			"starsValue": "2.5K+",
+			"contributors": "Contributors",
+			"contributorsValue": "50+",
+			"happyDevelopers": "Happy Developers",
+			"happyDevelopersValue": "1K+"
+		}
+	},
+	"Features": {
+		"heading": "Everything you need to build amazing apps",
+		"subheading": "Carefully crafted components and tools that make development a joy",
+		"features": {
+			"nextGenStack": {
+				"title": "Next-Gen Stack",
+				"description": "Powered by Next.js 15, React 19, TypeScript, and Tailwind CSS — built for speed, scalability, and developer happiness."
+			},
+			"advancedAuth": {
+				"title": "Advanced Auth System",
+				"description": "Modern auth with Better Auth, session persistence, Google OAuth, and multi-provider account linking."
+			},
+			"builtInSubscriptions": {
+				"title": "Built-in Subscriptions",
+				"description": "Seamless billing with Polar.sh, multi-tier pricing, webhook handling, and self-service customer portal."
+			},
+			"web3Ready": {
+				"title": "Web3 Ready",
+				"description": "Seamlessly integrate crypto wallets, smart contract interactions, and token-gated features into your app."
+			},
+			"aiReadyDashboard": {
+				"title": "AI-Ready Dashboard",
+				"description": "Integrated OpenAI chatbot with Markdown rendering and conversational UI—ready to boost user engagement."
+			},
+			"beautifulUI": {
+				"title": "Beautiful UI Components",
+				"description": "Accessible components with shadcn/ui and Radix UI. Dark/light themes, animations, and responsive design."
+			},
+			"typeSafeBackend": {
+				"title": "Type-Safe Backend",
+				"description": "Drizzle ORM, Neon Postgres, and Cloudflare R2 for scalable, zero-egress storage and schema-safe queries."
+			},
+			"i18nReady": {
+				"title": "Internationalization Ready",
+				"description": "next-intl powered localization with RTL support and dynamic locale switching."
+			},
+			"productionGrade": {
+				"title": "Production-Grade Setup",
+				"description": "Includes ESLint, Prettier, Docker, TypeScript strict mode, and Git hooks with lint-staged pre-commit checks."
+			}
+		}
+	},
+	"Testimonials": {
+		"heading": "Loved by developers worldwide",
+		"subheading": "Join thousands of developers who trust NextKit",
+		"testimonials": [
+			{
+				"name": "Sarah Chen",
+				"role": "Frontend Developer",
+				"company": "TechCorp",
+				"content": "This starter kit saved me weeks of setup time. The code quality is exceptional!"
+			},
+			{
+				"name": "Ahmed Kan",
+				"role": "Full Stack Engineer",
+				"company": "StartupXYZ",
+				"content": "Perfect RTL support and i18n implementation. Exactly what we needed for our global app."
+			},
+			{
+				"name": "Maria Rodriguez",
+				"role": "Product Manager",
+				"company": "InnovateLab",
+				"content": "The attention to detail in the UI components is outstanding. Our team loves it!"
+			}
+		]
+	},
+	"CTA": {
+		"heading": "Ready to build something amazing?",
+		"subheading": "Get started with NextKit today and ship your next project in record time.",
+		"cta": {
+			"github": "View on GitHub"
+		}
+	},
+	"CodePreview": {
+		"heading": "Clean, Modern Code",
+		"subheading": "Built with best practices and modern patterns",
+		"filename": "components/ui/button.tsx"
+	},
+	"Footer": {
+		"brand": "NextKit",
+		"description": "Production-ready Next.js starter kit with modern tooling and best practices.",
+		"quickLinks": {
+			"title": "Quick Links",
+			"documentation": "Documentation",
+			"examples": "Examples",
+			"changelog": "Changelog",
+			"support": "Support"
+		},
+		"resources": {
+			"title": "Resources",
+			"blog": "Blog",
+			"guides": "Guides",
+			"templates": "Templates",
+			"community": "Community"
+		},
+		"legal": {
+			"title": "Legal",
+			"privacyPolicy": "Privacy Policy",
+			"termsOfService": "Terms of Service",
+			"cookiePolicy": "Cookie Policy",
+			"license": "License"
+		},
+		"copyright": "All rights reserved."
+	}
+}
