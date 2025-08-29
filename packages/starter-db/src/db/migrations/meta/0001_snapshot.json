@@ -1,6 +1,6 @@
 {
-  "id": "fd905346-1f29-4787-b3e4-eb8781312afa",
-  "prevId": "00000000-0000-0000-0000-000000000000",
+  "id": "b410a997-a010-4dde-b556-8067c2f2161b",
+  "prevId": "fd905346-1f29-4787-b3e4-eb8781312afa",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -1733,7 +1733,7 @@
         },
         "language_id": {
           "name": "language_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -1828,15 +1828,15 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "product_category_translation_language_id_language_id_fk": {
-          "name": "product_category_translation_language_id_language_id_fk",
+        "product_category_translation_language_id_language_code_fk": {
+          "name": "product_category_translation_language_id_language_code_fk",
           "tableFrom": "product_category_translation",
           "tableTo": "language",
           "columnsFrom": [
             "language_id"
           ],
           "columnsTo": [
-            "id"
+            "code"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
@@ -3043,7 +3043,7 @@
         },
         "language_id": {
           "name": "language_id",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -3132,15 +3132,15 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "product_variant_translation_language_id_language_id_fk": {
-          "name": "product_variant_translation_language_id_language_id_fk",
+        "product_variant_translation_language_id_language_code_fk": {
+          "name": "product_variant_translation_language_id_language_code_fk",
           "tableFrom": "product_variant_translation",
           "tableTo": "language",
           "columnsFrom": [
             "language_id"
           ],
           "columnsTo": [
-            "id"
+            "code"
           ],
           "onDelete": "cascade",
           "onUpdate": "no action"
