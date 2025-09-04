@@ -186,7 +186,9 @@ export default function SignUp() {
 										onResponse: () => setLoading(false),
 										onError: (ctx) => {
 											setLoading(false);
-											toast.error(ctx.error.message);
+											toast.error(
+												ctx.error.message || "An unexpected error occurred",
+											);
 										},
 										onSuccess: async () => {
 											handleVerification({
