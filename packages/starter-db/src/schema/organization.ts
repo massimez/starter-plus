@@ -76,7 +76,7 @@ export const organizationInfo = pgTable("organization_info", {
 		.default("0.00")
 		.notNull(),
 	defaultLanguage: text("default_language"),
-	activeLanguages: text("active_languages"),
+	activeLanguages: jsonb("active_languages").$type<string[]>(),
 	images: jsonb("images").$type<TImage[]>(),
 
 	socialLinks: jsonb("social_links").$type<TSocialLinks>(),
@@ -102,13 +102,17 @@ export const insertOrganizationInfoSchema = createInsertSchema(
 			.regex(/^\d+(\.\d{1,2})?$/, "Tax rate must be a valid monetary value")
 			.optional(),
 		defaultLanguage: z.string().optional(),
-		activeLanguages: z.string().optional(),
+		activeLanguages: z.array(z.string()).optional(),
 		images: z
 			.array(
 				z.object({
 					url: z.string(),
 					alt: z.string().optional(),
 					type: z.string().optional(),
+					itemType: z.string().optional(),
+					key: z.string().optional(),
+					name: z.string().optional(),
+					size: z.number().optional(),
 				}),
 			)
 			.optional(),
@@ -146,13 +150,17 @@ export const updateOrganizationInfoSchema = createSelectSchema(
 			.regex(/^\d+(\.\d{1,2})?$/, "Tax rate must be a valid monetary value")
 			.optional(),
 		defaultLanguage: z.string().optional(),
-		activeLanguages: z.string().optional().or(z.literal("")),
+		activeLanguages: z.array(z.string()).optional(),
 		images: z
 			.array(
 				z.object({
 					url: z.string(),
 					alt: z.string().optional(),
 					type: z.string().optional(),
+					itemType: z.string().optional(),
+					key: z.string().optional(),
+					name: z.string().optional(),
+					size: z.number().optional(),
 				}),
 			)
 			.optional(),

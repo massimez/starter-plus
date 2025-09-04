@@ -9,8 +9,24 @@ export type TAddress = {
 	address?: string;
 };
 
-export type TImage = { url: string; alt?: string; type?: string };
-export type TVideo = { url: string; alt?: string; type?: string };
+export type TImage = {
+	url: string;
+	alt?: string;
+	type?: string;
+	itemType?: string;
+	key?: string;
+	name?: string;
+	size?: number;
+};
+
+export type TVideo = {
+	key?: string;
+	url: string;
+	alt?: string;
+	type?: string;
+	size?: number;
+	itemType?: string;
+};
 
 export type TSocialLinks = {
 	facebook?: string;
