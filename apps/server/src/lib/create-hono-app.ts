@@ -5,30 +5,24 @@ import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
 import { secureHeaders } from "hono/secure-headers";
-
 import { errorHandler } from "@/middleware/error-handler";
 import { rateLimiter } from "@/middleware/rate-limiter";
-import type { AuthType } from "@/types";
 import env from "../env";
+import type { auth } from "../lib/auth";
 
 export function createRouter() {
-	return new Hono<{ Variables: AuthType }>({
+	return new Hono<{
+		Variables: {
+			user: typeof auth.$Infer.Session.user | null;
+			session: typeof auth.$Infer.Session.session | null;
+		};
+	}>({
 		strict: false,
 	});
 }
 
 export default function createApp() {
 	const app = createRouter();
-
-	// Root route
-	// app.get("/", (c) => {
-	// 	return c.json({
-	// 		message: "Full-stack Monorepo API",
-	// 		version: "1.0.0",
-	// 		status: "healthy",
-	// 		timestamp: new Date().toISOString(),
-	// 	});
-	// });
 
 	// Middleware
 	app.use("*", logger());
