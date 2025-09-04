@@ -2,13 +2,15 @@ import "./../../globals.css";
 
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
+import QueryProvider from "@/app/providers/query";
 import { ThemeProvider } from "@/app/providers/theme";
 import { ModalProvider } from "@/components/modals/modal-context";
 import ModalRenderer from "@/components/modals/modal-render";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
 import { AppSidebar } from "./layout/sidebar/app-sidebar";
+import { HeaderDashboard } from "./layout/sidebar/header";
 
 export const metadata: Metadata = {
 	title: "Next Starter Template",
@@ -33,27 +35,28 @@ export default async function MainLayout({ children, params }: LayoutProps) {
 					"rtl",
 				)}
 			>
-				<ThemeProvider
-					attribute="class"
-					defaultTheme="system"
-					enableSystem
-					disableTransitionOnChange
-				>
-					<ModalProvider>
-						<ModalRenderer />
-						<Toaster position="top-center" richColors />
-						<SidebarProvider>
-							<NextIntlClientProvider>
-								<AppSidebar />
-
-								<main className="flex-1">
-									<SidebarTrigger />
-									{children}
-								</main>
-							</NextIntlClientProvider>
-						</SidebarProvider>
-					</ModalProvider>
-				</ThemeProvider>
+				<QueryProvider>
+					<ThemeProvider
+						attribute="class"
+						defaultTheme="system"
+						enableSystem
+						disableTransitionOnChange
+					>
+						<ModalProvider>
+							<ModalRenderer />
+							<Toaster position="top-center" richColors />
+							<SidebarProvider>
+								<NextIntlClientProvider>
+									<AppSidebar />
+									<SidebarInset>
+										<HeaderDashboard />
+										<div className="p-4">{children}</div>
+									</SidebarInset>
+								</NextIntlClientProvider>
+							</SidebarProvider>
+						</ModalProvider>
+					</ThemeProvider>
+				</QueryProvider>
 			</body>
 		</html>
 	);

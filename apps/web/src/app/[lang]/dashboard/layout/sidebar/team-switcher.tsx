@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, ChevronsUpDown, Plus } from "lucide-react";
+import { Building2, ChevronsUpDown, Plus, Settings } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
 
@@ -196,6 +196,16 @@ export function TeamSwitcher() {
 									</DropdownMenuItem>
 								))}
 						<DropdownMenuSeparator />
+						<DropdownMenuItem asChild className="gap-2 p-2">
+							<a href="/dashboard/organization">
+								<div className="flex size-6 items-center justify-center rounded-md border bg-transparent">
+									<Settings className="size-4" />
+								</div>
+								<div className="font-medium text-muted-foreground">
+									Settings
+								</div>
+							</a>
+						</DropdownMenuItem>
 						<DropdownMenuItem
 							onClick={() => {
 								openModal("createOrg", null);
