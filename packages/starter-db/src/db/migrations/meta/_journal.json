@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1756411226668,
-      "tag": "0000_curious_shiver_man",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1756411632283,
-      "tag": "0001_curious_snowbird",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1756651377023,
-      "tag": "0002_fancy_slipstream",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1758060959453,
-      "tag": "0003_steep_domino",
+      "when": 1758366189325,
+      "tag": "0000_fluffy_rage",
       "breakpoints": true
     }
   ]

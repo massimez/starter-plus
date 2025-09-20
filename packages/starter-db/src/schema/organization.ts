@@ -9,8 +9,7 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { z } from "zod";
+
 import type { TImage, TSocialLinks } from "./helpers/types";
 import { user } from "./user";
 
@@ -78,120 +77,9 @@ export const organizationInfo = pgTable("organization_info", {
 	bonusPercentage: numeric("bonus_percentage", { precision: 5, scale: 2 })
 		.default("0")
 		.notNull(),
-	defaultLanguage: text("default_language"),
+	defaultLanguage: varchar("default_language", { length: 20 }),
 	activeLanguages: jsonb("active_languages").$type<string[]>(),
 	images: jsonb("images").$type<TImage[]>(),
 
 	socialLinks: jsonb("social_links").$type<TSocialLinks>(),
 });
-
-export const insertOrganizationInfoSchema = createInsertSchema(
-	organizationInfo,
-	{
-		organizationId: z.string().min(1),
-		contactName: z.string().max(100).optional().or(z.literal("")),
-		contactEmail: z.email().max(100).optional().or(z.literal("")),
-		contactPhone: z.string().max(20).optional().or(z.literal("")),
-		travelFeeType: z
-			.enum(["fixed", "per_km", "varies", "start_at", "free"])
-			.optional(),
-		travelFeeValue: z.number().int().optional(),
-		travelFeeValueByKm: z.number().int().optional(),
-		maxTravelDistance: z.number().int().optional(),
-		travelFeesPolicyText: z.string().optional().or(z.literal("")),
-		minimumTravelFees: z.number().int().optional(),
-		taxRate: z
-			.string()
-			.regex(/^\d+(\.\d{1,2})?$/, "Tax rate must be a valid monetary value")
-			.optional(),
-		bonusPercentage: z
-			.string()
-			.regex(
-				/^\d+(\.\d{1,2})?$/,
-				"Bonus percentage must be a valid monetary value",
-			)
-			.optional(),
-		defaultLanguage: z.string().optional(),
-		activeLanguages: z.array(z.string()).optional(),
-		images: z
-			.array(
-				z.object({
-					url: z.string(),
-					alt: z.string().optional(),
-					type: z.string().optional(),
-					itemType: z.string().optional(),
-					key: z.string().optional(),
-					name: z.string().optional(),
-					size: z.number().optional(),
-				}),
-			)
-			.optional(),
-		socialLinks: z
-			.object({
-				facebook: z.string().optional(),
-				instagram: z.string().optional(),
-				twitter: z.string().optional(),
-				linkedin: z.string().optional(),
-				tiktok: z.string().optional(),
-				youtube: z.string().optional(),
-				telegram: z.string().optional(),
-				website: z.string().optional(),
-			})
-			.optional(),
-	},
-);
-
-export const updateOrganizationInfoSchema = createSelectSchema(
-	organizationInfo,
-	{
-		contactName: z.string().max(100).optional().or(z.literal("")),
-		contactEmail: z.email().max(100).optional().or(z.literal("")),
-		contactPhone: z.string().max(20).optional().or(z.literal("")),
-		travelFeeType: z
-			.enum(["fixed", "per_km", "varies", "start_at", "free"])
-			.optional(),
-		travelFeeValue: z.number().int().optional(),
-		travelFeeValueByKm: z.number().int().optional(),
-		maxTravelDistance: z.number().int().optional(),
-		travelFeesPolicyText: z.string().optional().or(z.literal("")),
-		minimumTravelFees: z.number().int().optional(),
-		taxRate: z
-			.string()
-			.regex(/^\d+(\.\d{1,2})?$/, "Tax rate must be a valid monetary value")
-			.optional(),
-		bonusPercentage: z
-			.string()
-			.regex(
-				/^\d+(\.\d{1,2})?$/,
-				"Bonus percentage must be a valid monetary value",
-			)
-			.optional(),
-		defaultLanguage: z.string().optional(),
-		activeLanguages: z.array(z.string()).optional(),
-		images: z
-			.array(
-				z.object({
-					url: z.string(),
-					alt: z.string().optional(),
-					type: z.string().optional(),
-					itemType: z.string().optional(),
-					key: z.string().optional(),
-					name: z.string().optional(),
-					size: z.number().optional(),
-				}),
-			)
-			.optional(),
-		socialLinks: z
-			.object({
-				facebook: z.string().optional(),
-				instagram: z.string().optional(),
-				twitter: z.string().optional(),
-				linkedin: z.string().optional(),
-				tiktok: z.string().optional(),
-				youtube: z.string().optional(),
-				telegram: z.string().optional(),
-				website: z.string().optional(),
-			})
-			.optional(),
-	},
-).partial();

@@ -11,7 +11,6 @@ import {
 } from "drizzle-orm/pg-core";
 import { softAudit } from "../helpers/common";
 import { organization } from "../organization";
-import { user } from "../user";
 import { location } from "./location";
 import { productVariant } from "./product";
 import { supplier } from "./supplier";
@@ -56,10 +55,7 @@ export const productVariantStockTransaction = pgTable(
 		reason: varchar("reason", { length: 50 }).notNull(), // purchase, sale, return, adjustment, transfer_in, transfer_out
 		referenceId: uuid("reference_id"), // e.g. orderId, purchaseOrderId
 		transferGroupId: uuid("transfer_group_id"), // link IN & OUT for transfers
-		createdAt: timestamp("created_at").defaultNow(),
-		createdBy: text("created_by").references(() => user.id, {
-			onDelete: "set null",
-		}),
+		...softAudit,
 	},
 );
 

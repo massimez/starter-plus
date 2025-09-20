@@ -32,7 +32,7 @@ export const stockMovement = pgTable("stock_movement", {
 		.notNull()
 		.references(() => productVariant.id, { onDelete: "cascade" }),
 
-	type: text("type").notNull().$type<TStockMovementType>(),
+	type: varchar("type", { length: 255 }).notNull().$type<TStockMovementType>(),
 	quantity: integer("quantity").notNull(), // +in, -out
 	previousStock: integer("previous_stock").notNull(),
 	newStock: integer("new_stock").notNull(),
@@ -40,8 +40,7 @@ export const stockMovement = pgTable("stock_movement", {
 	reference: varchar("reference", { length: 100 }), // Order ID, PO, etc.
 	reason: varchar("reason", { length: 255 }),
 	notes: text("notes"),
-	createdBy: text("created_by").references(() => user.id),
-	createdAt: timestamp("created_at").defaultNow().notNull(),
+	...softAudit,
 });
 
 /**
@@ -147,6 +146,5 @@ export const orderStatusHistory = pgTable("order_status_history", {
 	previousStatus: text("previous_status").$type<TOrderStatus>(),
 	notes: text("notes"),
 	metadata: jsonb("metadata"),
-	changedBy: text("changed_by").references(() => user.id),
-	changedAt: timestamp("changed_at").defaultNow().notNull(),
+	...softAudit,
 });

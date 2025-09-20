@@ -39,10 +39,74 @@ CREATE TABLE "organization_info" (
 	"travel_fees_policy_text" text,
 	"minimum_travel_fees" integer,
 	"tax_rate" numeric(5, 2) DEFAULT '0.00' NOT NULL,
-	"default_language" text,
-	"active_languages" text,
+	"bonus_percentage" numeric(5, 2) DEFAULT '0' NOT NULL,
+	"default_language" varchar(20),
+	"active_languages" jsonb,
 	"images" jsonb,
-	"social_links" jsonb
+	"social_links" jsonb,
+	CONSTRAINT "organization_info_organization_id_unique" UNIQUE("organization_id")
+);
+--> statement-breakpoint
+CREATE TABLE "user_bonus" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" text,
+	"organization_id" text NOT NULL,
+	"bonus" numeric(10, 2) DEFAULT '0',
+	"bonus_pending" numeric(10, 2) DEFAULT '0',
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now(),
+	"deleted_at" timestamp,
+	"created_by" text,
+	"updated_by" text
+);
+--> statement-breakpoint
+CREATE TABLE "product_variant_batch" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"product_variant_id" uuid NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"batch_number" varchar(100) NOT NULL,
+	"expiry_date" timestamp,
+	"location_id" uuid NOT NULL,
+	"quantity" integer DEFAULT 0 NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now(),
+	"deleted_at" timestamp,
+	"created_by" text,
+	"updated_by" text
+);
+--> statement-breakpoint
+CREATE TABLE "product_variant_stock" (
+	"product_variant_id" uuid PRIMARY KEY NOT NULL,
+	"organization_id" text NOT NULL,
+	"location_id" uuid NOT NULL,
+	"quantity" integer DEFAULT 0 NOT NULL,
+	"reserved_quantity" integer DEFAULT 0,
+	"unit_cost" numeric(10, 2),
+	"currency" varchar(3) DEFAULT 'USD',
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now(),
+	"deleted_at" timestamp,
+	"created_by" text,
+	"updated_by" text
+);
+--> statement-breakpoint
+CREATE TABLE "product_variant_stock_transaction" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"product_variant_id" uuid NOT NULL,
+	"organization_id" uuid NOT NULL,
+	"location_id" uuid NOT NULL,
+	"supplier_id" uuid,
+	"batch_id" uuid,
+	"quantity_change" integer NOT NULL,
+	"unit_cost" numeric(10, 2),
+	"reason" varchar(50) NOT NULL,
+	"reference_id" uuid,
+	"transfer_group_id" uuid,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now(),
+	"deleted_at" timestamp,
+	"created_by" text,
+	"updated_by" text
 );
 --> statement-breakpoint
 CREATE TABLE "location" (
@@ -91,7 +155,7 @@ CREATE TABLE "order" (
 	"shipped_at" timestamp,
 	"delivered_at" timestamp,
 	"cancelled_at" timestamp,
-	"location_id" uuid,
+	"location_id" uuid NOT NULL,
 	"notes" text,
 	"tags" jsonb,
 	"metadata" jsonb,
@@ -107,6 +171,7 @@ CREATE TABLE "order_item" (
 	"organization_id" text NOT NULL,
 	"order_id" uuid NOT NULL,
 	"product_variant_id" uuid NOT NULL,
+	"location_id" uuid NOT NULL,
 	"product_name" varchar(255) NOT NULL,
 	"variant_name" varchar(255),
 	"sku" varchar(100) NOT NULL,
@@ -131,15 +196,18 @@ CREATE TABLE "order_status_history" (
 	"previous_status" text,
 	"notes" text,
 	"metadata" jsonb,
-	"changed_by" text,
-	"changed_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now(),
+	"deleted_at" timestamp,
+	"created_by" text,
+	"updated_by" text
 );
 --> statement-breakpoint
 CREATE TABLE "stock_movement" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" text NOT NULL,
 	"product_variant_id" uuid NOT NULL,
-	"type" text NOT NULL,
+	"type" varchar(255) NOT NULL,
 	"quantity" integer NOT NULL,
 	"previous_stock" integer NOT NULL,
 	"new_stock" integer NOT NULL,
@@ -147,8 +215,11 @@ CREATE TABLE "stock_movement" (
 	"reference" varchar(100),
 	"reason" varchar(255),
 	"notes" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now(),
+	"deleted_at" timestamp,
 	"created_by" text,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"updated_by" text
 );
 --> statement-breakpoint
 CREATE TABLE "product" (
@@ -206,7 +277,7 @@ CREATE TABLE "product_category_translation" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" text NOT NULL,
 	"category_id" uuid NOT NULL,
-	"language_id" integer NOT NULL,
+	"language_code" text NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"slug" varchar(255) NOT NULL,
 	"description" text,
@@ -250,29 +321,11 @@ CREATE TABLE "product_review" (
 	"updated_by" text
 );
 --> statement-breakpoint
-CREATE TABLE "product_supplier" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"organization_id" text NOT NULL,
-	"product_variant_id" uuid NOT NULL,
-	"supplier_id" uuid NOT NULL,
-	"supplier_sku" varchar(100),
-	"unit_cost" numeric(12, 2) NOT NULL,
-	"min_order_quantity" integer DEFAULT 1 NOT NULL,
-	"lead_time_days" integer,
-	"is_preferred" boolean DEFAULT false NOT NULL,
-	"is_active" boolean DEFAULT true NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now(),
-	"deleted_at" timestamp,
-	"created_by" text,
-	"updated_by" text
-);
---> statement-breakpoint
 CREATE TABLE "product_translation" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" text NOT NULL,
 	"product_id" uuid NOT NULL,
-	"language_id" integer NOT NULL,
+	"language_code" text NOT NULL,
 	"name" varchar(255) NOT NULL,
 	"slug" varchar(255) NOT NULL,
 	"short_description" text,
@@ -281,7 +334,7 @@ CREATE TABLE "product_translation" (
 	"images" jsonb,
 	"seo_title" varchar(255),
 	"seo_description" text,
-	"tags" jsonb,
+	"tags" text,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now(),
 	"deleted_at" timestamp,
@@ -306,6 +359,7 @@ CREATE TABLE "product_variant" (
 	"price" numeric(12, 2) NOT NULL,
 	"compare_at_price" numeric(12, 2),
 	"cost" numeric(12, 2),
+	"unit" varchar(255),
 	"is_active" boolean DEFAULT true NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now(),
@@ -329,23 +383,11 @@ CREATE TABLE "product_variant_attribute" (
 	"updated_by" text
 );
 --> statement-breakpoint
-CREATE TABLE "product_variant_stock" (
-	"product_variant_id" uuid PRIMARY KEY NOT NULL,
-	"organization_id" text NOT NULL,
-	"location_id" uuid NOT NULL,
-	"quantity" integer DEFAULT 0 NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	"updated_at" timestamp DEFAULT now(),
-	"deleted_at" timestamp,
-	"created_by" text,
-	"updated_by" text
-);
---> statement-breakpoint
 CREATE TABLE "product_variant_translation" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" text NOT NULL,
 	"product_variant_id" uuid NOT NULL,
-	"language_id" integer NOT NULL,
+	"language_code" text NOT NULL,
 	"name" varchar(255),
 	"attributes" jsonb,
 	"features" jsonb,
@@ -374,6 +416,24 @@ CREATE TABLE "brand" (
 	"updated_by" text
 );
 --> statement-breakpoint
+CREATE TABLE "product_supplier" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"organization_id" text NOT NULL,
+	"product_variant_id" uuid NOT NULL,
+	"supplier_id" uuid NOT NULL,
+	"supplier_sku" varchar(100),
+	"unit_cost" numeric(12, 2) NOT NULL,
+	"min_order_quantity" integer DEFAULT 1 NOT NULL,
+	"lead_time_days" integer,
+	"is_preferred" boolean DEFAULT false NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now(),
+	"deleted_at" timestamp,
+	"created_by" text,
+	"updated_by" text
+);
+--> statement-breakpoint
 CREATE TABLE "supplier" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"organization_id" text NOT NULL,
@@ -388,7 +448,7 @@ CREATE TABLE "supplier" (
 	"country" varchar(100),
 	"payment_terms" varchar(100),
 	"lead_time_days" integer,
-	"currency" varchar(3) DEFAULT 'USD',
+	"currency" varchar(3),
 	"rating" numeric(3, 2),
 	"is_active" boolean DEFAULT true NOT NULL,
 	"metadata" jsonb,
@@ -397,6 +457,50 @@ CREATE TABLE "supplier" (
 	"deleted_at" timestamp,
 	"created_by" text,
 	"updated_by" text
+);
+--> statement-breakpoint
+CREATE TABLE "businesses" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"parent_id" integer,
+	"code" text NOT NULL,
+	"name" text NOT NULL,
+	"keywords" text,
+	"order" integer,
+	"images" jsonb,
+	"featured" boolean DEFAULT true NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"has_online_services" boolean,
+	"has_sub_category" boolean,
+	"suggested_services" text,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now(),
+	"deleted_at" timestamp,
+	"created_by" text,
+	"updated_by" text,
+	CONSTRAINT "businesses_code_unique" UNIQUE("code")
+);
+--> statement-breakpoint
+CREATE TABLE "currency" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"code" varchar(3) NOT NULL,
+	"name" varchar(100) NOT NULL,
+	"symbol" varchar(10),
+	"is_active" boolean DEFAULT true NOT NULL,
+	"is_default" boolean DEFAULT false NOT NULL,
+	"exchange_rate" numeric DEFAULT '1.0' NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "currency_code_unique" UNIQUE("code")
+);
+--> statement-breakpoint
+CREATE TABLE "language" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"code" varchar(5) NOT NULL,
+	"name" varchar(100) NOT NULL,
+	"native_name" varchar(20),
+	"is_active" boolean DEFAULT true NOT NULL,
+	"is_default" boolean DEFAULT false NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "language_code_unique" UNIQUE("code")
 );
 --> statement-breakpoint
 CREATE TABLE "account" (
@@ -459,51 +563,28 @@ CREATE TABLE "verification" (
 	"updated_at" timestamp
 );
 --> statement-breakpoint
-CREATE TABLE "businesses" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"parent_id" integer,
-	"code" text NOT NULL,
-	"name" text NOT NULL,
-	"keywords" text,
-	"order" integer,
-	"images" jsonb,
-	"featured" boolean DEFAULT true NOT NULL,
-	"is_active" boolean DEFAULT true NOT NULL,
-	"has_online_services" boolean,
-	"has_sub_category" boolean,
-	"suggested_services" text,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "businesses_code_unique" UNIQUE("code")
-);
---> statement-breakpoint
-CREATE TABLE "currency" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"code" text NOT NULL,
-	"name" text NOT NULL,
-	"symbol" text,
-	"is_active" boolean DEFAULT true NOT NULL,
-	"is_default" boolean DEFAULT false NOT NULL,
-	"exchange_rate" numeric DEFAULT '1.0' NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "currency_code_unique" UNIQUE("code")
-);
---> statement-breakpoint
-CREATE TABLE "language" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"code" text NOT NULL,
-	"name" text NOT NULL,
-	"native_name" text,
-	"is_active" boolean DEFAULT true NOT NULL,
-	"is_default" boolean DEFAULT false NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL,
-	CONSTRAINT "language_code_unique" UNIQUE("code")
-);
---> statement-breakpoint
 ALTER TABLE "invitation" ADD CONSTRAINT "invitation_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "invitation" ADD CONSTRAINT "invitation_inviter_id_user_id_fk" FOREIGN KEY ("inviter_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "member" ADD CONSTRAINT "member_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "member" ADD CONSTRAINT "member_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "organization_info" ADD CONSTRAINT "organization_info_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_bonus" ADD CONSTRAINT "user_bonus_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_bonus" ADD CONSTRAINT "user_bonus_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_bonus" ADD CONSTRAINT "user_bonus_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "user_bonus" ADD CONSTRAINT "user_bonus_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_batch" ADD CONSTRAINT "product_variant_batch_product_variant_id_product_variant_id_fk" FOREIGN KEY ("product_variant_id") REFERENCES "public"."product_variant"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_batch" ADD CONSTRAINT "product_variant_batch_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_batch" ADD CONSTRAINT "product_variant_batch_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_stock" ADD CONSTRAINT "product_variant_stock_product_variant_id_product_variant_id_fk" FOREIGN KEY ("product_variant_id") REFERENCES "public"."product_variant"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_stock" ADD CONSTRAINT "product_variant_stock_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_stock" ADD CONSTRAINT "product_variant_stock_location_id_location_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."location"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_stock" ADD CONSTRAINT "product_variant_stock_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_stock" ADD CONSTRAINT "product_variant_stock_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_stock_transaction" ADD CONSTRAINT "product_variant_stock_transaction_product_variant_id_product_variant_id_fk" FOREIGN KEY ("product_variant_id") REFERENCES "public"."product_variant"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_stock_transaction" ADD CONSTRAINT "product_variant_stock_transaction_supplier_id_supplier_id_fk" FOREIGN KEY ("supplier_id") REFERENCES "public"."supplier"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_stock_transaction" ADD CONSTRAINT "product_variant_stock_transaction_batch_id_product_variant_batch_id_fk" FOREIGN KEY ("batch_id") REFERENCES "public"."product_variant_batch"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_stock_transaction" ADD CONSTRAINT "product_variant_stock_transaction_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_stock_transaction" ADD CONSTRAINT "product_variant_stock_transaction_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "location" ADD CONSTRAINT "location_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "location" ADD CONSTRAINT "location_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "location" ADD CONSTRAINT "location_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
@@ -515,14 +596,17 @@ ALTER TABLE "order" ADD CONSTRAINT "order_updated_by_user_id_fk" FOREIGN KEY ("u
 ALTER TABLE "order_item" ADD CONSTRAINT "order_item_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_item" ADD CONSTRAINT "order_item_order_id_order_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."order"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_item" ADD CONSTRAINT "order_item_product_variant_id_product_variant_id_fk" FOREIGN KEY ("product_variant_id") REFERENCES "public"."product_variant"("id") ON DELETE restrict ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "order_item" ADD CONSTRAINT "order_item_location_id_location_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."location"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_item" ADD CONSTRAINT "order_item_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_item" ADD CONSTRAINT "order_item_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_status_history" ADD CONSTRAINT "order_status_history_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "order_status_history" ADD CONSTRAINT "order_status_history_order_id_order_id_fk" FOREIGN KEY ("order_id") REFERENCES "public"."order"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "order_status_history" ADD CONSTRAINT "order_status_history_changed_by_user_id_fk" FOREIGN KEY ("changed_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "order_status_history" ADD CONSTRAINT "order_status_history_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "order_status_history" ADD CONSTRAINT "order_status_history_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "stock_movement" ADD CONSTRAINT "stock_movement_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "stock_movement" ADD CONSTRAINT "stock_movement_product_variant_id_product_variant_id_fk" FOREIGN KEY ("product_variant_id") REFERENCES "public"."product_variant"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "stock_movement" ADD CONSTRAINT "stock_movement_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "stock_movement" ADD CONSTRAINT "stock_movement_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "stock_movement" ADD CONSTRAINT "stock_movement_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product" ADD CONSTRAINT "product_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product" ADD CONSTRAINT "product_brand_id_brand_id_fk" FOREIGN KEY ("brand_id") REFERENCES "public"."brand"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product" ADD CONSTRAINT "product_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
@@ -538,7 +622,7 @@ ALTER TABLE "product_category_assignment" ADD CONSTRAINT "product_category_assig
 ALTER TABLE "product_category_assignment" ADD CONSTRAINT "product_category_assignment_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_category_translation" ADD CONSTRAINT "product_category_translation_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_category_translation" ADD CONSTRAINT "product_category_translation_category_id_product_category_id_fk" FOREIGN KEY ("category_id") REFERENCES "public"."product_category"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_category_translation" ADD CONSTRAINT "product_category_translation_language_id_language_id_fk" FOREIGN KEY ("language_id") REFERENCES "public"."language"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_category_translation" ADD CONSTRAINT "product_category_translation_language_code_language_code_fk" FOREIGN KEY ("language_code") REFERENCES "public"."language"("code") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_category_translation" ADD CONSTRAINT "product_category_translation_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_category_translation" ADD CONSTRAINT "product_category_translation_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_review" ADD CONSTRAINT "product_review_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -549,14 +633,9 @@ ALTER TABLE "product_review" ADD CONSTRAINT "product_review_order_id_order_id_fk
 ALTER TABLE "product_review" ADD CONSTRAINT "product_review_moderated_by_user_id_fk" FOREIGN KEY ("moderated_by") REFERENCES "public"."user"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_review" ADD CONSTRAINT "product_review_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_review" ADD CONSTRAINT "product_review_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_supplier" ADD CONSTRAINT "product_supplier_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_supplier" ADD CONSTRAINT "product_supplier_product_variant_id_product_variant_id_fk" FOREIGN KEY ("product_variant_id") REFERENCES "public"."product_variant"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_supplier" ADD CONSTRAINT "product_supplier_supplier_id_supplier_id_fk" FOREIGN KEY ("supplier_id") REFERENCES "public"."supplier"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_supplier" ADD CONSTRAINT "product_supplier_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_supplier" ADD CONSTRAINT "product_supplier_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_translation" ADD CONSTRAINT "product_translation_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_translation" ADD CONSTRAINT "product_translation_product_id_product_id_fk" FOREIGN KEY ("product_id") REFERENCES "public"."product"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_translation" ADD CONSTRAINT "product_translation_language_id_language_id_fk" FOREIGN KEY ("language_id") REFERENCES "public"."language"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_translation" ADD CONSTRAINT "product_translation_language_code_language_code_fk" FOREIGN KEY ("language_code") REFERENCES "public"."language"("code") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_translation" ADD CONSTRAINT "product_translation_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_translation" ADD CONSTRAINT "product_translation_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_variant" ADD CONSTRAINT "product_variant_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
@@ -567,21 +646,28 @@ ALTER TABLE "product_variant_attribute" ADD CONSTRAINT "product_variant_attribut
 ALTER TABLE "product_variant_attribute" ADD CONSTRAINT "product_variant_attribute_product_variant_id_product_variant_id_fk" FOREIGN KEY ("product_variant_id") REFERENCES "public"."product_variant"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_variant_attribute" ADD CONSTRAINT "product_variant_attribute_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_variant_attribute" ADD CONSTRAINT "product_variant_attribute_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_variant_stock" ADD CONSTRAINT "product_variant_stock_product_variant_id_product_variant_id_fk" FOREIGN KEY ("product_variant_id") REFERENCES "public"."product_variant"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_variant_stock" ADD CONSTRAINT "product_variant_stock_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_variant_stock" ADD CONSTRAINT "product_variant_stock_location_id_location_id_fk" FOREIGN KEY ("location_id") REFERENCES "public"."location"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_variant_stock" ADD CONSTRAINT "product_variant_stock_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_variant_stock" ADD CONSTRAINT "product_variant_stock_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_variant_translation" ADD CONSTRAINT "product_variant_translation_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_variant_translation" ADD CONSTRAINT "product_variant_translation_product_variant_id_product_variant_id_fk" FOREIGN KEY ("product_variant_id") REFERENCES "public"."product_variant"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "product_variant_translation" ADD CONSTRAINT "product_variant_translation_language_id_language_id_fk" FOREIGN KEY ("language_id") REFERENCES "public"."language"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_variant_translation" ADD CONSTRAINT "product_variant_translation_language_code_language_code_fk" FOREIGN KEY ("language_code") REFERENCES "public"."language"("code") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_variant_translation" ADD CONSTRAINT "product_variant_translation_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "product_variant_translation" ADD CONSTRAINT "product_variant_translation_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "brand" ADD CONSTRAINT "brand_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "brand" ADD CONSTRAINT "brand_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "brand" ADD CONSTRAINT "brand_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_supplier" ADD CONSTRAINT "product_supplier_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_supplier" ADD CONSTRAINT "product_supplier_product_variant_id_product_variant_id_fk" FOREIGN KEY ("product_variant_id") REFERENCES "public"."product_variant"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_supplier" ADD CONSTRAINT "product_supplier_supplier_id_supplier_id_fk" FOREIGN KEY ("supplier_id") REFERENCES "public"."supplier"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_supplier" ADD CONSTRAINT "product_supplier_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "product_supplier" ADD CONSTRAINT "product_supplier_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "supplier" ADD CONSTRAINT "supplier_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "supplier" ADD CONSTRAINT "supplier_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "supplier" ADD CONSTRAINT "supplier_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "businesses" ADD CONSTRAINT "businesses_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "businesses" ADD CONSTRAINT "businesses_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "account" ADD CONSTRAINT "account_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;
+ALTER TABLE "session" ADD CONSTRAINT "session_user_id_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."user"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+CREATE UNIQUE INDEX "user_bonus_user_org_idx" ON "user_bonus" USING btree ("user_id","organization_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "uq_variant_org_loc" ON "product_variant_stock" USING btree ("product_variant_id","organization_id","location_id");--> statement-breakpoint
+CREATE UNIQUE INDEX "product_category_language_idx" ON "product_category_translation" USING btree ("organization_id","category_id","language_code");--> statement-breakpoint
+CREATE UNIQUE INDEX "product_language_idx" ON "product_translation" USING btree ("organization_id","product_id","language_code");--> statement-breakpoint
+CREATE UNIQUE INDEX "product_variant_language_idx" ON "product_variant_translation" USING btree ("organization_id","product_variant_id","language_code");

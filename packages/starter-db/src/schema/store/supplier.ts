@@ -37,7 +37,7 @@ export const supplier = pgTable("supplier", {
 	country: varchar("country", { length: 100 }),
 	paymentTerms: varchar("payment_terms", { length: 100 }),
 	leadTimeDays: integer("lead_time_days"),
-	currency: varchar("currency", { length: 3 }).default("USD"), // Default supplier currency
+	currency: varchar("currency", { length: 3 }),
 	rating: decimal("rating", { precision: 3, scale: 2 }),
 	isActive: boolean("is_active").default(true).notNull(),
 	metadata: jsonb("metadata"),

@@ -24,7 +24,6 @@ export const location = pgTable("location", {
 		.notNull()
 		.references(() => organization.id, { onDelete: "cascade" }),
 
-	// Type of location with constraint
 	locationType: varchar("location_type", {
 		length: 50,
 	})
@@ -34,24 +33,19 @@ export const location = pgTable("location", {
 	name: varchar("name", { length: 255 }).notNull(),
 	description: text("description"),
 
-	// Optional: Store full address as JSON for history/export
 	address: jsonb("address").$type<TAddress>(),
 
-	// Geolocation
 	latitude: varchar("latitude", { length: 20 }),
 	longitude: varchar("longitude", { length: 20 }),
 
 	// Capacity (e.g., units, pallets, etc.)
 	capacity: integer("capacity"),
 
-	// Flags
 	isActive: boolean("is_active").default(true).notNull(),
 	isDefault: boolean("is_default").default(false).notNull(),
 
-	// Metadata
 	metadata: jsonb("metadata").$type<Record<string, unknown>>(),
 
-	// Soft audit (assumed: createdAt, updatedAt, deletedAt?)
 	...softAudit,
 });
 

@@ -25,7 +25,7 @@ const categoryIdParamSchema = z.object({
 
 const categoryTranslationParamSchema = z.object({
 	categoryId: z.string().min(1, "categoryId is required"),
-	languageId: z.string().min(1, "languageId is required"),
+	languageCode: z.string().min(1, "languageCode is required"),
 });
 
 // --------------------
@@ -221,14 +221,14 @@ export const productCategoryRoute = createRouter()
 		},
 	)
 	.get(
-		"/product-categories/:categoryId/translations/:languageId",
+		"/product-categories/:categoryId/translations/:languageCode",
 		authMiddleware,
 		hasOrgPermission("productCategory:read"),
 		paramValidator(categoryTranslationParamSchema),
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
-				const { categoryId, languageId } = c.req.valid("param");
+				const { categoryId, languageCode } = c.req.valid("param");
 
 				const [foundTranslation] = await db
 					.select()
@@ -236,7 +236,7 @@ export const productCategoryRoute = createRouter()
 					.where(
 						and(
 							eq(productCategoryTranslation.categoryId, categoryId),
-							eq(productCategoryTranslation.languageId, languageId),
+							eq(productCategoryTranslation.languageCode, languageCode),
 							eq(
 								productCategoryTranslation.organizationId,
 								validateOrgId(activeOrgId),
@@ -256,7 +256,7 @@ export const productCategoryRoute = createRouter()
 		},
 	)
 	.put(
-		"/product-categories/:categoryId/translations/:languageId",
+		"/product-categories/:categoryId/translations/:languageCode",
 		authMiddleware,
 		hasOrgPermission("productCategory:update"),
 		paramValidator(categoryTranslationParamSchema),
@@ -264,7 +264,7 @@ export const productCategoryRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
-				const { categoryId, languageId } = c.req.valid("param");
+				const { categoryId, languageCode } = c.req.valid("param");
 				const data = c.req.valid("json");
 
 				const [updatedTranslation] = await db
@@ -273,7 +273,7 @@ export const productCategoryRoute = createRouter()
 					.where(
 						and(
 							eq(productCategoryTranslation.categoryId, categoryId),
-							eq(productCategoryTranslation.languageId, languageId),
+							eq(productCategoryTranslation.languageCode, languageCode),
 							eq(
 								productCategoryTranslation.organizationId,
 								validateOrgId(activeOrgId),
@@ -297,21 +297,21 @@ export const productCategoryRoute = createRouter()
 		},
 	)
 	.delete(
-		"/product-categories/:categoryId/translations/:languageId",
+		"/product-categories/:categoryId/translations/:languageCode",
 		authMiddleware,
 		hasOrgPermission("productCategory:delete"),
 		paramValidator(categoryTranslationParamSchema),
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
-				const { categoryId, languageId } = c.req.valid("param");
+				const { categoryId, languageCode } = c.req.valid("param");
 
 				const [deletedTranslation] = await db
 					.delete(productCategoryTranslation)
 					.where(
 						and(
 							eq(productCategoryTranslation.categoryId, categoryId),
-							eq(productCategoryTranslation.languageId, languageId),
+							eq(productCategoryTranslation.languageCode, languageCode),
 							eq(
 								productCategoryTranslation.organizationId,
 								validateOrgId(activeOrgId),

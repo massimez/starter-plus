@@ -1,4 +1,4 @@
-import { decimal, pgTable, uniqueIndex, uuid } from "drizzle-orm/pg-core";
+import { decimal, pgTable, text, uniqueIndex, uuid } from "drizzle-orm/pg-core";
 import { softAudit } from "../helpers/common";
 
 import { organization } from "../organization";
@@ -8,10 +8,8 @@ export const userBonus = pgTable(
 	"user_bonus",
 	{
 		id: uuid("id").defaultRandom().primaryKey(),
-		userId: uuid("user_id")
-			.notNull()
-			.references(() => user.id, { onDelete: "cascade" }),
-		organizationId: uuid("organization_id")
+		userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+		organizationId: text("organization_id")
 			.notNull()
 			.references(() => organization.id, { onDelete: "cascade" }),
 		bonus: decimal("bonus", { precision: 10, scale: 2 }).default("0"),

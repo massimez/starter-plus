@@ -52,7 +52,7 @@ export const productCategoryTranslation = pgTable(
 		categoryId: uuid("category_id")
 			.notNull()
 			.references(() => productCategory.id, { onDelete: "cascade" }),
-		languageId: text("language_id")
+		languageCode: text("language_code")
 			.notNull()
 			.references(() => language.code, { onDelete: "cascade" }),
 
@@ -67,7 +67,7 @@ export const productCategoryTranslation = pgTable(
 		uniqueIndex("product_category_language_idx").on(
 			table.organizationId,
 			table.categoryId,
-			table.languageId,
+			table.languageCode,
 		),
 	],
 );
@@ -114,7 +114,7 @@ export const productTranslation = pgTable(
 		productId: uuid("product_id")
 			.notNull()
 			.references(() => product.id, { onDelete: "cascade" }),
-		languageId: text("language_id")
+		languageCode: text("language_code")
 			.notNull()
 			.references(() => language.code, { onDelete: "cascade" }),
 
@@ -135,7 +135,7 @@ export const productTranslation = pgTable(
 		uniqueIndex("product_language_idx").on(
 			table.organizationId,
 			table.productId,
-			table.languageId,
+			table.languageCode,
 		),
 	],
 );
@@ -189,7 +189,7 @@ export const productVariantTranslation = pgTable(
 		productVariantId: uuid("product_variant_id")
 			.notNull()
 			.references(() => productVariant.id, { onDelete: "cascade" }),
-		languageId: text("language_id")
+		languageCode: text("language_code")
 			.notNull()
 			.references(() => language.code, { onDelete: "cascade" }),
 
@@ -203,7 +203,7 @@ export const productVariantTranslation = pgTable(
 		uniqueIndex("product_variant_language_idx").on(
 			table.organizationId,
 			table.productVariantId,
-			table.languageId,
+			table.languageCode,
 		),
 	],
 );
@@ -230,6 +230,7 @@ export const productVariantAttribute = pgTable("product_variant_attribute", {
  * PRODUCT-CATEGORY ASSIGNMENTS & SUPPLIERS
  * ---------------------------------------------------------------------------
  */
+// TODO CRUD API
 export const productCategoryAssignment = pgTable(
 	"product_category_assignment",
 	{
