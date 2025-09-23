@@ -46,6 +46,7 @@ type AdvancedSettingsFormValues = z.infer<typeof formSchema>;
 export function AdvancedSettingsForm() {
 	const t = useTranslations("common");
 	const { activeOrganization } = useActiveOrganization();
+
 	const organizationId = activeOrganization?.id;
 
 	const { data: organizationInfo, isLoading } = useGetOrganizationInfo(
@@ -119,6 +120,7 @@ export function AdvancedSettingsForm() {
 					labelKey: "tax_rate",
 					itemType: "field",
 					type: "text",
+					gridCols: 6,
 				},
 				{
 					name: "defaultLanguage",
