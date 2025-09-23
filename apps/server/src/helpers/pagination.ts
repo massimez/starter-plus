@@ -6,6 +6,7 @@ import {
 	desc,
 	eq,
 	getTableColumns,
+	type InferSelectModel,
 	isNull,
 	sql,
 } from "drizzle-orm";
@@ -22,11 +23,11 @@ export async function getTotal(db: any, table: any, orgId: string) {
 }
 
 // Simple helper to apply pagination to any query
-export function withPagination<T extends PgTable>(
+export function withPagination<T extends PgTable, R = InferSelectModel<T>>(
 	query: any,
 	table: T,
 	params: OffsetPaginationParams,
-) {
+): R[] {
 	const { limit, offset, orderBy, direction } = params;
 
 	let result = query.limit(limit).offset(offset);
@@ -41,7 +42,7 @@ export function withPagination<T extends PgTable>(
 		}
 	}
 
-	return result;
+	return result as R[];
 }
 
 interface WithPaginationAndTotalParams<T extends PgTable> {
