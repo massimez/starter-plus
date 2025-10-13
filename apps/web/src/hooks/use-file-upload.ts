@@ -15,13 +15,16 @@ export type FileMetadata = {
 	size: number;
 	type: string;
 	url: string;
-	id: string;
+	key: string;
 };
 
 export type FileWithPreview = {
 	file: File | FileMetadata;
 	id: string;
 	preview?: string;
+	isUploading?: boolean;
+	uploadProgress?: number;
+	isUploaded?: boolean;
 };
 
 export type FileUploadOptions = {
@@ -75,10 +78,11 @@ export const useFileUpload = (
 	} = options;
 
 	const [state, setState] = useState<FileUploadState>({
-		files: initialFiles.map((file) => ({
+		files: initialFiles?.map((file) => ({
 			file,
-			id: file.id,
+			id: file.key,
 			preview: file.url,
+			isUploaded: true,
 		})),
 		isDragging: false,
 		errors: [],
@@ -138,7 +142,7 @@ export const useFileUpload = (
 		if (file instanceof File) {
 			return `${file.name}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 		}
-		return file.id;
+		return file.key;
 	}, []);
 
 	const clearFiles = useCallback(() => {

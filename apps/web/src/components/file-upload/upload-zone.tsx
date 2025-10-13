@@ -1,15 +1,18 @@
 "use client";
 
-import { UploadIcon } from "lucide-react";
+import { LoaderIcon, UploadIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { useFileUpload } from "@/hooks/use-file-upload";
 
 type UploadZoneProps = {
 	state: ReturnType<typeof useFileUpload>[0];
 	actions: ReturnType<typeof useFileUpload>[1];
+	isUploading?: boolean;
 };
 
 export function UploadZone({ state, actions }: UploadZoneProps) {
+	const hasUploadingFiles = state.files.some((file) => file.isUploading);
+
 	return (
 		<div className="space-y-4">
 			{/* Dropzone */}
@@ -20,15 +23,23 @@ export function UploadZone({ state, actions }: UploadZoneProps) {
 				onDragLeave={actions.handleDragLeave}
 				onDragOver={actions.handleDragOver}
 				onDrop={actions.handleDrop}
-				className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 transition ${state.isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/30"}
-        `}
-				onClick={actions.openFileDialog}
+				className={`flex cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed p-6 transition ${state.isDragging ? "border-primary bg-primary/5" : "border-muted-foreground/30"} ${hasUploadingFiles ? "pointer-events-none opacity-50" : ""}`}
+				onClick={hasUploadingFiles ? undefined : actions.openFileDialog}
 			>
 				<input {...actions.getInputProps({ className: "hidden" })} />
-				<UploadIcon className="mb-2 h-8 w-8 text-muted-foreground" />
-				<p className="text-muted-foreground text-sm">
-					Drag & drop files here, or click to upload
-				</p>
+				{hasUploadingFiles ? (
+					<>
+						<LoaderIcon className="mb-2 h-8 w-8 animate-spin text-muted-foreground" />
+						<p className="text-muted-foreground text-sm">Uploading images...</p>
+					</>
+				) : (
+					<>
+						<UploadIcon className="mb-2 h-8 w-8 text-muted-foreground" />
+						<p className="text-muted-foreground text-sm">
+							Drag & drop files here, or click to upload
+						</p>
+					</>
+				)}
 			</div>
 
 			{/* Errors */}

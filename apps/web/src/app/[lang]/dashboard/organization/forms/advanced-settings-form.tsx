@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useFormContext } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { GalleryViewer } from "@/components/file-upload/gallery-viewer";
@@ -9,8 +10,9 @@ import {
 	FormBuilder,
 	type FormBuilderConfig,
 } from "@/components/form/form-builder";
-import { useFileUpload } from "@/hooks/use-file-upload";
-import { deleteFile, uploadPublic } from "@/lib/storage";
+import type { SlotComponent } from "@/components/form/form-builder/types";
+import { useEntityImageUpload } from "@/hooks/use-entity-image-upload";
+import type { FileMetadata } from "@/hooks/use-file-upload";
 import {
 	useActiveOrganization,
 	useGetOrganizationInfo,
@@ -51,7 +53,54 @@ const LANGUAGE_OPTIONS = [
 	{ value: "kab", label: "Kabyle" },
 ];
 
-const MAX_IMAGES = 6;
+// Slot component for organization images that integrates with form state
+const OrganizationImagesSlot: SlotComponent<
+	AdvancedSettingsFormValues
+> = () => {
+	const { setValue } = useFormContext<AdvancedSettingsFormValues>();
+	const t = useTranslations("common");
+	const { activeOrganization } = useActiveOrganization();
+	const organizationId = activeOrganization?.id;
+	const { data: organizationInfo } = useGetOrganizationInfo(
+		organizationId || "",
+	);
+	const { mutateAsync: updateOrganizationInfo } = useUpdateOrganizationInfo();
+
+	const handleUpdateOrganizationImages = async (images: FileMetadata[]) => {
+		if (!organizationId || !organizationInfo?.id) {
+			return;
+		}
+
+		await updateOrganizationInfo({
+			organizationId,
+			organizationInfoId: organizationInfo.id,
+			images: images,
+		});
+		setValue("images", images); // Sync with form state
+	};
+
+	const { stateImages, actions, handleRemove } = useEntityImageUpload({
+		initialImages: (organizationInfo?.images as FileMetadata[]) ?? [],
+		onUpdateImages: handleUpdateOrganizationImages,
+	});
+
+	return (
+		<div>
+			<div className="block font-medium text-gray-700 text-sm dark:text-gray-300">
+				{t("organization_images")}
+			</div>
+			<p className="mb-2 text-gray-500 text-xs dark:text-gray-400">
+				{t("you_can_upload_up_to_6_images")}
+			</p>
+			<UploadZone state={stateImages} actions={actions} />
+			<GalleryViewer
+				className="mt-4"
+				files={stateImages.files}
+				onRemove={handleRemove}
+			/>
+		</div>
+	);
+};
 
 export function AdvancedSettingsForm() {
 	const t = useTranslations("common");
@@ -65,104 +114,7 @@ export function AdvancedSettingsForm() {
 	const { mutateAsync: updateOrganizationInfo, isPending } =
 		useUpdateOrganizationInfo();
 
-	// Transform organization images to file upload format
-	const initialFiles =
-		organizationInfo?.images?.map((img) => ({
-			id: img.key ?? "",
-			name: img.name ?? "",
-			size: img.size ?? 0,
-			type: img.type ?? "",
-			url: img.url,
-		})) ?? [];
-
-	// File upload state
-	const [stateImages, actions] = useFileUpload({
-		multiple: true,
-		accept: "image/*",
-		maxFiles: MAX_IMAGES,
-		initialFiles,
-		onFilesAdded: handleFilesAdded,
-	});
-
-	// Handle file uploads
-	async function handleFilesAdded(addedFiles: any[]) {
-		if (!organizationId || !organizationInfo?.id) {
-			toast.error(t("organization_info_missing"));
-			return;
-		}
-
-		await Promise.allSettled(
-			addedFiles.map(async (fileItem) => {
-				if (!(fileItem.file instanceof File)) return;
-
-				try {
-					// Upload to storage
-					const { key, publicUrl } = await uploadPublic(fileItem.file);
-
-					// Create new image object
-					const newImage = {
-						key,
-						url: publicUrl,
-						name: fileItem.file.name,
-						size: fileItem.file.size,
-						type: fileItem.file.type,
-					};
-
-					// Update organization info
-					await updateOrganizationInfo({
-						organizationId,
-						organizationInfoId: organizationInfo.id,
-						images: [...(organizationInfo.images ?? []), newImage],
-					});
-
-					// Update file item
-					fileItem.preview = publicUrl;
-					fileItem.id = key;
-				} catch (error) {
-					const errorMessage =
-						error instanceof Error
-							? error.message
-							: t("failed_to_upload_image", { fileName: fileItem.file.name });
-
-					console.error("Upload error:", errorMessage);
-					toast.error(errorMessage);
-					actions.triggerError([errorMessage]);
-					actions.removeFile(fileItem.id);
-				}
-			}),
-		);
-	}
-
-	// Handle file removal
-	async function handleRemove(id: string) {
-		if (!organizationId || !organizationInfo?.id) {
-			toast.error(t("organization_info_missing"));
-			return;
-		}
-
-		try {
-			// Delete from storage
-			await deleteFile(id);
-
-			// Remove from UI
-			actions.removeFile(id);
-
-			// Update organization info
-			await updateOrganizationInfo({
-				organizationId,
-				organizationInfoId: organizationInfo.id,
-				images: organizationInfo.images?.filter((img) => img.key !== id) ?? [],
-			});
-
-			toast.success(t("image_removed_successfully"));
-		} catch (error) {
-			const errorMessage =
-				error instanceof Error ? error.message : t("failed_to_delete_image");
-
-			console.error("Delete failed:", errorMessage);
-			toast.error(errorMessage);
-		}
-	}
+	// Remove the old separate useEntityImageUpload instance
 
 	// Form configuration
 	const advancedSettingsFormConfig: FormBuilderConfig<AdvancedSettingsFormValues> =
@@ -199,22 +151,7 @@ export function AdvancedSettingsForm() {
 				{
 					itemType: "slot",
 					slotId: "organization-images",
-					component: () => (
-						<div>
-							<div className="block font-medium text-gray-700 text-sm dark:text-gray-300">
-								{t("organization_images")}
-							</div>
-							<p className="mb-2 text-gray-500 text-xs dark:text-gray-400">
-								{t("you_can_upload_up_to_6_images")}
-							</p>
-							<UploadZone state={stateImages} actions={actions} />
-							<GalleryViewer
-								className="mt-4"
-								files={stateImages.files}
-								onRemove={handleRemove}
-							/>
-						</div>
-					),
+					component: OrganizationImagesSlot,
 					gridCols: 12,
 				},
 			],
@@ -254,7 +191,7 @@ export function AdvancedSettingsForm() {
 			toast.success(t("advanced_settings_updated_successfully"));
 		} catch (error) {
 			console.error("Failed to update advanced settings:", error);
-			toast.error(t("failed_to_update_advanced_settings"));
+			toast.error("Failed to update advanced settings");
 		}
 	}
 

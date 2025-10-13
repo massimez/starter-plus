@@ -80,6 +80,9 @@ export const product = pgTable("product", {
 	isActive: boolean("is_active").default(true).notNull(),
 	metadata: jsonb("metadata"),
 
+	images: jsonb("images").$type<TImage[]>(),
+	thumbnailImage: jsonb("thumbnail_image").$type<TImage>(),
+
 	// Translations
 	translations:
 		jsonb("translations").$type<
@@ -90,7 +93,6 @@ export const product = pgTable("product", {
 				shortDescription?: string;
 				description?: string;
 				brandName?: string;
-				images?: TImage[];
 				seoTitle?: string;
 				seoDescription?: string;
 				tags?: string;

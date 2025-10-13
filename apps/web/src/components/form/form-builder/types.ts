@@ -164,6 +164,7 @@ export interface FormBuilderProps<T extends FieldValues> {
 	onSubmit: (values: T) => Promise<void>;
 	isSubmitting?: boolean;
 	className?: string;
+	mode?: "onBlur" | "onChange" | "onSubmit" | "all";
 }
 
 export interface FieldRendererProps<T extends FieldValues> {

@@ -17,6 +17,7 @@ export function FormBuilder<T extends FieldValues>({
 	onSubmit,
 	isSubmitting = false,
 	className = "",
+	mode = "onBlur",
 }: FormBuilderProps<T>) {
 	// Simple translation function (replace with actual i18n implementation)
 	const t = useCallback((key: string) => key, []);
@@ -27,7 +28,7 @@ export function FormBuilder<T extends FieldValues>({
 			...config.defaultValues,
 			...initialValues,
 		} as DefaultValues<T>,
-		mode: "onBlur",
+		mode,
 	});
 
 	const handleSubmit = useCallback(

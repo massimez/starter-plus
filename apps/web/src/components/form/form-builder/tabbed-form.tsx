@@ -50,8 +50,9 @@ const TabContent: React.FC<{
 	control: any;
 	config: any;
 	formValues: any;
+	setValue: any;
 	t: (key: string) => string;
-}> = ({ tab, control, config, formValues, t }) => {
+}> = ({ tab, control, config, formValues, setValue, t }) => {
 	const tabItems = convertLegacyFieldsToItems(tab.items, tab.fields);
 
 	return (
@@ -73,7 +74,7 @@ const TabContent: React.FC<{
 						items={tabItems}
 						control={control}
 						config={config}
-						setValue={control.setValue}
+						setValue={setValue}
 						formValues={formValues}
 						t={t}
 					/>
@@ -200,6 +201,7 @@ export const TabbedForm = <T extends FieldValues>({
 				control={form.control}
 				config={config}
 				formValues={formValues}
+				setValue={form.setValue}
 				t={t}
 			/>
 		),

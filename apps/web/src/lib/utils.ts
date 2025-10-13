@@ -35,3 +35,26 @@ export async function extractErrorMessage(res: Response): Promise<string> {
 		return res.statusText;
 	}
 }
+
+export const removeNulls = (obj: any): any => {
+	if (Array.isArray(obj)) {
+		return obj
+			.map((item) => removeNulls(item))
+			.filter((item) => item !== null && item !== undefined);
+	}
+	if (obj && typeof obj === "object") {
+		return Object.entries(obj).reduce(
+			(acc, [key, value]) => {
+				if (value !== null && value !== undefined) {
+					const cleaned = removeNulls(value);
+					if (cleaned !== null && cleaned !== undefined) {
+						acc[key] = cleaned;
+					}
+				}
+				return acc;
+			},
+			{} as Record<string, any>,
+		);
+	}
+	return obj;
+};

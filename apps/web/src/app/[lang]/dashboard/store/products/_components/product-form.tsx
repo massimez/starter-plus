@@ -8,19 +8,83 @@ import {
 } from "@/app/[lang]/dashboard/store/product-categories/hooks/use-product-categories";
 import { FormBuilder } from "@/components/form/form-builder";
 import type { FormTabConfig } from "@/components/form/form-builder/types";
+import { ProductImagesSlot } from "./product-images-slot";
+
+export type ProductFormValues = {
+	id?: string;
+	categoryId?: string;
+	brandId?: string | null;
+	images?: Array<{
+		key: string;
+		url: string;
+		name: string;
+		size: number;
+		type: string;
+	}>;
+	thumbnailImage?: {
+		key: string;
+		url: string;
+		name: string;
+		size: number;
+		type: string;
+	};
+	translations: Record<
+		string,
+		{
+			name: string;
+			slug: string;
+			shortDescription?: string;
+			description?: string;
+			brandName?: string;
+			seoTitle?: string;
+			seoDescription?: string;
+			tags?: string;
+		}
+	>;
+	type: string;
+	status: string;
+	taxRate: string;
+	minQuantity: number;
+	maxQuantity?: number;
+	isFeatured: boolean;
+	trackStock: boolean;
+	allowBackorders: boolean;
+	isActive: boolean;
+};
 
 // Extend schema with proper types
 const productFormSchema = insertProductSchema
 	.omit({
-		id: true,
 		organizationId: true,
 		createdAt: true,
 		updatedAt: true,
 		deletedAt: true,
 	})
 	.extend({
+		id: z.string().optional(),
 		categoryId: z.string().optional(),
 		brandId: z.string().nullable().optional(),
+		images: z
+			.array(
+				z.object({
+					key: z.string(),
+					url: z.string(),
+					name: z.string(),
+					size: z.number(),
+					type: z.string(),
+				}),
+			)
+			.optional(),
+		thumbnailImage: z
+			.object({
+				key: z.string(),
+				url: z.string(),
+				name: z.string(),
+				size: z.number(),
+				type: z.string(),
+			})
+			.nullable()
+			.optional(),
 		translations: z.record(
 			z.string(),
 			z.object({
@@ -29,14 +93,6 @@ const productFormSchema = insertProductSchema
 				shortDescription: z.string().optional(),
 				description: z.string().optional(),
 				brandName: z.string().optional(),
-				images: z
-					.array(
-						z.object({
-							url: z.url("Must be a valid URL"),
-							alt: z.string().optional(),
-						}),
-					)
-					.optional(),
 				seoTitle: z
 					.string()
 					.max(60, "SEO title should be under 60 characters")
@@ -50,13 +106,11 @@ const productFormSchema = insertProductSchema
 		),
 	});
 
-export type ProductFormValues = z.infer<typeof productFormSchema>;
-
 interface ProductFormProps {
 	onSubmit: (values: ProductFormValues) => Promise<void>;
 	initialValues?: Partial<ProductFormValues>;
 	selectedLanguage: string;
-	brands?: Array<{ id: string; name: string }>; // Add brands support
+	brands?: Array<{ id: string; name: string }>;
 }
 
 export const ProductForm = ({
@@ -104,6 +158,12 @@ export const ProductForm = ({
 						"URL-friendly version (auto-generated from name if left empty)",
 				},
 				{
+					itemType: "slot",
+					slotId: "product-images",
+					component: ProductImagesSlot,
+					gridCols: 12,
+				},
+				{
 					itemType: "field",
 					name: `translations.${selectedLanguage}.shortDescription` as any,
 					labelKey: "Short Description",
@@ -124,6 +184,7 @@ export const ProductForm = ({
 					required: false,
 					gridCols: 12,
 				},
+
 				{
 					itemType: "field",
 					name: "brandId",

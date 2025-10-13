@@ -35,13 +35,16 @@ export const productRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
-				const { translations, ...productData } = c.req.valid("json");
+				const { translations, images, thumbnailImage, ...productData } =
+					c.req.valid("json");
 				const [newProduct] = await db
 					.insert(product)
 					.values({
 						...productData,
 						organizationId: activeOrgId,
 						status: productData.status as TProductStatus,
+						images: images,
+						thumbnailImage: thumbnailImage,
 						translations: translations,
 					})
 					.returning();
@@ -150,7 +153,6 @@ export const productRoute = createRouter()
 						shortDescription: t.shortDescription,
 						description: t.description,
 						brandName: t.brandName,
-						images: t.images,
 						seoTitle: t.seoTitle,
 						seoDescription: t.seoDescription,
 						tags: t.tags,
@@ -161,6 +163,8 @@ export const productRoute = createRouter()
 					.set({
 						...productData,
 						status: productData.status as TProductStatus,
+						images: productData.images,
+						thumbnailImage: productData.thumbnailImage,
 						translations: validTranslations,
 					})
 					.where(

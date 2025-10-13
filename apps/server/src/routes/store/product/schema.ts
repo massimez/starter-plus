@@ -19,9 +19,6 @@ export const productTranslationEmbeddedSchema = z.object({
 	shortDescription: z.string().optional(),
 	description: z.string().optional(),
 	brandName: z.string().optional(),
-	images: z
-		.array(z.object({ url: z.string(), alt: z.string().optional() }))
-		.optional(),
 	seoTitle: z.string().optional(),
 	seoDescription: z.string().optional(),
 	tags: z.string().optional(),
@@ -42,6 +39,26 @@ export const baseUpdateProductSchema = createSelectSchema(product).partial();
 
 // Combined Product Insert Schema
 export const insertProductSchema = baseInsertProductSchema.extend({
+	images: z
+		.array(
+			z.object({
+				url: z.string(),
+				key: z.string(),
+				name: z.string(),
+				size: z.number(),
+				type: z.string(),
+			}),
+		)
+		.optional(),
+	thumbnailImage: z
+		.object({
+			url: z.string(),
+			key: z.string(),
+			name: z.string(),
+			size: z.number(),
+			type: z.string(),
+		})
+		.optional(),
 	translations: z
 		.array(productTranslationEmbeddedSchema)
 		.min(1, "At least one translation is required"),
@@ -49,6 +66,26 @@ export const insertProductSchema = baseInsertProductSchema.extend({
 
 // Combined Product Update Schema
 export const updateProductSchema = baseUpdateProductSchema.extend({
+	images: z
+		.array(
+			z.object({
+				url: z.string(),
+				key: z.string(),
+				name: z.string(),
+				size: z.number(),
+				type: z.string(),
+			}),
+		)
+		.optional(),
+	thumbnailImage: z
+		.object({
+			url: z.string(),
+			key: z.string(),
+			name: z.string(),
+			size: z.number(),
+			type: z.string(),
+		})
+		.optional(),
 	translations: z.array(productTranslationEmbeddedSchema.partial()).optional(),
 });
 
