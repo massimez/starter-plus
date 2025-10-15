@@ -1,0 +1,144 @@
+"use client";
+
+import { MoreHorizontal, Search, Truck } from "lucide-react";
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { DeleteDropdownMenuItem } from "@/components/ui/delete-confirmation-dialog";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
+import { useDeleteSupplier } from "../hooks";
+
+interface Supplier {
+	id: string;
+	name: string;
+	email?: string;
+	phone?: string;
+	address?: string;
+	city?: string;
+	country?: string;
+	contactPerson?: string;
+	createdAt: string;
+}
+
+interface SupplierListProps {
+	suppliers: Supplier[];
+	onEditSupplier?: (supplier: Supplier) => void;
+}
+
+export const SupplierList = ({
+	suppliers,
+	onEditSupplier,
+}: SupplierListProps) => {
+	const [searchTerm, setSearchTerm] = useState("");
+
+	const { deleteSupplier, isDeletingSupplier } = useDeleteSupplier();
+
+	const filteredSuppliers = suppliers.filter(
+		(supplier) =>
+			supplier.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			supplier.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+			supplier.contactPerson
+				?.toLowerCase()
+				.includes(searchTerm.toLowerCase()) ||
+			supplier.id.toLowerCase().includes(searchTerm.toLowerCase()),
+	);
+
+	const handleDeleteClick = (supplierId: string) => {
+		deleteSupplier(supplierId);
+	};
+
+	return (
+		<div className="space-y-4">
+			<div className="flex items-center gap-4">
+				<Input
+					placeholder="Search suppliers by name, email, contact person, or ID..."
+					value={searchTerm}
+					onChange={(e) => setSearchTerm(e.target.value)}
+					className="max-w-md"
+				/>
+				<p className="whitespace-nowrap text-muted-foreground text-sm">
+					{filteredSuppliers.length}{" "}
+					{filteredSuppliers.length === 1 ? "supplier" : "suppliers"}
+				</p>
+			</div>
+
+			{filteredSuppliers.length === 0 ? (
+				<Card>
+					<CardContent className="flex flex-col items-center justify-center py-12 text-center">
+						<Truck className="mb-4 h-12 w-12 text-muted-foreground" />
+						<CardTitle className="mb-2">No suppliers found</CardTitle>
+						<p className="text-muted-foreground text-sm">
+							{searchTerm
+								? "Try adjusting your search terms"
+								: "Get started by creating your first supplier"}
+						</p>
+					</CardContent>
+				</Card>
+			) : (
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead>Name</TableHead>
+							<TableHead>Contact Person</TableHead>
+							<TableHead>Email</TableHead>
+							<TableHead>Phone</TableHead>
+							<TableHead>Location</TableHead>
+							<TableHead>Actions</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{filteredSuppliers.map((supplier) => (
+							<TableRow key={supplier.id}>
+								<TableCell className="font-medium">{supplier.name}</TableCell>
+								<TableCell>{supplier.contactPerson || "-"}</TableCell>
+								<TableCell>{supplier.email || "-"}</TableCell>
+								<TableCell>{supplier.phone || "-"}</TableCell>
+								<TableCell>
+									{[supplier.city, supplier.country]
+										.filter(Boolean)
+										.join(", ") || "-"}
+								</TableCell>
+								<TableCell>
+									<DropdownMenu>
+										<DropdownMenuTrigger asChild>
+											<Button variant="ghost" className="h-8 w-8 p-0">
+												<span className="sr-only">Open menu</span>
+												<MoreHorizontal className="h-4 w-4" />
+											</Button>
+										</DropdownMenuTrigger>
+										<DropdownMenuContent align="end">
+											<DropdownMenuItem
+												onClick={() => onEditSupplier?.(supplier)}
+											>
+												Edit
+											</DropdownMenuItem>
+											<DeleteDropdownMenuItem
+												onConfirm={() => handleDeleteClick(supplier.id)}
+												disabled={isDeletingSupplier}
+												description="This action cannot be undone. This will permanently delete the supplier."
+											/>
+										</DropdownMenuContent>
+									</DropdownMenu>
+								</TableCell>
+							</TableRow>
+						))}
+					</TableBody>
+				</Table>
+			)}
+		</div>
+	);
+};
