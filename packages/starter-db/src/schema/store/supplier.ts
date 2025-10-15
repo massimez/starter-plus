@@ -51,7 +51,7 @@ export const brand = pgTable("brand", {
 		.references(() => organization.id, { onDelete: "cascade" }),
 
 	name: varchar("name", { length: 255 }).notNull(),
-	slug: varchar("slug", { length: 255 }).notNull(),
+	companyName: varchar("company_name", { length: 255 }),
 	logo: text("logo"),
 	website: varchar("website", { length: 255 }),
 	description: text("description"),

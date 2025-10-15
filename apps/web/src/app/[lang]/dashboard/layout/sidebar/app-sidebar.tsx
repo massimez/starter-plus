@@ -51,10 +51,7 @@ const data = {
 					title: "Clients",
 					url: "/dashboard/store/clients",
 				},
-				{
-					title: "Suppliers",
-					url: "/dashboard/store/suppliers",
-				},
+
 				{
 					title: "Categories",
 					url: "/dashboard/store/product-categories",
@@ -82,37 +79,16 @@ const data = {
 
 				{
 					title: "Suppliers",
-					url: "#",
+					url: "/dashboard/store/suppliers",
 				},
-				{
-					title: "Referrals",
-					url: "#",
-				},
+
 				{
 					title: "Settings",
 					url: "#",
 				},
 			],
 		},
-		{
-			title: "Models",
-			url: "#",
-			icon: Bot,
-			items: [
-				{
-					title: "Genesis",
-					url: "#",
-				},
-				{
-					title: "Explorer",
-					url: "#",
-				},
-				{
-					title: "Quantum",
-					url: "#",
-				},
-			],
-		},
+
 		{
 			title: "Settings",
 			url: "#",

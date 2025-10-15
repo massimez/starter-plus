@@ -50,6 +50,13 @@
       "when": 1760345809452,
       "tag": "0006_ordinary_black_widow",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1760548628432,
+      "tag": "0007_round_electro",
+      "breakpoints": true
     }
   ]
 }
