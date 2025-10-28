@@ -1,23 +1,22 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { useOtpVerification } from "@/hooks/use-otp-verification";
-import { Link } from "@/i18n/navigation";
-import { signUp } from "@/lib/auth-client";
-import { useModal } from "../modals/modal-context";
+import { Button } from "@workspace/ui/components/button";
 import {
 	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "../ui/dialog";
+} from "@workspace/ui/components/dialog";
+import { Input } from "@workspace/ui/components/input";
+import { Label } from "@workspace/ui/components/label";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import { useOtpVerification } from "@/hooks/use-otp-verification";
+import { Link } from "@/i18n/navigation";
+import { signUp } from "@/lib/auth-client";
+import { useModal } from "../modals/modal-context";
 
 export default function SignUp() {
 	const [firstName, setFirstName] = useState("");
@@ -32,7 +31,7 @@ export default function SignUp() {
 	const [loading, setLoading] = useState(false);
 
 	const { openModal, modalProps } = useModal();
-	const { handleVerification } = useOtpVerification();
+	const { handleVerification } = useOtpVerification({});
 
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];

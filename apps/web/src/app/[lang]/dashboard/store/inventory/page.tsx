@@ -1,12 +1,17 @@
 "use client";
 
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
 import { useState } from "react";
 import {
 	useActiveOrganization,
 	useGetLocations,
 } from "@/app/[lang]/dashboard/organization/queries";
 import { PageDashboardHeader } from "@/components/sections/page-dashboard-header";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
 	BatchesList,
 	BatchModal,

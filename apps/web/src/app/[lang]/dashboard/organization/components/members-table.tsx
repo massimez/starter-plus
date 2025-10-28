@@ -1,10 +1,12 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { toast } from "sonner";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import {
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from "@workspace/ui/components/avatar";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
 import {
 	Table,
 	TableBody,
@@ -12,7 +14,9 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
+} from "@workspace/ui/components/table";
+import { useTranslations } from "next-intl";
+import { toast } from "sonner";
 import {
 	useActiveOrganization,
 	useGetFullOrganization,

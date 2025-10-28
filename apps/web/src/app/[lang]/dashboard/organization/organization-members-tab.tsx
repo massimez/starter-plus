@@ -1,6 +1,12 @@
 // OrganizationMembersTab.tsx
+
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
 import { getTranslations } from "next-intl/server";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { InviteMemberForm } from "./components/invite-member-form";
 import { MembersTable } from "./components/members-table";
 

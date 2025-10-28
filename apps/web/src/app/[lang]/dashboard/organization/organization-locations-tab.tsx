@@ -1,6 +1,22 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
+	Dialog,
+	DialogContent,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@workspace/ui/components/dialog";
+import { Separator } from "@workspace/ui/components/separator";
+import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -8,17 +24,6 @@ import type { InsertLocation } from "starter-db/schema";
 import type { LocationFormValues } from "@/app/[lang]/dashboard/organization/forms/location-form";
 import { LocationForm } from "@/app/[lang]/dashboard/organization/forms/location-form";
 import { useGetLocations } from "@/app/[lang]/dashboard/organization/queries";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-	Dialog,
-	DialogContent,
-	DialogHeader,
-	DialogTitle,
-	DialogTrigger,
-} from "@/components/ui/dialog";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 import { hc } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
 import { showError } from "@/lib/error-utils";

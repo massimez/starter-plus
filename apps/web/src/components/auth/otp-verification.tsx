@@ -1,11 +1,15 @@
 "use client";
 
+import { Button } from "@workspace/ui/components/button";
+import {
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "@workspace/ui/components/dialog";
+import { Input } from "@workspace/ui/components/input";
+import OTPInput, { type InputProps } from "@workspace/ui/components/inputs/otp";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import OTPInput, { type InputProps } from "@/components/ui/inputs/otp";
-import { DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 
 interface OtpVerificationProps {
 	title?: string;

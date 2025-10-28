@@ -1,13 +1,13 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
 import {
 	Dialog,
 	DialogContent,
 	DialogHeader,
 	DialogTitle,
-} from "@/components/ui/dialog";
+} from "@workspace/ui/components/dialog";
+import { toast } from "sonner";
 import { hc } from "@/lib/api-client";
 import { useActiveOrganization } from "@/lib/auth-client";
 import {

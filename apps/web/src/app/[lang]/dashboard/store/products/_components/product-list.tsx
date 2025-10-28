@@ -1,7 +1,5 @@
 "use client";
 
-import { Package } from "lucide-react";
-import { useState } from "react";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -11,8 +9,10 @@ import {
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Input } from "@/components/ui/input";
+} from "@workspace/ui/components/alert-dialog";
+import { Input } from "@workspace/ui/components/input";
+import { Package } from "lucide-react";
+import { useState } from "react";
 import { ProductCard } from "./product-card";
 import { ProductModal } from "./product-modal";
 import type { Product } from "./use-products";

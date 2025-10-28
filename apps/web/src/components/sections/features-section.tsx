@@ -1,5 +1,6 @@
 "use client";
 
+import { FeatureCard } from "@workspace/ui/components/cards/feature-card";
 import {
 	Bot,
 	Code2,
@@ -13,8 +14,6 @@ import {
 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-
-import { FeatureCard } from "../ui/cards/feature-card";
 
 export function FeaturesSection() {
 	const t = useTranslations("Features");

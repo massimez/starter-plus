@@ -1,12 +1,10 @@
 "use client";
 
-import { ChevronRight, type LucideIcon } from "lucide-react";
-import { usePathname } from "next/navigation";
 import {
 	Collapsible,
 	CollapsibleContent,
 	CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+} from "@workspace/ui/components/collapsible";
 import {
 	SidebarGroup,
 	SidebarGroupLabel,
@@ -16,8 +14,10 @@ import {
 	SidebarMenuSub,
 	SidebarMenuSubButton,
 	SidebarMenuSubItem,
-} from "@/components/ui/sidebar";
-import { cn } from "@/lib/utils";
+} from "@workspace/ui/components/sidebar";
+import { cn } from "@workspace/ui/lib/utils";
+import { ChevronRight, type LucideIcon } from "lucide-react";
+import { usePathname } from "next/navigation";
 
 export function NavMain({
 	items,

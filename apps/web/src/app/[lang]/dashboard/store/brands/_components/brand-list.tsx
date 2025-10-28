@@ -1,17 +1,15 @@
 "use client";
 
-import { MoreHorizontal, Search, Tag } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { DeleteDropdownMenuItem } from "@/components/ui/delete-confirmation-dialog";
+import { Button } from "@workspace/ui/components/button";
+import { Card, CardContent, CardTitle } from "@workspace/ui/components/card";
+import { DeleteDropdownMenuItem } from "@workspace/ui/components/delete-confirmation-dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
+} from "@workspace/ui/components/dropdown-menu";
+import { Input } from "@workspace/ui/components/input";
 import {
 	Table,
 	TableBody,
@@ -19,7 +17,9 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
+} from "@workspace/ui/components/table";
+import { MoreHorizontal, Search, Tag } from "lucide-react";
+import { useState } from "react";
 import { useDeleteBrand } from "../hooks";
 
 interface Brand {

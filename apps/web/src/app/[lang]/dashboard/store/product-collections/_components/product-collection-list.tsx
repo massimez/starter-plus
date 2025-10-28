@@ -1,22 +1,20 @@
 "use client";
 
-import { MoreHorizontal } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { DeleteDropdownMenuItem } from "@/components/ui/delete-confirmation-dialog";
+import { Button } from "@workspace/ui/components/button";
+import { DeleteDropdownMenuItem } from "@workspace/ui/components/delete-confirmation-dialog";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@workspace/ui/components/dropdown-menu";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
+} from "@workspace/ui/components/select";
 import {
 	Table,
 	TableBody,
@@ -24,7 +22,9 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
+} from "@workspace/ui/components/table";
+import { MoreHorizontal } from "lucide-react";
+import { useState } from "react";
 import { LOCALES } from "@/constants/locales";
 import { useDeleteProductCollection } from "../hooks/use-delete-product-collection";
 import {

@@ -1,10 +1,5 @@
 "use client";
 
-import { Building2, ChevronsUpDown, Plus, Settings } from "lucide-react";
-import Image from "next/image";
-import * as React from "react";
-
-import { useModal } from "@/components/modals/modal-context";
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -13,14 +8,18 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuShortcut,
 	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+} from "@workspace/ui/components/dropdown-menu";
 import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
 	useSidebar,
-} from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
+} from "@workspace/ui/components/sidebar";
+import { Skeleton } from "@workspace/ui/components/skeleton";
+import { Building2, ChevronsUpDown, Plus, Settings } from "lucide-react";
+import Image from "next/image";
+import * as React from "react";
+import { useModal } from "@/components/modals/modal-context";
 import { useMounted } from "@/hooks/use-mounted";
 import { authClient } from "@/lib/auth-client";
 

@@ -3,6 +3,9 @@
 /** biome-ignore-all lint/a11y/noStaticElementInteractions: <> */
 "use client";
 
+import { Button } from "@workspace/ui/components/button";
+import { Card, CardContent } from "@workspace/ui/components/card";
+import { cn } from "@workspace/ui/lib/utils";
 import {
 	ChevronLeftIcon,
 	ChevronRightIcon,
@@ -14,10 +17,7 @@ import {
 	XIcon,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import type { FileMetadata, useFileUpload } from "@/hooks/use-file-upload";
-import { cn } from "@/lib/utils";
 
 type GalleryViewerProps = {
 	files: ReturnType<typeof useFileUpload>[0]["files"];

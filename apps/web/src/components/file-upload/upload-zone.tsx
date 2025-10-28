@@ -1,7 +1,7 @@
 "use client";
 
+import { Alert, AlertDescription } from "@workspace/ui/components/alert";
 import { LoaderIcon, UploadIcon } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { useFileUpload } from "@/hooks/use-file-upload";
 
 type UploadZoneProps = {

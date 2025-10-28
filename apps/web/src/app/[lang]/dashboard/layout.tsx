@@ -1,14 +1,17 @@
-import "./../../globals.css";
+import "@workspace/ui/styles/globals.css";
 
+import {
+	SidebarInset,
+	SidebarProvider,
+} from "@workspace/ui/components/sidebar";
+import { Toaster } from "@workspace/ui/components/sonner";
+import { cn } from "@workspace/ui/lib/utils";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import QueryProvider from "@/app/providers/query";
 import { ThemeProvider } from "@/app/providers/theme";
 import { ModalProvider } from "@/components/modals/modal-context";
 import ModalRenderer from "@/components/modals/modal-render";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { Toaster } from "@/components/ui/sonner";
-import { cn } from "@/lib/utils";
 import { AppSidebar } from "./layout/sidebar/app-sidebar";
 import { HeaderDashboard } from "./layout/sidebar/header";
 

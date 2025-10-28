@@ -1,11 +1,16 @@
 "use client";
 
+import { Button } from "@workspace/ui/components/button";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
 import type React from "react";
 import { useCallback } from "react";
 import type { FieldValues } from "react-hook-form";
 import { FormProvider, useWatch } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useTabManagement } from ".";
 import {
 	DEFAULT_NEXT_TEXT,

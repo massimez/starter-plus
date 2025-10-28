@@ -1,4 +1,9 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@workspace/ui/components/tabs";
 import OrganizationAdvancedTab from "./organization-advanced-tab";
 import OrganizationGeneralTab from "./organization-general-tab";
 import OrganizationLocationsTab from "./organization-locations-tab";

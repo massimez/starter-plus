@@ -1,7 +1,5 @@
 "use client";
 
-import React from "react";
-import { type FieldValues, useWatch } from "react-hook-form";
 import {
 	FormControl,
 	FormDescription,
@@ -9,7 +7,9 @@ import {
 	FormItem,
 	FormLabel,
 	FormMessage,
-} from "@/components/ui/form";
+} from "@workspace/ui/components/form";
+import React from "react";
+import { type FieldValues, useWatch } from "react-hook-form";
 import { SWITCH_CONTAINER_CLASS, SWITCH_LABEL_CLASS } from "./constants";
 import {
 	CustomFieldError,

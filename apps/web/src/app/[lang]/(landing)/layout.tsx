@@ -1,15 +1,14 @@
-import "./../../globals.css";
+import "@workspace/ui/styles/globals.css";
 
+import { Toaster } from "@workspace/ui/components//sonner";
+import { cn } from "@workspace/ui/lib/utils";
 import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
-
 import { FooterMain } from "@/app/[lang]/(landing)/layout/footer";
 import { HeaderMain } from "@/app/[lang]/(landing)/layout/header";
 import { ThemeProvider } from "@/app/providers/theme";
 import { ModalProvider } from "@/components/modals/modal-context";
 import ModalRenderer from "@/components/modals/modal-render";
-import { Toaster } from "@/components/ui/sonner";
-import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = {
 	title: "Next Starter Template",

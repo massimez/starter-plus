@@ -1,18 +1,18 @@
 "use client";
 
-import { ChevronDown, ChevronRight, Package, Search } from "lucide-react";
-import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import { Card, CardContent, CardTitle } from "@workspace/ui/components/card";
+import { Input } from "@workspace/ui/components/input";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
+} from "@workspace/ui/components/select";
+import { ChevronDown, ChevronRight, Package, Search } from "lucide-react";
+import { useState } from "react";
 
 import { StockDataRow } from "./stock-data-row";
 

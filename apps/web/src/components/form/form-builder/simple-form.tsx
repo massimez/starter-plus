@@ -1,10 +1,10 @@
 "use client";
 
+import { Button } from "@workspace/ui/components/button";
+import { Form } from "@workspace/ui/components/form";
 import React, { useMemo } from "react";
 import type { FieldValues } from "react-hook-form";
 import { FormProvider, useWatch } from "react-hook-form";
-import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
 import {
 	DEFAULT_SUBMIT_BUTTON_TEXT,
 	DEFAULT_SUBMITTING_TEXT,

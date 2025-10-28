@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@workspace/ui/components/button";
 
 import type { FlattenedInventoryItem } from "./inventory-list";
 

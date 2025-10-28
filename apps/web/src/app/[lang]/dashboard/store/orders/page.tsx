@@ -1,15 +1,15 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { PageDashboardHeader } from "@/components/sections/page-dashboard-header";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
+} from "@workspace/ui/components/select";
+import { useState } from "react";
+import { PageDashboardHeader } from "@/components/sections/page-dashboard-header";
 import { hc } from "@/lib/api-client";
 import { EditOrderDialog } from "./_components/edit-order-dialog";
 import { OrderList } from "./_components/order-list";

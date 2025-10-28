@@ -1,5 +1,12 @@
 "use client";
 
+import { Button } from "@workspace/ui/components/button";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from "@workspace/ui/components/dropdown-menu";
 import {
 	BookOpen,
 	Globe,
@@ -13,13 +20,6 @@ import { useParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { GitHubIcon } from "@/components/icons/brands/github-icon";
 import { useModal } from "@/components/modals/modal-context";
-import { Button } from "@/components/ui/button";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useSession } from "@/lib/auth-client";
 import { ThemeToggle } from "./toogle-theme";

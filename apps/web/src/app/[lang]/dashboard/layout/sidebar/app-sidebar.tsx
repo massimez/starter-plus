@@ -1,6 +1,13 @@
 "use client";
 
 import {
+	Sidebar,
+	SidebarContent,
+	SidebarFooter,
+	SidebarHeader,
+	SidebarRail,
+} from "@workspace/ui/components/sidebar";
+import {
 	ContainerIcon,
 	Frame,
 	Map as MapIcon,
@@ -9,14 +16,6 @@ import {
 	StoreIcon,
 } from "lucide-react";
 import type * as React from "react";
-
-import {
-	Sidebar,
-	SidebarContent,
-	SidebarFooter,
-	SidebarHeader,
-	SidebarRail,
-} from "@/components/ui/sidebar";
 
 import { NavMain } from "./nav-main";
 import { NavUser } from "./nav-user";

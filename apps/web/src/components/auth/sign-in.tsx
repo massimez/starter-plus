@@ -1,5 +1,16 @@
 "use client";
 
+import { Button } from "@workspace/ui/components/button";
+import { Checkbox } from "@workspace/ui/components/checkbox";
+import {
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@workspace/ui/components/dialog";
+import { Input } from "@workspace/ui/components/input";
+import { Label } from "@workspace/ui/components/label";
+import { cn } from "@workspace/ui/lib/utils";
 import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -8,22 +19,11 @@ import { AppleIcon } from "@/components/icons/brands/AppleIcon";
 import { FacebookIcon } from "@/components/icons/brands/FacebookIcon";
 import { GoogleIcon } from "@/components/icons/brands/GoogleIcon";
 import { TikTokIcon } from "@/components/icons/brands/TikTokIcon";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useOtpVerification } from "@/hooks/use-otp-verification";
 import { useRouter } from "@/i18n/navigation";
 import { authClient, signIn } from "@/lib/auth-client";
 import { getErrorMessage } from "@/lib/error-utils";
-import { cn } from "@/lib/utils";
 import { useModal } from "../modals/modal-context";
-import {
-	DialogDescription,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "../ui/dialog";
 
 export default function SignIn() {
 	const [email, setEmail] = useState("");

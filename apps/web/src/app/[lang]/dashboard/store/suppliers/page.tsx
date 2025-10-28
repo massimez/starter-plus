@@ -1,7 +1,7 @@
 "use client";
+import { Button } from "@workspace/ui/components/button";
 import { useState } from "react";
 import { PageDashboardHeader } from "@/components/sections/page-dashboard-header";
-import { Button } from "@/components/ui/button";
 import { SupplierList } from "./_components/supplier-list";
 import { SupplierModal } from "./_components/supplier-modal";
 import { useSuppliers } from "./hooks";

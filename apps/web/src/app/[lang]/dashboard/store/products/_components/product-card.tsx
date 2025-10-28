@@ -1,5 +1,13 @@
 "use client";
 
+import { Badge } from "@workspace/ui/components/badge";
+import { Button } from "@workspace/ui/components/button";
+import {
+	Card,
+	CardContent,
+	CardFooter,
+	CardHeader,
+} from "@workspace/ui/components/card";
 import {
 	Calendar,
 	DollarSign,
@@ -11,14 +19,6 @@ import {
 	Tag,
 	Trash2,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-	Card,
-	CardContent,
-	CardFooter,
-	CardHeader,
-} from "@/components/ui/card";
 import type { Product } from "./use-products";
 import type { ProductVariant } from "./variant-modal";
 

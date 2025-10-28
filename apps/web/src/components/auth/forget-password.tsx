@@ -1,21 +1,20 @@
 "use client";
 
-import { Loader2 } from "lucide-react";
-import Link from "next/link";
-import { useState } from "react";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { authClient } from "@/lib/auth-client"; // Import authClient
-import { useModal } from "../modals/modal-context";
+import { Button } from "@workspace/ui/components/button";
 import {
 	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
-} from "../ui/dialog";
+} from "@workspace/ui/components/dialog";
+import { Input } from "@workspace/ui/components/input";
+import { Label } from "@workspace/ui/components/label";
+import { Loader2 } from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
+import { authClient } from "@/lib/auth-client"; // Import authClient
+import { useModal } from "../modals/modal-context";
 
 export default function ForgetPassword() {
 	const [email, setEmail] = useState("");

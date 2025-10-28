@@ -1,18 +1,18 @@
 "use client";
 
-import type React from "react";
-import { useMemo } from "react";
-import { Input } from "@/components/ui/input";
-import MultipleSelector from "@/components/ui/multi-select";
+import { Input } from "@workspace/ui/components/input";
+import MultipleSelector from "@workspace/ui/components/multi-select";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
+} from "@workspace/ui/components/select";
+import { Switch } from "@workspace/ui/components/switch";
+import { Textarea } from "@workspace/ui/components/textarea";
+import type React from "react";
+import { useMemo } from "react";
 import type { FormFieldConfig } from "./types";
 
 // ============================================================================

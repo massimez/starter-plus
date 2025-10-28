@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@workspace/ui/components/dialog";
 import ForgetPassword from "../auth/forget-password";
 import { OtpVerification } from "../auth/otp-verification";
 import ResetPasswordOtp from "../auth/reset-password-otp"; // Import the new component

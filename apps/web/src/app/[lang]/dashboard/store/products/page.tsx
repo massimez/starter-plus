@@ -1,17 +1,17 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { PageDashboardHeader } from "@/components/sections/page-dashboard-header";
-import { Button } from "@/components/ui/button";
+import { Button } from "@workspace/ui/components/button";
 import {
 	Select,
 	SelectContent,
 	SelectItem,
 	SelectTrigger,
 	SelectValue,
-} from "@/components/ui/select";
+} from "@workspace/ui/components/select";
+import { useTranslations } from "next-intl";
+import { useState } from "react";
+import { PageDashboardHeader } from "@/components/sections/page-dashboard-header";
 import { DEFAULT_LOCALE, LOCALES } from "@/constants/locales";
 import { hc } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";

@@ -1,7 +1,7 @@
 "use client";
 
+import { Input } from "@workspace/ui/components/input";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
 import { OrderCard } from "./order-card";
 import type { Order } from "./types";
 

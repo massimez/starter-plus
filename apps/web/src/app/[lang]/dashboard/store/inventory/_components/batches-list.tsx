@@ -1,9 +1,7 @@
 "use client";
 
-import { Package, Search } from "lucide-react";
-import { useState } from "react";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardTitle } from "@workspace/ui/components/card";
+import { Input } from "@workspace/ui/components/input";
 import {
 	Table,
 	TableBody,
@@ -11,7 +9,9 @@ import {
 	TableHead,
 	TableHeader,
 	TableRow,
-} from "@/components/ui/table";
+} from "@workspace/ui/components/table";
+import { Package, Search } from "lucide-react";
+import { useState } from "react";
 import { useBatches } from "../hooks/use-batches";
 
 interface BatchesListProps {
