@@ -15,6 +15,25 @@ import { organization } from "../organization";
 
 /**
  * ---------------------------------------------------------------------------
+ * ADDRESSES - Shared address storage
+ * ---------------------------------------------------------------------------
+ */
+export const address = pgTable("address", {
+	id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
+	street: varchar("street", { length: 255 }),
+	city: varchar("city", { length: 100 }),
+	state: varchar("state", { length: 100 }),
+	zipCode: varchar("zip_code", { length: 20 }),
+	country: varchar("country", { length: 100 }),
+	office: varchar("office", { length: 255 }),
+	building: varchar("building", { length: 255 }),
+	latitude: varchar("latitude", { length: 20 }),
+	longitude: varchar("longitude", { length: 20 }),
+	...softAudit,
+});
+
+/**
+ * ---------------------------------------------------------------------------
  * LOCATIONS (Warehouses, Shops, etc.)
  * ---------------------------------------------------------------------------
  */
@@ -33,13 +52,14 @@ export const location = pgTable("location", {
 	name: varchar("name", { length: 255 }).notNull(),
 	description: text("description"),
 
-	address: jsonb("address").$type<TAddress>(),
-
-	latitude: varchar("latitude", { length: 20 }),
-	longitude: varchar("longitude", { length: 20 }),
+	addressId: uuid("address_id").references(() => address.id),
 
 	// Capacity (e.g., units, pallets, etc.)
 	capacity: integer("capacity"),
+
+	contactName: varchar("contact_name", { length: 100 }),
+	contactEmail: varchar("contact_email", { length: 100 }),
+	contactPhone: varchar("contact_phone", { length: 20 }),
 
 	isActive: boolean("is_active").default(true).notNull(),
 	isDefault: boolean("is_default").default(false).notNull(),
@@ -50,7 +70,7 @@ export const location = pgTable("location", {
 });
 
 // Zod Schemas for validation
-const TAddressSchema = z.object({
+const addressSchema = z.object({
 	street: z.string().max(255).optional(),
 	city: z.string().max(100).optional(),
 	state: z.string().max(100).optional(),
@@ -58,19 +78,23 @@ const TAddressSchema = z.object({
 	country: z.string().max(100).optional(),
 	office: z.string().max(255).optional(),
 	building: z.string().max(255).optional(),
+	latitude: z.string().max(20).optional(),
+	longitude: z.string().max(20).optional(),
 });
+
+export const insertAddressSchema = addressSchema;
+export const updateAddressSchema = addressSchema.partial();
 
 export const insertLocationSchema = z.object({
 	organizationId: z.string().min(1).max(255),
 	locationType: z.enum(["warehouse", "shop", "distribution_center"]),
 	name: z.string().min(1).max(255),
 	description: z.string().optional(),
-	address: TAddressSchema.optional(),
-	latitude: z.string().max(20).optional(),
-	longitude: z.string().max(20).optional(),
+	address: addressSchema.optional(),
+	addressId: z.string().uuid().optional(),
 	capacity: z.number().int().positive().optional(),
 	contactName: z.string().max(100).optional(),
-	contactEmail: z.email().max(100).optional(),
+	contactEmail: z.string().email().max(100).optional(),
 	contactPhone: z.string().max(20).optional(),
 
 	isActive: z.boolean().default(true).optional(),

@@ -177,8 +177,6 @@ export default function OrganizationLocationsTab() {
 													? setEditingLocation({
 															...location,
 															description: location.description ?? undefined,
-															latitude: location.latitude ?? undefined,
-															longitude: location.longitude ?? undefined,
 															capacity: location.capacity ?? undefined,
 															metadata: location.metadata ?? undefined,
 															address: location.address
@@ -191,6 +189,8 @@ export default function OrganizationLocationsTab() {
 																		zipCode:
 																			location.address.zipCode ?? undefined,
 																		country: location.address.country ?? "",
+																		latitude: location.address.latitude ?? "",
+																		longitude: location.address.longitude ?? "",
 																	}
 																: undefined,
 														})

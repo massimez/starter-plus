@@ -70,14 +70,14 @@ const formConfig: FormBuilderConfig<LocationFormValues> = {
 					placeholderKey: "Select location type",
 					options: LOCATION_TYPES,
 				},
-				{
-					itemType: "field",
-					type: "number",
-					name: "capacity",
-					labelKey: "Capacity",
-					placeholderKey: "Capacity",
-					descriptionKey: "The maximum capacity of the location.",
-				},
+				// {
+				// 	itemType: "field",
+				// 	type: "number",
+				// 	name: "capacity",
+				// 	labelKey: "Capacity",
+				// 	placeholderKey: "Capacity",
+				// 	descriptionKey: "The maximum capacity of the location.",
+				// },
 				{
 					itemType: "field",
 					type: "switch",

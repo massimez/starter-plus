@@ -50,6 +50,20 @@
       "when": 1761326303487,
       "tag": "0006_large_avengers",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1761734993760,
+      "tag": "0007_smiling_loa",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1761735980375,
+      "tag": "0008_serious_umar",
+      "breakpoints": true
     }
   ]
 }

@@ -1,19 +1,21 @@
-import { and, eq } from "drizzle-orm";
 import z from "zod";
 import { createRouter } from "@/lib/create-hono-app";
-import { db } from "@/lib/db";
-import { organizationInfo } from "@/lib/db/schema";
 import { handleRouteError } from "@/lib/utils/route-helpers";
 import { jsonValidator, paramValidator } from "@/lib/utils/validator";
 import { authMiddleware } from "@/middleware/auth";
 import { hasOrgPermission } from "@/middleware/org-permission";
 import {
+	createOrganizationInfo,
+	deleteOrganizationInfo,
+	getOrganizationBasicInfoBySlug,
+	getOrganizationInfo,
+	getOrganizationInfoById,
+	updateOrganizationInfo,
+} from "./organization-info.service";
+import {
 	insertOrganizationInfoSchema,
 	updateOrganizationInfoSchema,
 } from "./schema";
-
-const buildOrganizationInfoQuery = (id: string, orgId: string) =>
-	and(eq(organizationInfo.id, id), eq(organizationInfo.organizationId, orgId));
 
 export const organizationInfoRoute = createRouter()
 	.post(
@@ -28,12 +30,9 @@ export const organizationInfoRoute = createRouter()
 				const data = c.req.valid("json");
 				const insertData = { ...data, organizationId: activeOrgId };
 
-				const newOrganizationInfo = await db
-					.insert(organizationInfo)
-					.values(insertData)
-					.returning();
+				const newOrganizationInfo = await createOrganizationInfo(insertData);
 
-				return c.json(newOrganizationInfo[0], 201);
+				return c.json(newOrganizationInfo, 201);
 			} catch (error) {
 				return handleRouteError(c, error, "create organization info");
 			}
@@ -54,12 +53,7 @@ export const organizationInfoRoute = createRouter()
 					);
 				}
 
-				const foundOrganizationInfo = await db.query.organizationInfo.findFirst(
-					{
-						where: (organizationInfo, { eq }) =>
-							eq(organizationInfo.organizationId, activeOrgId),
-					},
-				);
+				const foundOrganizationInfo = await getOrganizationInfo(activeOrgId);
 
 				return c.json({
 					data: foundOrganizationInfo,
@@ -72,7 +66,6 @@ export const organizationInfoRoute = createRouter()
 	.get(
 		"/info/:id",
 		authMiddleware,
-
 		hasOrgPermission("organization:read"),
 		paramValidator(
 			z.object({
@@ -82,20 +75,18 @@ export const organizationInfoRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
-
 				const id = c.req.param("id");
 
-				const foundOrganizationInfo = await db
-					.select()
-					.from(organizationInfo)
-					.where(buildOrganizationInfoQuery(id, activeOrgId))
-					.limit(1);
+				const foundOrganizationInfo = await getOrganizationInfoById(
+					id,
+					activeOrgId,
+				);
 
-				if (!foundOrganizationInfo.length) {
+				if (!foundOrganizationInfo) {
 					return c.json({ error: "Organization info not found" }, 404);
 				}
 
-				return c.json(foundOrganizationInfo[0]);
+				return c.json(foundOrganizationInfo);
 			} catch (error) {
 				return handleRouteError(c, error, "fetch organization info");
 			}
@@ -104,28 +95,26 @@ export const organizationInfoRoute = createRouter()
 	.put(
 		"/info/:id",
 		authMiddleware,
-
 		hasOrgPermission("organization:update"),
 		jsonValidator(updateOrganizationInfoSchema),
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
-
 				const id = c.req.param("id");
 				const data = c.req.valid("json");
 				console.log("Updating organization info with data:", data);
 
-				const updatedOrganizationInfo = await db
-					.update(organizationInfo)
-					.set(data)
-					.where(buildOrganizationInfoQuery(id, activeOrgId))
-					.returning();
+				const updatedOrganizationInfo = await updateOrganizationInfo(
+					id,
+					data,
+					activeOrgId,
+				);
 
-				if (!updatedOrganizationInfo.length) {
+				if (!updatedOrganizationInfo) {
 					return c.json({ error: "Organization info not found" }, 404);
 				}
 
-				return c.json(updatedOrganizationInfo[0]);
+				return c.json(updatedOrganizationInfo);
 			} catch (error) {
 				return handleRouteError(c, error, "update organization info");
 			}
@@ -142,21 +131,20 @@ export const organizationInfoRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
-
 				const id = c.req.param("id");
 
-				const deletedOrganizationInfo = await db
-					.delete(organizationInfo)
-					.where(buildOrganizationInfoQuery(id, activeOrgId))
-					.returning();
+				const deletedOrganizationInfo = await deleteOrganizationInfo(
+					id,
+					activeOrgId,
+				);
 
-				if (!deletedOrganizationInfo.length) {
+				if (!deletedOrganizationInfo) {
 					return c.json({ error: "Organization info not found" }, 404);
 				}
 
 				return c.json({
 					message: "Organization info deleted successfully",
-					deletedOrganizationInfo: deletedOrganizationInfo[0],
+					deletedOrganizationInfo,
 				});
 			} catch (error) {
 				return handleRouteError(c, error, "delete organization info");
@@ -174,68 +162,13 @@ export const organizationInfoRoute = createRouter()
 			try {
 				const orgSlug = c.req.param("orgSlug");
 
-				const foundOrganization = await db.query.organization.findFirst({
-					where: (organization, { eq }) => eq(organization.slug, orgSlug),
-					columns: {
-						id: true,
-						name: true,
-						slug: true,
-						logo: true,
-					},
-				});
+				const foundOrganization = await getOrganizationBasicInfoBySlug(orgSlug);
 
 				if (!foundOrganization) {
 					return c.json({ error: "Organization not found" }, 404);
 				}
 
-				const foundOrganizationInfo = await db.query.organizationInfo.findFirst(
-					{
-						where: (organizationInfo, { eq }) =>
-							eq(organizationInfo.organizationId, foundOrganization.id),
-						columns: {
-							contactName: true,
-							contactEmail: true,
-							contactPhone: true,
-							travelFeeType: true,
-							travelFeeValue: true,
-							travelFeeValueByKm: true,
-							maxTravelDistance: true,
-							travelFeesPolicyText: true,
-							minimumTravelFees: true,
-							taxRate: true,
-							bonusPercentage: true,
-							defaultLanguage: true,
-							activeLanguages: true,
-							images: true,
-							socialLinks: true,
-						},
-					},
-				);
-
-				const defaultLocation = await db.query.location.findFirst({
-					where: (location, { eq, and }) =>
-						and(
-							eq(location.organizationId, foundOrganization.id),
-							eq(location.isDefault, true),
-						),
-					columns: {
-						name: true,
-						metadata: true,
-						description: true,
-						isActive: true,
-						address: true,
-						locationType: true,
-						latitude: true,
-						longitude: true,
-						isDefault: true,
-					},
-				});
-
-				return c.json({
-					...foundOrganization,
-					...{ defaultLocation },
-					...{ info: foundOrganizationInfo || null },
-				});
+				return c.json(foundOrganization);
 			} catch (error) {
 				return handleRouteError(
 					c,
