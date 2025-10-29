@@ -1,13 +1,13 @@
 import { and, eq, sql } from "drizzle-orm";
-import { db } from "starter-db";
+import type { z } from "zod";
+import { db } from "@/lib/db";
 import {
 	product,
 	productVariant,
 	productVariantBatch,
 	productVariantStock,
 	productVariantStockTransaction,
-} from "starter-db/schema";
-import type { z } from "zod";
+} from "@/lib/db/schema";
 import { validateOrgId } from "@/lib/utils/validator";
 import type { offsetPaginationSchema } from "@/middleware/pagination";
 import type {

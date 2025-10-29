@@ -59,7 +59,7 @@ const ProductsPage = () => {
 				</div>
 			</div>
 			<ProductList
-				products={productsQueryResult?.data || []}
+				products={(productsQueryResult?.data as any) || []}
 				selectedLanguage={selectedLanguage}
 				onDeleteProduct={async (productId) => {
 					await hc.api.store.products[":id"].$delete({

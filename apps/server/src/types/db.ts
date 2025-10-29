@@ -1,4 +1,4 @@
-import type { db } from "starter-db";
+import type { db } from "@/lib/db";
 
 export type TransactionDb = Parameters<typeof db.transaction>[0] extends (
 	tx: infer T,

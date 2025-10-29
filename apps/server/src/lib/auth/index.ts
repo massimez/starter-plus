@@ -7,8 +7,8 @@ import {
 	phoneNumber,
 } from "better-auth/plugins";
 import type { GoogleProfile } from "better-auth/social-providers";
-import { db } from "starter-db";
-import * as schema from "starter-db/schema";
+import { db } from "../db";
+import * as schema from "../db/schema";
 export const auth = betterAuth({
 	telemetry: {
 		enabled: false,

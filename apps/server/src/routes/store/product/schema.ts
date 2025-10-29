@@ -1,4 +1,6 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { z } from "zod";
+import { idAndAuditFields } from "@/helpers/constant/fields";
 import {
 	product,
 	productCollection,
@@ -7,9 +9,7 @@ import {
 	productSupplier,
 	productVariant,
 	productVariantStock,
-} from "starter-db/schema";
-import { z } from "zod";
-import { idAndAuditFields } from "@/helpers/constant/fields";
+} from "@/lib/db/schema";
 
 // Product Translation Schema for embedding
 export const productTranslationEmbeddedSchema = z.object({

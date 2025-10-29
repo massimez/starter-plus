@@ -1,5 +1,5 @@
-import { db } from "starter-db";
 import { createRouter } from "@/lib/create-hono-app";
+import { db } from "@/lib/db";
 
 const healthRoutes = createRouter().get("/health", async (c) => {
 	try {

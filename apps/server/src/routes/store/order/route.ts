@@ -1,7 +1,7 @@
 import { type AnyColumn, and, asc, count, desc, eq, isNull } from "drizzle-orm";
-import { db } from "starter-db";
-import { order } from "starter-db/schema";
 import { createRouter } from "@/lib/create-hono-app";
+import { db } from "@/lib/db";
+import { order } from "@/lib/db/schema";
 import { handleRouteError } from "@/lib/utils/route-helpers";
 import {
 	idParamSchema,

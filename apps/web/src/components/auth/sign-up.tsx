@@ -31,7 +31,7 @@ export default function SignUp() {
 	const [loading, setLoading] = useState(false);
 
 	const { openModal, modalProps } = useModal();
-	const { handleVerification } = useOtpVerification({});
+	const { handleVerification } = useOtpVerification();
 
 	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const file = e.target.files?.[0];

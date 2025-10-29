@@ -1,11 +1,12 @@
 import { DeleteObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { eq, inArray } from "drizzle-orm";
-import { db } from "starter-db";
-import { uploads } from "starter-db/schema";
+
 import { z } from "zod";
 import env from "@/env";
 import { createRouter } from "@/lib/create-hono-app";
+import { db } from "@/lib/db";
+import { uploads } from "@/lib/db/schema";
 import { jsonValidator } from "@/lib/utils/validator";
 import { authMiddleware } from "@/middleware/auth";
 import { hasOrgPermission } from "@/middleware/org-permission";
@@ -45,13 +46,15 @@ const storageRoutes = createRouter()
 			// sanitize filename
 			const safeName = fileName.replace(/[^\w.-]+/g, "_");
 			const key = `${tenantId}/${visibility}/uploads/${crypto.randomUUID()}-${safeName}`;
-
+			if (env.CF_BUCKET_NAME === undefined) {
+				throw new Error("CF_BUCKET_NAME is undefined");
+			}
 			// Insert pending record
 			const [upload] = await db
 				.insert(uploads)
 				.values({
 					fileKey: key,
-					bucket: env.CF_BUCKET_NAME!,
+					bucket: env.CF_BUCKET_NAME,
 					contentType,
 					size,
 					status: "pending",
@@ -117,12 +120,13 @@ const storageRoutes = createRouter()
 		authMiddleware,
 		hasOrgPermission("storage:write"),
 		async (c) => {
-			const user = c.get("user");
+			// biome-ignore lint/style/noNonNullAssertion: <authMiddleware>
+			const user = c.get("user")!;
 			const activeOrgId = c.get("session")?.activeOrganizationId as string;
 			const { key } = c.req.param();
 
 			// Verify ownership (tenant)
-			if (!key.startsWith(activeOrgId) && !key.startsWith(user?.id!)) {
+			if (!key.startsWith(activeOrgId) && !key.startsWith(user.id)) {
 				return c.json({ error: "Forbidden" }, 403);
 			}
 

@@ -1,10 +1,10 @@
 import { and, eq, isNull } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { db } from "starter-db"; // Corrected import
-import { brand } from "starter-db/schema"; // Corrected import
-import { idAndAuditFields } from "@/helpers/constant/fields"; // Import idAndAuditFields
+import { idAndAuditFields } from "@/helpers/constant/fields";
 import { withPaginationAndTotal } from "@/helpers/pagination";
 import { createRouter } from "@/lib/create-hono-app";
+import { db } from "@/lib/db";
+import { brand } from "@/lib/db/schema";
 import { handleRouteError } from "@/lib/utils/route-helpers";
 import {
 	idParamSchema,

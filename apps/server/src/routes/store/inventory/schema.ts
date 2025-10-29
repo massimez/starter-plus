@@ -1,10 +1,10 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
+import { idAndAuditFields } from "@/helpers/constant/fields";
 import {
 	productVariantBatch,
 	productVariantStock,
 	productVariantStockTransaction,
-} from "starter-db/schema";
-import { idAndAuditFields } from "@/helpers/constant/fields";
+} from "@/lib/db/schema";
 
 export const insertProductVariantBatchSchema =
 	createInsertSchema(productVariantBatch);

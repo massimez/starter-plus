@@ -1,6 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
+import type { InsertLocation } from "@workspace/server/hc";
 import { Button } from "@workspace/ui/components/button";
 import {
 	Card,
@@ -20,7 +21,6 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import type { InsertLocation } from "starter-db/schema";
 import type { LocationFormValues } from "@/app/[lang]/dashboard/organization/forms/location-form";
 import { LocationForm } from "@/app/[lang]/dashboard/organization/forms/location-form";
 import { useGetLocations } from "@/app/[lang]/dashboard/organization/queries";

@@ -8,6 +8,7 @@ export type Client = typeof client;
 export const hcWithType = (...args: Parameters<typeof hc>): Client =>
 	hc<App>(...args);
 
+export * from "@/lib/db/schema/store/location";
 export * from "../routes/organization/schema";
 export {
 	insertProductVariantBatchSchema,

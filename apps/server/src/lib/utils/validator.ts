@@ -26,7 +26,17 @@ const createValidator = <
 };
 
 export const queryValidator = createValidator("query");
-export const jsonValidator = createValidator("json");
+// Factory for JSON body validators
+export const jsonValidator = <T extends z.ZodSchema>(schema: T) => {
+	return validator("json", (value, c) => {
+		const parsed = schema.safeParse(value);
+		if (!parsed.success) {
+			return c.json(zodErrorToResponse(parsed.error), 400);
+		}
+		return parsed.data;
+	});
+};
+
 export const formValidator = createValidator("form");
 export const paramValidator = createValidator("param");
 export const headerValidator = createValidator("header");

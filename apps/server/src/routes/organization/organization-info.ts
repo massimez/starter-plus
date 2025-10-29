@@ -1,8 +1,8 @@
 import { and, eq } from "drizzle-orm";
-import { db } from "starter-db";
-import { organizationInfo } from "starter-db/schema";
 import z from "zod";
 import { createRouter } from "@/lib/create-hono-app";
+import { db } from "@/lib/db";
+import { organizationInfo } from "@/lib/db/schema";
 import { handleRouteError } from "@/lib/utils/route-helpers";
 import { jsonValidator, paramValidator } from "@/lib/utils/validator";
 import { authMiddleware } from "@/middleware/auth";

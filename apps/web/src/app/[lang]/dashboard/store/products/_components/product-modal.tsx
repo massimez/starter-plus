@@ -7,11 +7,11 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
+import { removeNulls } from "@workspace/ui/lib/utils";
 import { toast } from "sonner";
 import { LOCALES } from "@/constants/locales";
 import { hc } from "@/lib/api-client";
 import { useActiveOrganization } from "@/lib/auth-client";
-import { removeNulls } from "@/lib/utils";
 import { ProductForm, type ProductFormValues } from "./product-form";
 import type { Product } from "./use-products";
 
@@ -102,9 +102,9 @@ export const ProductModal = ({
 					const errorData = await response.json();
 					console.error("Update failed with error:", errorData);
 					const errorMessage =
-						typeof errorData.error === "string"
-							? errorData.error
-							: errorData.error?.message || "Failed to save product";
+						"success" in errorData && !errorData.success
+							? errorData.error.message
+							: "Failed to save product";
 					toast.error(errorMessage);
 					return;
 				}
@@ -218,9 +218,7 @@ export const ProductModal = ({
 					const errorData = await response.json();
 					console.error("Create failed with error:", errorData);
 					const errorMessage =
-						typeof errorData.error === "string"
-							? errorData.error
-							: errorData.error?.message || "Failed to save product";
+						errorData.error.message || "Failed to save product";
 					toast.error(errorMessage);
 					return;
 				}

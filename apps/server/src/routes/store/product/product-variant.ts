@@ -2,10 +2,10 @@
 // Product Variant Routes
 
 import { and, eq } from "drizzle-orm";
-import { db } from "starter-db";
-import { productVariant } from "starter-db/schema";
 import type z from "zod";
 import { createRouter } from "@/lib/create-hono-app";
+import { db } from "@/lib/db";
+import { productVariant } from "@/lib/db/schema";
 import { handleRouteError } from "@/lib/utils/route-helpers";
 import {
 	idParamSchema,

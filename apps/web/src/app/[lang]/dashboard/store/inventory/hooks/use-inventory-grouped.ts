@@ -69,7 +69,7 @@ export const useGroupedInventory = (locationId?: string) => {
 				);
 			}
 
-			return json.data;
+			return (json as GroupedInventoryApiResponseSuccess).data;
 		},
 	});
 };

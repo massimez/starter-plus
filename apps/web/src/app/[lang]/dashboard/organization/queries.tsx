@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
 	insertOrganizationInfoSchema,
 	updateOrganizationInfoSchema,
-} from "starter-plus-server/hc";
+} from "@workspace/server/hc";
 import type { z } from "zod";
 import { hc } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
@@ -106,8 +106,13 @@ export const useUpdateOrganizationInfo = () => {
 				const data = await res.json();
 				return data;
 			}
-			const errorData = (await res.json()) as { error: string };
-			throw new Error(errorData.error || "Failed to update organization info");
+			const errorData = await res.json();
+			if ("error" in errorData && typeof errorData.error === "object") {
+				throw new Error(
+					errorData.error.message || "Failed to update organization info",
+				);
+			}
+			throw new Error("Failed to update organization info");
 		},
 		onSuccess: (_, variables) => {
 			queryClient.invalidateQueries({
@@ -133,10 +138,13 @@ export const useCreateOrganizationInfo = () => {
 				const data = await res.json(); // data is the organization info object directly
 				return data;
 			}
-			const errorData = await res.json(); // Type assertion for errorData
-			throw new Error(
-				errorData.error.message || "Failed to create organization info",
-			);
+			const errorData = await res.json();
+			if ("error" in errorData && typeof errorData.error === "object") {
+				throw new Error(
+					errorData.error.message || "Failed to create organization info",
+				);
+			}
+			throw new Error("Failed to create organization info");
 		},
 		onSuccess: (_, variables) => {
 			queryClient.invalidateQueries({

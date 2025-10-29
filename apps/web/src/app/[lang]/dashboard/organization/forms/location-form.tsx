@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { insertLocationSchema } from "@workspace/server/hc";
 import { useForm } from "react-hook-form";
-import { insertLocationSchema } from "starter-db/schema";
 import type { z } from "zod";
 import { TabbedForm } from "@/components/form/form-builder/tabbed-form";
 import type { FormBuilderConfig } from "@/components/form/form-builder/types";

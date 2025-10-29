@@ -48,8 +48,18 @@ export default function createApp() {
 		return c.json(
 			{
 				success: false,
-				error: "Not Found",
-				message: "The requested resource was not found",
+				error: {
+					name: "NotFound",
+					message: "The requested resource was not found",
+					issues: [
+						{
+							code: "NOT_FOUND",
+							path: [],
+							message: "The requested resource was not found",
+						},
+					],
+				},
+				data: null,
 			},
 			404,
 		);

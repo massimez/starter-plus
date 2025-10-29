@@ -2,9 +2,9 @@
 // Product Review Routes
 // --------------------
 import { and, eq } from "drizzle-orm";
-import { db } from "starter-db";
-import { productReview } from "starter-db/schema";
 import { createRouter } from "@/lib/create-hono-app";
+import { db } from "@/lib/db";
+import { productReview } from "@/lib/db/schema";
 import { handleRouteError } from "@/lib/utils/route-helpers";
 import {
 	idParamSchema,

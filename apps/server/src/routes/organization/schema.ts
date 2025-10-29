@@ -1,6 +1,6 @@
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
-import { organizationInfo } from "starter-db/schema";
 import z from "zod";
+import { organizationInfo } from "@/lib/db/schema";
 export const insertOrganizationInfoSchema = createInsertSchema(
 	organizationInfo,
 	{

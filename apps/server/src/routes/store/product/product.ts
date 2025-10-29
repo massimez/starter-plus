@@ -1,12 +1,8 @@
 import { and, eq, inArray, sql } from "drizzle-orm";
-import { db } from "starter-db";
-import {
-	product,
-	productVariant,
-	type TProductStatus,
-} from "starter-db/schema";
 import { withPaginationAndTotal } from "@/helpers/pagination";
 import { createRouter } from "@/lib/create-hono-app";
+import { db } from "@/lib/db";
+import { product, productVariant, type TProductStatus } from "@/lib/db/schema";
 import { handleRouteError } from "@/lib/utils/route-helpers";
 import {
 	idParamSchema,
@@ -16,6 +12,7 @@ import {
 	validateOrgId,
 } from "@/lib/utils/validator";
 import { authMiddleware } from "@/middleware/auth";
+import { createErrorResponse } from "@/middleware/error-handler";
 import { hasOrgPermission } from "@/middleware/org-permission";
 import {
 	languageCodeSchema,
@@ -123,7 +120,18 @@ export const productRoute = createRouter()
 						),
 					)
 					.limit(1);
-				if (!foundProduct) return c.json({ error: "Product not found" }, 404);
+				if (!foundProduct)
+					return c.json(
+						createErrorResponse("NotFoundError", "Product not found", [
+							{
+								code: "PRODUCT_NOT_FOUND",
+								path: ["id"],
+								message: "No product found with the provided id",
+							},
+						]),
+						404,
+					);
+
 				return c.json(foundProduct);
 			} catch (error) {
 				return handleRouteError(c, error, "fetch product");
@@ -172,7 +180,17 @@ export const productRoute = createRouter()
 						),
 					)
 					.returning();
-				if (!updatedProduct) return c.json({ error: "Product not found" }, 404);
+				if (!updatedProduct)
+					return c.json(
+						createErrorResponse("NotFoundError", "Product not found", [
+							{
+								code: "PRODUCT_NOT_FOUND",
+								path: ["id"],
+								message: "No product found with the provided id",
+							},
+						]),
+						404,
+					);
 				return c.json(updatedProduct);
 			} catch (error) {
 				return handleRouteError(c, error, "update product");
@@ -197,7 +215,17 @@ export const productRoute = createRouter()
 						),
 					)
 					.returning();
-				if (!deletedProduct) return c.json({ error: "Product not found" }, 404);
+				if (!deletedProduct)
+					return c.json(
+						createErrorResponse("NotFoundError", "Product not found", [
+							{
+								code: "PRODUCT_NOT_FOUND",
+								path: ["id"],
+								message: "No product found with the provided id",
+							},
+						]),
+						404,
+					);
 				return c.json({
 					message: "Product deleted successfully",
 					deletedProduct,

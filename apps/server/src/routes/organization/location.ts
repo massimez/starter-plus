@@ -1,12 +1,12 @@
 import { and, eq } from "drizzle-orm";
-import { db } from "starter-db";
+import z from "zod";
+import { createRouter } from "@/lib/create-hono-app";
+import { db } from "@/lib/db";
 import {
 	insertLocationSchema,
 	location,
 	updateLocationSchema,
-} from "starter-db/schema";
-import z from "zod";
-import { createRouter } from "@/lib/create-hono-app";
+} from "@/lib/db/schema";
 import { handleRouteError } from "@/lib/utils/route-helpers";
 import {
 	jsonValidator,

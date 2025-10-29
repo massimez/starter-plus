@@ -1,7 +1,7 @@
 import { and, eq, sql } from "drizzle-orm";
-import { db } from "starter-db";
-import * as schema from "starter-db/schema";
 import type { z } from "zod";
+import { db } from "@/lib/db";
+import * as schema from "@/lib/db/schema";
 import type { TransactionDb } from "@/types/db";
 import type { createOrderSchema } from "./schema";
 

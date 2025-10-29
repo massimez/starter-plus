@@ -1,6 +1,6 @@
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
-import type { ErrorSchema } from "@/middleware/error-handler";
+import { createErrorResponse } from "@/middleware/error-handler";
 
 // Helper for standardized error responses
 export const handleRouteError = (
@@ -13,37 +13,35 @@ export const handleRouteError = (
 		error instanceof Error &&
 		error.message === "organizationId is required"
 	) {
-		const errorResponse: ErrorSchema = {
-			success: false,
-			data: null,
-			error: {
-				name: "BadRequestError",
-				issues: [
-					{
-						code: "ORGANIZATION_ID_REQUIRED",
-						path: [],
-						message: error.message,
-					},
-				],
-			},
-		};
-		return c.json(errorResponse, 400);
-	}
-	console.error(`Error ${message}:`, error);
-	const errorResponse: ErrorSchema = {
-		success: false,
-		data: null,
-		error: {
-			name: "InternalServerError",
-			message: `An error occurred while trying to ${message}`,
-			issues: [
+		return c.json(
+			createErrorResponse("BadRequestError", "Organization ID is required", [
 				{
-					code: "INTERNAL_ERROR",
-					path: [],
-					message: (error as any).cause || `Failed to ${message}`,
+					code: "ORGANIZATION_ID_REQUIRED",
+					path: ["organizationId"],
+					message:
+						"The organizationId parameter is required for this operation",
 				},
-			],
-		},
-	};
-	return c.json(errorResponse, statusCode as ContentfulStatusCode);
+			]),
+			400,
+		);
+	}
+
+	console.error(`Error ${message}:`, error);
+	const errorMessage =
+		error instanceof Error ? error.message : `Failed to ${message}`;
+	const errorCause =
+		error instanceof Error && error.cause
+			? String(error.cause)
+			: `An error occurred while trying to ${message}`;
+
+	return c.json(
+		createErrorResponse("InternalServerError", errorMessage, [
+			{
+				code: "INTERNAL_ERROR",
+				path: [],
+				message: errorCause,
+			},
+		]),
+		statusCode as ContentfulStatusCode,
+	);
 };

@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import type { TAddress } from "starter-db/schema";
 import { hc } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
+import type { TAddress } from "../../orders/_components/types";
 
 export type SupplierFormData = {
 	name: string;
