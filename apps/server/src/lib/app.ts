@@ -1,16 +1,9 @@
 import auth from "@/routes/auth";
 import healthRoutes from "@/routes/health";
-import { locationRoute } from "@/routes/organization/location";
+import { locationRoute } from "@/routes/organization/location/location";
 import { organizationInfoRoute } from "@/routes/organization/organization-info";
-import storageRoutes from "@/routes/storage";
-import { inventoryRoute } from "@/routes/store/inventory/route";
-import { orderRoute } from "@/routes/store/order/route";
-import { productRoute } from "@/routes/store/product/product";
-import { productCollectionRoute } from "@/routes/store/product/product-collection";
-import { productReviewRoute } from "@/routes/store/product/product-review";
-import { productVariantRoute } from "@/routes/store/product/product-variant";
-import { brandRoute } from "@/routes/store/supplier/brand";
-import { supplierRoute } from "@/routes/store/supplier/supplier";
+import storageRoutes from "@/routes/storage/storage";
+import { storeRoute } from "@/routes/store";
 import createApp from "./create-hono-app";
 
 const app = createApp()
@@ -20,14 +13,7 @@ const app = createApp()
 	.route("/organizations", locationRoute)
 	.route("/organizations", organizationInfoRoute)
 	.route("/storage", storageRoutes)
-	.route("/store", productRoute)
-	.route("/store", productVariantRoute)
-	.route("/store", productCollectionRoute)
-	.route("/store", productReviewRoute)
-	.route("/store", inventoryRoute)
-	.route("/store", supplierRoute)
-	.route("/store", brandRoute)
-	.route("/store", orderRoute);
+	.route("/store", storeRoute);
 
 export const honoApp = app;
 export type App = typeof honoApp;

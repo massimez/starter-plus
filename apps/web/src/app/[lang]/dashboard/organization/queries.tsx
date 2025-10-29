@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
 	insertOrganizationInfoSchema,
 	updateOrganizationInfoSchema,
-} from "@workspace/server/hc";
+} from "@workspace/server/schema";
 import type { z } from "zod";
 import { hc } from "@/lib/api-client";
 import { authClient } from "@/lib/auth-client";
@@ -109,7 +109,7 @@ export const useUpdateOrganizationInfo = () => {
 			const errorData = await res.json();
 			if ("error" in errorData && typeof errorData.error === "object") {
 				throw new Error(
-					errorData.error.message || "Failed to update organization info",
+					errorData.error?.message || "Failed to update organization info",
 				);
 			}
 			throw new Error("Failed to update organization info");

@@ -1,13 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { hc } from "@/lib/api-client";
 
-export interface SuppliersResponse {
-	total: number;
-	data: any[];
-}
-
 export const useSuppliers = () => {
-	return useQuery<SuppliersResponse, Error>({
+	return useQuery({
 		queryKey: ["suppliers"],
 		queryFn: async () => {
 			const response = await hc.api.store.suppliers.$get({
@@ -23,11 +18,11 @@ export const useSuppliers = () => {
 
 			const json = await response.json();
 
-			if ("error" in json) {
+			if (json.error) {
 				throw new Error(json.error.message || "Failed to fetch suppliers");
 			}
 
-			return json as SuppliersResponse;
+			return json.data;
 		},
 	});
 };

@@ -1,13 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { hc } from "@/lib/api-client";
 
-export interface BrandsResponse {
-	total: number;
-	data: any[];
-}
-
 export const useBrands = () => {
-	return useQuery<BrandsResponse, Error>({
+	return useQuery({
 		queryKey: ["brands"],
 		queryFn: async () => {
 			const response = await hc.api.store.brands.$get({
@@ -24,10 +19,10 @@ export const useBrands = () => {
 			const json = await response.json();
 
 			if ("error" in json) {
-				throw new Error(json.error.message || "Failed to fetch brands");
+				throw new Error(json.error?.message || "Failed to fetch brands");
 			}
 
-			return json as BrandsResponse;
+			return json.data;
 		},
 	});
 };

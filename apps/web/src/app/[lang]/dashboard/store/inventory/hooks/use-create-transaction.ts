@@ -47,11 +47,11 @@ export const useCreateTransaction = () => {
 
 			const json = await response.json();
 
-			if ("error" in json) {
+			if (json.error) {
 				throw new Error(json.error.message || "Failed to create transaction");
 			}
 
-			return json;
+			return json.data;
 		},
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["inventory"] });

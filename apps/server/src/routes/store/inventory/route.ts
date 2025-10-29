@@ -1,6 +1,9 @@
 import z from "zod";
 import { createRouter } from "@/lib/create-hono-app";
-import { handleRouteError } from "@/lib/utils/route-helpers";
+import {
+	createSuccessResponse,
+	handleRouteError,
+} from "@/lib/utils/route-helpers";
 import {
 	jsonValidator,
 	paramValidator,
@@ -49,7 +52,7 @@ export const inventoryRoute = createRouter()
 					productVariantId,
 					activeOrgId,
 				);
-				return c.json(stock, 200);
+				return c.json(createSuccessResponse(stock));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch product variant stock");
 			}
@@ -67,7 +70,7 @@ export const inventoryRoute = createRouter()
 				const data = c.req.valid("json");
 
 				const newTransaction = await createStockTransaction(data, activeOrgId);
-				return c.json(newTransaction, 201);
+				return c.json(createSuccessResponse(newTransaction), 201);
 			} catch (error) {
 				return handleRouteError(c, error, "create stock transaction");
 			}
@@ -88,7 +91,7 @@ export const inventoryRoute = createRouter()
 					activeOrgId,
 					paginationParams,
 				);
-				return c.json({ total: result.total, data: result.data });
+				return c.json(createSuccessResponse(result));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch stock transactions");
 			}
@@ -111,7 +114,7 @@ export const inventoryRoute = createRouter()
 					activeOrgId,
 					paginationParams,
 				);
-				return c.json({ total: result.total, data: result.data });
+				return c.json(createSuccessResponse(result));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch stock transactions");
 			}
@@ -129,7 +132,7 @@ export const inventoryRoute = createRouter()
 				const data = c.req.valid("json");
 
 				const newBatch = await createProductVariantBatch(data, activeOrgId);
-				return c.json(newBatch, 201);
+				return c.json(createSuccessResponse(newBatch), 201);
 			} catch (error) {
 				return handleRouteError(c, error, "create product variant batch");
 			}
@@ -149,7 +152,7 @@ export const inventoryRoute = createRouter()
 					productVariantId,
 					activeOrgId,
 				);
-				return c.json({ data: foundBatches });
+				return c.json(createSuccessResponse(foundBatches));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch product variant batches");
 			}
@@ -170,7 +173,7 @@ export const inventoryRoute = createRouter()
 					activeOrgId,
 					locationId,
 				);
-				return c.json({ data });
+				return c.json(createSuccessResponse(data));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch grouped inventory");
 			}

@@ -92,11 +92,11 @@ export const BatchModal = ({
 
 	// Memoize flattened variants for performance
 	const flattenedInventory = useMemo(() => {
-		const items = (inventoryResult?.data ?? []) as InventoryItem[];
+		const items = inventoryResult?.data ?? [];
 		return items.flatMap((item) =>
 			item.variants.map((variant) => ({
-				productId: item.product?.id,
-				productName: item.product?.name || "Unnamed Product",
+				productId: item.id,
+				productName: item.name || "Unnamed Product",
 				productVariantId: variant.id,
 				variantSku: variant.sku || "No SKU",
 			})),

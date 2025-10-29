@@ -1,6 +1,6 @@
 "use client";
 
-import { insertProductSchema } from "@workspace/server/hc";
+import { insertProductSchema } from "@workspace/server/schema";
 import { z } from "zod";
 import { FormBuilder } from "@/components/form/form-builder";
 import type { FormTabConfig } from "@/components/form/form-builder/types";

@@ -1,11 +1,18 @@
-export interface ApiResponse<T = unknown> {
-	success: boolean;
-	data?: T;
-	error?: string;
-	message?: string;
-}
+import type {
+	ApiResponse,
+	ErrorSchema,
+	SuccessSchema,
+} from "@/middleware/error-handler";
+import {
+	createErrorResponse,
+	createSuccessResponse,
+} from "@/middleware/error-handler";
 
-export interface PaginatedResponse<T> extends ApiResponse<T[]> {
+export type { ApiResponse, SuccessSchema, ErrorSchema };
+export { createSuccessResponse, createErrorResponse };
+
+export interface PaginatedResponse<T>
+	extends Omit<SuccessSchema<T[]>, "error"> {
 	pagination: {
 		offset: number;
 		limit: number;
@@ -21,29 +28,29 @@ export type OffsetPaginationParams = {
 };
 
 /**
+ * @deprecated Use createSuccessResponse instead
  * Create success API response
  */
 export function createApiResponse<T>(
 	data: T,
 	message?: string,
-): ApiResponse<T> {
-	return {
-		success: true,
-		data,
-		message,
-	};
+): SuccessSchema<T> {
+	return createSuccessResponse(data, message);
 }
 
 /**
+ * @deprecated Use createErrorResponse instead
  * Create error API response
  */
-export function createErrorResponse(
+export function createErrorResponseLegacy(
 	error: string,
 	message?: string,
-): ApiResponse<never> {
-	return {
-		success: false,
-		error,
-		message,
-	};
+): ErrorSchema {
+	return createErrorResponse(error, message || error, [
+		{
+			code: error,
+			path: [],
+			message: message || error,
+		},
+	]);
 }

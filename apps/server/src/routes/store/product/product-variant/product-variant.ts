@@ -1,24 +1,29 @@
 // --------------------
 // Product Variant Routes
-
-import { and, eq } from "drizzle-orm";
-import type z from "zod";
 import { createRouter } from "@/lib/create-hono-app";
-import { db } from "@/lib/db";
-import { productVariant } from "@/lib/db/schema";
-import { handleRouteError } from "@/lib/utils/route-helpers";
+import {
+	createErrorResponse,
+	createSuccessResponse,
+	handleRouteError,
+} from "@/lib/utils/route-helpers";
 import {
 	idParamSchema,
 	jsonValidator,
 	paramValidator,
-	validateOrgId,
 } from "@/lib/utils/validator";
 import { authMiddleware } from "@/middleware/auth";
 import { hasOrgPermission } from "@/middleware/org-permission";
 import {
 	insertProductVariantSchema,
 	updateProductVariantSchema,
-} from "./schema";
+} from "../schema";
+import {
+	createProductVariant,
+	deleteProductVariant,
+	getProductVariant,
+	getProductVariants,
+	updateProductVariant,
+} from "./product-variant.service";
 
 // --------------------
 export const productVariantRoute = createRouter()
@@ -31,14 +36,8 @@ export const productVariantRoute = createRouter()
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
 				const data = c.req.valid("json");
-				const [newProductVariant] = await db
-					.insert(productVariant)
-					.values({
-						...data,
-						organizationId: activeOrgId,
-					} as z.infer<typeof insertProductVariantSchema>)
-					.returning();
-				return c.json(newProductVariant, 201);
+				const newProductVariant = await createProductVariant(data, activeOrgId);
+				return c.json(createSuccessResponse(newProductVariant), 201);
 			} catch (error) {
 				return handleRouteError(c, error, "create product variant");
 			}
@@ -51,11 +50,8 @@ export const productVariantRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
-				const foundProductVariants = await db
-					.select()
-					.from(productVariant)
-					.where(eq(productVariant.organizationId, activeOrgId));
-				return c.json({ data: foundProductVariants });
+				const foundProductVariants = await getProductVariants(activeOrgId);
+				return c.json(createSuccessResponse(foundProductVariants));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch product variants");
 			}
@@ -70,19 +66,20 @@ export const productVariantRoute = createRouter()
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
 				const { id } = c.req.valid("param");
-				const [foundProductVariant] = await db
-					.select()
-					.from(productVariant)
-					.where(
-						and(
-							eq(productVariant.id, id),
-							eq(productVariant.organizationId, validateOrgId(activeOrgId)),
-						),
-					)
-					.limit(1);
-				if (!foundProductVariant)
-					return c.json({ error: "Product variant not found" }, 404);
-				return c.json(foundProductVariant);
+				const foundProductVariant = await getProductVariant(id, activeOrgId);
+				if (!foundProductVariant) {
+					return c.json(
+						createErrorResponse("NotFoundError", "Product variant not found", [
+							{
+								code: "RESOURCE_NOT_FOUND",
+								path: ["id"],
+								message: "No product variant found with the provided id",
+							},
+						]),
+						404,
+					);
+				}
+				return c.json(createSuccessResponse(foundProductVariant));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch product variant");
 			}
@@ -99,19 +96,24 @@ export const productVariantRoute = createRouter()
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
 				const { id } = c.req.valid("param");
 				const data = c.req.valid("json");
-				const [updatedProductVariant] = await db
-					.update(productVariant)
-					.set(data)
-					.where(
-						and(
-							eq(productVariant.id, id),
-							eq(productVariant.organizationId, validateOrgId(activeOrgId)),
-						),
-					)
-					.returning();
-				if (!updatedProductVariant)
-					return c.json({ error: "Product variant not found" }, 404);
-				return c.json(updatedProductVariant);
+				const updatedProductVariant = await updateProductVariant(
+					id,
+					data,
+					activeOrgId,
+				);
+				if (!updatedProductVariant) {
+					return c.json(
+						createErrorResponse("NotFoundError", "Product variant not found", [
+							{
+								code: "RESOURCE_NOT_FOUND",
+								path: ["id"],
+								message: "No product variant found with the provided id",
+							},
+						]),
+						404,
+					);
+				}
+				return c.json(createSuccessResponse(updatedProductVariant));
 			} catch (error) {
 				return handleRouteError(c, error, "update product variant");
 			}
@@ -126,21 +128,28 @@ export const productVariantRoute = createRouter()
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
 				const { id } = c.req.valid("param");
-				const [deletedProductVariant] = await db
-					.delete(productVariant)
-					.where(
-						and(
-							eq(productVariant.id, id),
-							eq(productVariant.organizationId, validateOrgId(activeOrgId)),
-						),
-					)
-					.returning();
-				if (!deletedProductVariant)
-					return c.json({ error: "Product variant not found" }, 404);
-				return c.json({
-					message: "Product variant deleted successfully",
-					deletedProductVariant,
-				});
+				const deletedProductVariant = await deleteProductVariant(
+					id,
+					activeOrgId,
+				);
+				if (!deletedProductVariant) {
+					return c.json(
+						createErrorResponse("NotFoundError", "Product variant not found", [
+							{
+								code: "RESOURCE_NOT_FOUND",
+								path: ["id"],
+								message: "No product variant found with the provided id",
+							},
+						]),
+						404,
+					);
+				}
+				return c.json(
+					createSuccessResponse(
+						deletedProductVariant,
+						"Product variant deleted successfully",
+					),
+				);
 			} catch (error) {
 				return handleRouteError(c, error, "delete product variant");
 			}

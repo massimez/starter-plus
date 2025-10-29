@@ -1,12 +1,8 @@
 import { and, eq } from "drizzle-orm";
 import type z from "zod";
 import { db } from "@/lib/db";
-import {
-	address,
-	type insertLocationSchema,
-	location,
-	type updateLocationSchema,
-} from "@/lib/db/schema";
+import { address, location } from "@/lib/db/schema";
+import type { insertLocationSchema, updateLocationSchema } from "./schema";
 
 type LocationType = typeof location.$inferSelect;
 

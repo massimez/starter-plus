@@ -2,7 +2,11 @@ import { type AnyColumn, and, asc, count, desc, eq, isNull } from "drizzle-orm";
 import { createRouter } from "@/lib/create-hono-app";
 import { db } from "@/lib/db";
 import { order } from "@/lib/db/schema";
-import { handleRouteError } from "@/lib/utils/route-helpers";
+import {
+	createErrorResponse,
+	createSuccessResponse,
+	handleRouteError,
+} from "@/lib/utils/route-helpers";
 import {
 	idParamSchema,
 	jsonValidator,
@@ -32,7 +36,7 @@ export const orderRoute = createRouter()
 
 				const result = await createOrder(payload, user, activeOrgId);
 
-				return c.json(result, 201);
+				return c.json(createSuccessResponse(result), 201);
 			} catch (error) {
 				return handleRouteError(c, error, "create order");
 			}
@@ -82,7 +86,12 @@ export const orderRoute = createRouter()
 
 				const total = Number(totalResult[0]?.count ?? 0);
 
-				return c.json({ total, data: result });
+				return c.json(
+					createSuccessResponse({
+						total,
+						data: result,
+					}),
+				);
 			} catch (error) {
 				return handleRouteError(c, error, "fetch orders");
 			}
@@ -113,10 +122,19 @@ export const orderRoute = createRouter()
 				});
 
 				if (!result) {
-					return c.json({ message: "Order not found" }, 404);
+					return c.json(
+						createErrorResponse("NotFoundError", "Order not found", [
+							{
+								code: "RESOURCE_NOT_FOUND",
+								path: ["id"],
+								message: "No order found with the provided id",
+							},
+						]),
+						404,
+					);
 				}
 
-				return c.json(result);
+				return c.json(createSuccessResponse(result));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch order");
 			}
@@ -152,7 +170,16 @@ export const orderRoute = createRouter()
 					.returning();
 
 				if (!updated) {
-					return c.json({ message: "Order not found" }, 404);
+					return c.json(
+						createErrorResponse("NotFoundError", "Order not found", [
+							{
+								code: "RESOURCE_NOT_FOUND",
+								path: ["id"],
+								message: "No order found with the provided id",
+							},
+						]),
+						404,
+					);
 				}
 
 				const result = await db.query.order.findFirst({
@@ -161,7 +188,7 @@ export const orderRoute = createRouter()
 				});
 				const items = result?.items || [];
 
-				return c.json({ ...updated, items });
+				return c.json(createSuccessResponse({ ...updated, items }));
 			} catch (error) {
 				return handleRouteError(c, error, "update order");
 			}
@@ -183,7 +210,9 @@ export const orderRoute = createRouter()
 
 				const ord = await completeOrder(id, activeOrgId);
 
-				return c.json({ order: ord });
+				return c.json(
+					createSuccessResponse(ord, "Order completed successfully"),
+				);
 			} catch (error) {
 				return handleRouteError(c, error, "complete order");
 			}
@@ -204,7 +233,9 @@ export const orderRoute = createRouter()
 
 				const ord = await cancelOrder(id, activeOrgId);
 
-				return c.json({ order: ord });
+				return c.json(
+					createSuccessResponse(ord, "Order cancelled successfully"),
+				);
 			} catch (error) {
 				return handleRouteError(c, error, "cancel order");
 			}
@@ -237,10 +268,26 @@ export const orderRoute = createRouter()
 					.returning();
 
 				if (!deleted) {
-					return c.json({ message: "Order not found or already deleted" }, 404);
+					return c.json(
+						createErrorResponse(
+							"NotFoundError",
+							"Order not found or already deleted",
+							[
+								{
+									code: "RESOURCE_NOT_FOUND",
+									path: ["id"],
+									message:
+										"No order found with the provided id or already deleted",
+								},
+							],
+						),
+						404,
+					);
 				}
 
-				return c.json({ message: "Order deleted successfully", deleted });
+				return c.json(
+					createSuccessResponse(deleted, "Order deleted successfully"),
+				);
 			} catch (error) {
 				return handleRouteError(c, error, "delete order");
 			}

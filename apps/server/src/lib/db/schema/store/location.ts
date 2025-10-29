@@ -10,7 +10,6 @@ import {
 } from "drizzle-orm/pg-core";
 import { z } from "zod";
 import { softAudit } from "../helpers/common";
-import type { TAddress } from "../helpers/types";
 import { organization } from "../organization";
 
 /**
@@ -84,27 +83,3 @@ const addressSchema = z.object({
 
 export const insertAddressSchema = addressSchema;
 export const updateAddressSchema = addressSchema.partial();
-
-export const insertLocationSchema = z.object({
-	organizationId: z.string().min(1).max(255),
-	locationType: z.enum(["warehouse", "shop", "distribution_center"]),
-	name: z.string().min(1).max(255),
-	description: z.string().optional(),
-	address: addressSchema.optional(),
-	addressId: z.string().uuid().optional(),
-	capacity: z.number().int().positive().optional(),
-	contactName: z.string().max(100).optional(),
-	contactEmail: z.string().email().max(100).optional(),
-	contactPhone: z.string().max(20).optional(),
-
-	isActive: z.boolean().default(true).optional(),
-	isDefault: z.boolean().default(false).optional(),
-	metadata: z.record(z.string(), z.unknown()).optional(),
-});
-
-export const updateLocationSchema = insertLocationSchema.partial().extend({
-	organizationId: z.string().min(1).max(255),
-});
-
-export type InsertLocation = z.infer<typeof insertLocationSchema>;
-export type UpdateLocation = z.infer<typeof updateLocationSchema>;

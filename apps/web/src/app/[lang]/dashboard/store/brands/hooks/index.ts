@@ -1,7 +1,4 @@
-export {
-	type BrandsResponse,
-	useBrands,
-} from "./use-brands";
+export { useBrands } from "./use-brands";
 export {
 	type BrandFormData,
 	useCreateBrand,

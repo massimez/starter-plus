@@ -27,7 +27,7 @@ export const BatchesList = ({ productVariantId }: BatchesListProps) => {
 		error,
 	} = useBatches(productVariantId || "");
 
-	const batches = batchesResponse?.data || [];
+	const batches = batchesResponse || [];
 
 	const filteredBatches = batches.filter(
 		(batch) =>

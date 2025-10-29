@@ -1,13 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { hc } from "@/lib/api-client";
 
-export interface InventoryResponse {
-	total: number;
-	data: any[];
-}
-
 export const useInventory = () => {
-	return useQuery<InventoryResponse, Error>({
+	return useQuery({
 		queryKey: ["inventory"],
 		queryFn: async () => {
 			const response = await hc.api.store.products.$get({
@@ -23,11 +18,11 @@ export const useInventory = () => {
 
 			const json = await response.json();
 
-			if ("error" in json) {
+			if (json.error) {
 				throw new Error(json.error.message || "Failed to fetch inventory");
 			}
 
-			return json as InventoryResponse;
+			return json.data;
 		},
 	});
 };
@@ -45,7 +40,7 @@ export function useInventoryStock(productVariantId: string) {
 				throw new Error("Failed to fetch stock data");
 			}
 			const data = await response.json();
-			return data;
+			return data.data;
 		},
 		enabled: !!productVariantId,
 	});
@@ -79,9 +74,9 @@ export const useInventoryTransactions = (
 			const json = await response.json();
 
 			if ("error" in json) {
-				throw new Error(json.error.message || "Failed to fetch transactions");
+				throw new Error(json.error?.message || "Failed to fetch transactions");
 			}
-			return json;
+			return json.data;
 		},
 		enabled: true,
 	});

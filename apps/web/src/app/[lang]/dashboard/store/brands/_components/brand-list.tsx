@@ -25,10 +25,10 @@ import { useDeleteBrand } from "../hooks";
 interface Brand {
 	id: string;
 	name: string;
-	companyName?: string;
-	logo?: string;
-	website?: string;
-	description?: string;
+	companyName?: string | null;
+	logo?: string | null;
+	website?: string | null;
+	description?: string | null;
 	isActive: boolean;
 	createdAt: string;
 }

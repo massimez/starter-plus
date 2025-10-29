@@ -3,7 +3,8 @@ import { defineConfig } from "tsdown";
 export default defineConfig({
 	entry: {
 		index: "src/index.ts",
-		hc: "src/lib/hc.ts",
+		hc: "src/lib/hc/hc.ts",
+		schema: "src/lib/hc/schema.ts",
 	},
 	dts: {
 		resolve: false,

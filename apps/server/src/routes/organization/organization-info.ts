@@ -1,6 +1,10 @@
 import z from "zod";
 import { createRouter } from "@/lib/create-hono-app";
-import { handleRouteError } from "@/lib/utils/route-helpers";
+import {
+	createErrorResponse,
+	createSuccessResponse,
+	handleRouteError,
+} from "@/lib/utils/route-helpers";
 import { jsonValidator, paramValidator } from "@/lib/utils/validator";
 import { authMiddleware } from "@/middleware/auth";
 import { hasOrgPermission } from "@/middleware/org-permission";
@@ -32,7 +36,7 @@ export const organizationInfoRoute = createRouter()
 
 				const newOrganizationInfo = await createOrganizationInfo(insertData);
 
-				return c.json(newOrganizationInfo, 201);
+				return c.json(createSuccessResponse(newOrganizationInfo), 201);
 			} catch (error) {
 				return handleRouteError(c, error, "create organization info");
 			}
@@ -48,16 +52,25 @@ export const organizationInfoRoute = createRouter()
 
 				if (!activeOrgId) {
 					return c.json(
-						{ error: "No active organization found in session" },
+						createErrorResponse(
+							"BadRequestError",
+							"No active organization found in session",
+							[
+								{
+									code: "SESSION_ERROR",
+									path: ["session"],
+									message:
+										"Active organization ID is required for this operation",
+								},
+							],
+						),
 						400,
 					);
 				}
 
 				const foundOrganizationInfo = await getOrganizationInfo(activeOrgId);
 
-				return c.json({
-					data: foundOrganizationInfo,
-				});
+				return c.json(createSuccessResponse(foundOrganizationInfo));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch organization info");
 			}
@@ -83,10 +96,23 @@ export const organizationInfoRoute = createRouter()
 				);
 
 				if (!foundOrganizationInfo) {
-					return c.json({ error: "Organization info not found" }, 404);
+					return c.json(
+						createErrorResponse(
+							"NotFoundError",
+							"Organization info not found",
+							[
+								{
+									code: "RESOURCE_NOT_FOUND",
+									path: ["id"],
+									message: "No organization info found with the provided id",
+								},
+							],
+						),
+						404,
+					);
 				}
 
-				return c.json(foundOrganizationInfo);
+				return c.json(createSuccessResponse(foundOrganizationInfo));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch organization info");
 			}
@@ -111,10 +137,23 @@ export const organizationInfoRoute = createRouter()
 				);
 
 				if (!updatedOrganizationInfo) {
-					return c.json({ error: "Organization info not found" }, 404);
+					return c.json(
+						createErrorResponse(
+							"NotFoundError",
+							"Organization info not found",
+							[
+								{
+									code: "RESOURCE_NOT_FOUND",
+									path: ["id"],
+									message: "No organization info found with the provided id",
+								},
+							],
+						),
+						404,
+					);
 				}
 
-				return c.json(updatedOrganizationInfo);
+				return c.json(createSuccessResponse(updatedOrganizationInfo));
 			} catch (error) {
 				return handleRouteError(c, error, "update organization info");
 			}
@@ -139,13 +178,28 @@ export const organizationInfoRoute = createRouter()
 				);
 
 				if (!deletedOrganizationInfo) {
-					return c.json({ error: "Organization info not found" }, 404);
+					return c.json(
+						createErrorResponse(
+							"NotFoundError",
+							"Organization info not found",
+							[
+								{
+									code: "RESOURCE_NOT_FOUND",
+									path: ["id"],
+									message: "No organization info found with the provided id",
+								},
+							],
+						),
+						404,
+					);
 				}
 
-				return c.json({
-					message: "Organization info deleted successfully",
-					deletedOrganizationInfo,
-				});
+				return c.json(
+					createSuccessResponse(
+						deletedOrganizationInfo,
+						"Organization info deleted successfully",
+					),
+				);
 			} catch (error) {
 				return handleRouteError(c, error, "delete organization info");
 			}
@@ -165,10 +219,19 @@ export const organizationInfoRoute = createRouter()
 				const foundOrganization = await getOrganizationBasicInfoBySlug(orgSlug);
 
 				if (!foundOrganization) {
-					return c.json({ error: "Organization not found" }, 404);
+					return c.json(
+						createErrorResponse("NotFoundError", "Organization not found", [
+							{
+								code: "RESOURCE_NOT_FOUND",
+								path: ["orgSlug"],
+								message: "No organization found with the provided slug",
+							},
+						]),
+						404,
+					);
 				}
 
-				return c.json(foundOrganization);
+				return c.json(createSuccessResponse(foundOrganization));
 			} catch (error) {
 				return handleRouteError(
 					c,

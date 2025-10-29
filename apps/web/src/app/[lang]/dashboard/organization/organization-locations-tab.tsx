@@ -1,7 +1,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import type { InsertLocation } from "@workspace/server/hc";
+import type { InsertLocation } from "@workspace/server/schema";
 import { Button } from "@workspace/ui/components/button";
 import {
 	Card,
@@ -84,7 +84,7 @@ export default function OrganizationLocationsTab() {
 		try {
 			const res = await hc.api.organizations.locations[":id"].$put({
 				param: { id: editingLocation.id },
-				json: { ...values, organizationId },
+				json: { ...values },
 			});
 			if (res.ok) {
 				toast.success("Location updated successfully");

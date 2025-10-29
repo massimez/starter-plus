@@ -1,6 +1,18 @@
 import type { Context } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
-import { createErrorResponse } from "@/middleware/error-handler";
+import type {
+	ApiResponse,
+	ErrorSchema,
+	SuccessSchema,
+} from "@/middleware/error-handler";
+import {
+	createErrorResponse,
+	createSuccessResponse,
+} from "@/middleware/error-handler";
+
+// Re-export response types and functions for convenience
+export type { ApiResponse, SuccessSchema, ErrorSchema };
+export { createSuccessResponse, createErrorResponse };
 
 // Helper for standardized error responses
 export const handleRouteError = (

@@ -1,21 +1,28 @@
-import { and, eq, isNull } from "drizzle-orm";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { idAndAuditFields } from "@/helpers/constant/fields";
-import { withPaginationAndTotal } from "@/helpers/pagination";
 import { createRouter } from "@/lib/create-hono-app";
-import { db } from "@/lib/db";
 import { brand } from "@/lib/db/schema";
-import { handleRouteError } from "@/lib/utils/route-helpers";
+import {
+	createErrorResponse,
+	createSuccessResponse,
+	handleRouteError,
+} from "@/lib/utils/route-helpers";
 import {
 	idParamSchema,
 	jsonValidator,
 	paramValidator,
 	queryValidator,
-	validateOrgId,
 } from "@/lib/utils/validator";
 import { authMiddleware } from "@/middleware/auth";
 import { hasOrgPermission } from "@/middleware/org-permission";
 import { offsetPaginationSchema } from "@/middleware/pagination";
+import {
+	createBrand,
+	deleteBrand,
+	getBrand,
+	getBrands,
+	updateBrand,
+} from "./brand.service";
 
 const app = createRouter();
 
@@ -34,14 +41,8 @@ export const brandRoute = app
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
 				const data = c.req.valid("json");
-				const [newBrand] = await db
-					.insert(brand)
-					.values({
-						...data,
-						organizationId: activeOrgId,
-					})
-					.returning();
-				return c.json(newBrand, 201);
+				const newBrand = await createBrand(data, activeOrgId);
+				return c.json(createSuccessResponse(newBrand), 201);
 			} catch (error) {
 				return handleRouteError(c, error, "create brand");
 			}
@@ -55,17 +56,9 @@ export const brandRoute = app
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
-				const { limit, offset, orderBy, direction } = c.req.valid("query");
-
-				const { data: brandList, total } = await withPaginationAndTotal({
-					db,
-					query: db.select().from(brand),
-					table: brand,
-					params: { limit, offset, orderBy, direction },
-					orgId: activeOrgId,
-				});
-
-				return c.json({ total, data: brandList });
+				const paginationParams = c.req.valid("query");
+				const result = await getBrands(paginationParams, activeOrgId);
+				return c.json(createSuccessResponse(result));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch brands");
 			}
@@ -80,19 +73,20 @@ export const brandRoute = app
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
 				const { id } = c.req.valid("param");
-				const [foundBrand] = await db
-					.select()
-					.from(brand)
-					.where(
-						and(
-							eq(brand.id, id),
-							eq(brand.organizationId, validateOrgId(activeOrgId)),
-							isNull(brand.deletedAt),
-						),
-					)
-					.limit(1);
-				if (!foundBrand) return c.json({ error: "Brand not found" }, 404);
-				return c.json(foundBrand);
+				const foundBrand = await getBrand(id, activeOrgId);
+				if (!foundBrand) {
+					return c.json(
+						createErrorResponse("NotFoundError", "Brand not found", [
+							{
+								code: "RESOURCE_NOT_FOUND",
+								path: ["id"],
+								message: "No brand found with the provided id",
+							},
+						]),
+						404,
+					);
+				}
+				return c.json(createSuccessResponse(foundBrand));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch brand");
 			}
@@ -109,19 +103,20 @@ export const brandRoute = app
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
 				const { id } = c.req.valid("param");
 				const data = c.req.valid("json");
-				const [updatedBrand] = await db
-					.update(brand)
-					.set(data)
-					.where(
-						and(
-							eq(brand.id, id),
-							eq(brand.organizationId, validateOrgId(activeOrgId)),
-							isNull(brand.deletedAt),
-						),
-					)
-					.returning();
-				if (!updatedBrand) return c.json({ error: "Brand not found" }, 404);
-				return c.json(updatedBrand);
+				const updatedBrand = await updateBrand(id, data, activeOrgId);
+				if (!updatedBrand) {
+					return c.json(
+						createErrorResponse("NotFoundError", "Brand not found", [
+							{
+								code: "RESOURCE_NOT_FOUND",
+								path: ["id"],
+								message: "No brand found with the provided id",
+							},
+						]),
+						404,
+					);
+				}
+				return c.json(createSuccessResponse(updatedBrand));
 			} catch (error) {
 				return handleRouteError(c, error, "update brand");
 			}
@@ -136,23 +131,27 @@ export const brandRoute = app
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
 				const { id } = c.req.valid("param");
-				const [deletedBrand] = await db
-					.update(brand)
-					.set({ deletedAt: new Date() })
-					.where(
-						and(
-							eq(brand.id, id),
-							eq(brand.organizationId, validateOrgId(activeOrgId)),
-							isNull(brand.deletedAt),
+				const deletedBrand = await deleteBrand(id, activeOrgId);
+				if (!deletedBrand) {
+					return c.json(
+						createErrorResponse(
+							"NotFoundError",
+							"Brand not found or already deleted",
+							[
+								{
+									code: "RESOURCE_NOT_FOUND",
+									path: ["id"],
+									message:
+										"No brand found with the provided id or already deleted",
+								},
+							],
 						),
-					)
-					.returning();
-				if (!deletedBrand)
-					return c.json({ error: "Brand not found or already deleted" }, 404);
-				return c.json({
-					message: "Brand deleted successfully",
-					deletedBrand,
-				});
+						404,
+					);
+				}
+				return c.json(
+					createSuccessResponse(deletedBrand, "Brand deleted successfully"),
+				);
 			} catch (error) {
 				return handleRouteError(c, error, "brand delete");
 			}

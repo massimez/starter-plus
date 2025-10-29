@@ -1,6 +1,5 @@
 import z from "zod";
 import { createRouter } from "@/lib/create-hono-app";
-import { insertLocationSchema, updateLocationSchema } from "@/lib/db/schema";
 import { handleRouteError } from "@/lib/utils/route-helpers";
 import { jsonValidator, paramValidator } from "@/lib/utils/validator";
 import { authMiddleware } from "@/middleware/auth";
@@ -12,6 +11,7 @@ import {
 	getLocationsByOrg,
 	updateLocation,
 } from "./location.service";
+import { insertLocationSchema, updateLocationSchema } from "./schema";
 
 const idParamSchema = z.object({
 	id: z.string().min(1, "id is required"),

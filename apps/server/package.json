@@ -19,6 +19,11 @@
       "types": "./dist/hc.d.ts",
       "import": "./dist/hc.js",
       "require": "./dist/hc.js"
+    },
+    "./schema": {
+      "types": "./dist/schema.d.ts",
+      "import": "./dist/schema.js",
+      "require": "./dist/schema.js"
     }
   },
   "dependencies": {

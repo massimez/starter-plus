@@ -25,13 +25,21 @@ import { useDeleteSupplier } from "../hooks";
 interface Supplier {
 	id: string;
 	name: string;
-	email?: string;
-	phone?: string;
-	address?: string;
-	city?: string;
-	country?: string;
-	contactPerson?: string;
+	email?: string | null;
+	phone?: string | null;
+	city?: string | null;
+	country?: string | null;
+	contactPerson?: string | null;
 	createdAt: string;
+	address: {
+		building?: string | null;
+		office?: string | null;
+		street?: string | null;
+		city?: string | null;
+		state?: string | null;
+		zipCode?: string | null;
+		country?: string | null;
+	} | null;
 }
 
 interface SupplierListProps {

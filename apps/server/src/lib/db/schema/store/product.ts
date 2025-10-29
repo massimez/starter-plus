@@ -11,7 +11,6 @@ import {
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
-import { createInsertSchema } from "drizzle-zod";
 import { softAudit } from "../helpers/common";
 import type { TImage, TProductStatus, TVideo } from "../helpers/types";
 import { organization } from "../organization";

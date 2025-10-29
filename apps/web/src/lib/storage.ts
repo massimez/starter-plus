@@ -1,13 +1,6 @@
 import { extractErrorMessage } from "@workspace/ui/lib/utils";
 import { hc } from "./api-client";
 
-// Types
-interface PresignedUrlResponse {
-	url: string;
-	key: string;
-	publicUrl: string;
-}
-
 interface UploadResult {
 	key: string;
 	publicUrl: string;
@@ -34,10 +27,10 @@ export async function uploadPublic(file: File): Promise<UploadResult> {
 			throw new Error("Failed to get presigned URL");
 		}
 
-		const data = (await presignRes.json()) as PresignedUrlResponse;
+		const { data } = await presignRes.json();
 
 		// Validate presigned URL response
-		if (!data.url || !data.key || !data.publicUrl) {
+		if (!data?.url || !data.key || !data.publicUrl) {
 			throw new Error("Invalid presigned URL response");
 		}
 

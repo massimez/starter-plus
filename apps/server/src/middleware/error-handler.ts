@@ -20,9 +20,25 @@ export type SuccessSchema<T> = {
 	success: true;
 	data: T;
 	error?: null;
+	message?: string;
 };
 
 export type ApiResponse<T> = SuccessSchema<T> | ErrorSchema;
+
+/**
+ * Creates a standardized success response
+ */
+export function createSuccessResponse<T>(
+	data: T,
+	message?: string,
+): SuccessSchema<T> {
+	return {
+		success: true,
+		data,
+		error: null,
+		message,
+	};
+}
 
 // ============================================================================
 // ERROR UTILITIES - Centralized error formatting

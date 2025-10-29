@@ -66,7 +66,7 @@ export const getProducts = async ({
 
 	const json = await res.json();
 
-	if ("error" in json) {
+	if (json.error) {
 		throw new Error(json.error.message || "Failed to fetch products");
 	}
 
@@ -74,7 +74,7 @@ export const getProducts = async ({
 		throw new Error("Invalid response format");
 	}
 
-	return json;
+	return json.data;
 };
 
 export const useProducts = ({
