@@ -1,7 +1,6 @@
 import { Slot } from "@radix-ui/react-slot";
 import { cn } from "@workspace/ui/lib/utils";
 import { ChevronRight, MoreHorizontal } from "lucide-react";
-import { useTranslations } from "next-intl";
 import type * as React from "react";
 
 function Breadcrumb({ ...props }: React.ComponentProps<"nav">) {
@@ -84,7 +83,6 @@ function BreadcrumbEllipsis({
 	className,
 	...props
 }: React.ComponentProps<"span">) {
-	const t = useTranslations("common");
 
 	return (
 		<span
@@ -95,7 +93,7 @@ function BreadcrumbEllipsis({
 			{...props}
 		>
 			<MoreHorizontal className="size-4" />
-			<span className="sr-only"> {t("more")}</span>
+			<span className="sr-only"> More</span>
 		</span>
 	);
 }

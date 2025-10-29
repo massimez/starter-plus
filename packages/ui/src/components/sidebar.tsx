@@ -22,7 +22,6 @@ import { useIsMobile } from "@workspace/ui/hooks/use-mobile";
 import { cn } from "@workspace/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 import { PanelLeftIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
 import * as React from "react";
 
 const _SIDEBAR_COOKIE_NAME = "sidebar_state";
@@ -163,8 +162,6 @@ function Sidebar({
 	variant?: "sidebar" | "floating" | "inset";
 	collapsible?: "offcanvas" | "icon" | "none";
 }) {
-	const t = useTranslations("common");
-
 	const { isMobile, state, openMobile, setOpenMobile } = useSidebar();
 
 	if (collapsible === "none") {
@@ -198,8 +195,8 @@ function Sidebar({
 					side={side}
 				>
 					<SheetHeader className="sr-only">
-						<SheetTitle>{t("sidebar.title")}</SheetTitle>
-						<SheetDescription>{t("sidebar.description")}</SheetDescription>
+						<SheetTitle>Title</SheetTitle>
+						<SheetDescription>Description</SheetDescription>
 					</SheetHeader>
 					<div className="flex h-full w-full flex-col">{children}</div>
 				</SheetContent>
@@ -260,8 +257,6 @@ function SidebarTrigger({
 	onClick,
 	...props
 }: React.ComponentProps<typeof Button>) {
-	const t = useTranslations("common");
-
 	const { toggleSidebar } = useSidebar();
 
 	return (
@@ -278,7 +273,7 @@ function SidebarTrigger({
 			{...props}
 		>
 			<PanelLeftIcon />
-			<span className="sr-only">{t("sidebar.toggle")}</span>
+			<span className="sr-only">Toggle Sidebar</span>
 		</Button>
 	);
 }
