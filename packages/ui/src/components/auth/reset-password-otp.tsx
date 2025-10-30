@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@workspace/ui/components/button";
 import {
 	DialogDescription,
@@ -8,42 +6,29 @@ import {
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
 import { Input } from "@workspace/ui/components/input";
-import OtpInput from "@workspace/ui/components/inputs/otp"; // Corrected import for OtpInput
+import OtpInput from "@workspace/ui/components/inputs/otp";
 import { Label } from "@workspace/ui/components/label";
 import { Loader2 } from "lucide-react";
-import Link from "next/link"; // Import Link
 import { useState } from "react";
-import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
-import { useModal } from "../modals/modal-context";
 
 interface ResetPasswordOtpProps {
 	email: string;
+	handleResetPassword: (
+		email: string,
+		otp: string,
+		newPassword: string,
+	) => Promise<void>;
+	onResendOtp: () => void;
 }
 
-export default function ResetPasswordOtp({ email }: ResetPasswordOtpProps) {
+export const ResetPasswordOtp = ({
+	email,
+	handleResetPassword,
+	onResendOtp,
+}: ResetPasswordOtpProps) => {
 	const [otp, setOtp] = useState("");
 	const [newPassword, setNewPassword] = useState("");
 	const [loading, setLoading] = useState(false);
-	const { closeModal, openModal } = useModal();
-
-	const handleResetPassword = async () => {
-		setLoading(true);
-		const { error } = await authClient.emailOtp.resetPassword({
-			email,
-			otp,
-			password: newPassword,
-		});
-
-		if (error) {
-			toast.error(error.message || error.statusText);
-		} else {
-			toast.success("Your password has been reset successfully!");
-			closeModal();
-			openModal("signIn", null); // Redirect to sign-in after successful reset
-		}
-		setLoading(false);
-	};
 
 	return (
 		<div className="">
@@ -83,7 +68,14 @@ export default function ResetPasswordOtp({ email }: ResetPasswordOtpProps) {
 					type="submit"
 					className="w-full"
 					disabled={loading || otp.length !== 6 || newPassword.length === 0}
-					onClick={handleResetPassword}
+					onClick={async () => {
+						setLoading(true);
+						try {
+							await handleResetPassword(email, otp, newPassword);
+						} finally {
+							setLoading(false);
+						}
+					}}
 				>
 					{loading ? (
 						<Loader2 size={16} className="animate-spin" />
@@ -94,15 +86,11 @@ export default function ResetPasswordOtp({ email }: ResetPasswordOtpProps) {
 			</div>
 			<DialogFooter className="flex sm:justify-start">
 				<div className="mt-6 text-sm">
-					<Link
-						href="#"
-						className="underline"
-						onClick={() => openModal("forgetPassword", null)}
-					>
+					<button className="underline" onClick={() => onResendOtp()}>
 						Resend OTP
-					</Link>
+					</button>
 				</div>
 			</DialogFooter>
 		</div>
 	);
-}
+};

@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@workspace/ui/components/button";
 import {
 	DialogDescription,
@@ -9,7 +7,6 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import OTPInput, { type InputProps } from "@workspace/ui/components/inputs/otp";
 import { useCallback, useEffect, useState } from "react";
-import { toast } from "sonner";
 
 interface OtpVerificationProps {
 	title?: string;
@@ -30,7 +27,7 @@ interface OtpVerificationProps {
 	onResendLimitReached?: () => void;
 }
 
-export function OtpVerification({
+export const OtpVerification = ({
 	title = "OTP Verification",
 	description = "Please enter the one-time password sent to your device.",
 	length = 6,
@@ -42,7 +39,7 @@ export function OtpVerification({
 	resendTimeoutDuration = 60, // Default 60 seconds
 	maxResendAttempts = 3, // Default max 3 attempts
 	onResendLimitReached,
-}: OtpVerificationProps) {
+}: OtpVerificationProps) => {
 	const [otp, setOtp] = useState("");
 	const [timeLeft, setTimeLeft] = useState(0);
 	const [resendAttempts, setResendAttempts] = useState(0);
@@ -85,35 +82,21 @@ export function OtpVerification({
 
 	const handleResend = async () => {
 		if (!onResend || isResending || isTimeoutActive) return;
-
-		try {
-			// Check if max attempts reached
-			if (resendAttempts >= maxResendAttempts) {
-				onResendLimitReached?.();
-				return;
-			}
-
-			const res = await onResend();
-			if (res) {
-				toast.error("Resend failed", { description: res?.code });
-				return;
-			}
-			// Start timeout and increment attempts
-			setTimeLeft(resendTimeoutDuration);
-			setIsTimeoutActive(true);
-			setResendAttempts((prev) => prev + 1);
-
-			// Clear current OTP
-			setOtp("");
-		} catch (error: unknown) {
-			if (error instanceof Error) {
-				toast.error("Resend failed", { description: error.message });
-			} else {
-				toast.error("Resend failed", { description: "Unknown error" });
-			}
-			console.error("Resend failed:", error);
-			// Don't increment attempts if resend failed
+		// Check if max attempts reached
+		if (resendAttempts >= maxResendAttempts) {
+			onResendLimitReached?.();
+			return;
 		}
+
+		await onResend();
+
+		// Start timeout and increment attempts
+		setTimeLeft(resendTimeoutDuration);
+		setIsTimeoutActive(true);
+		setResendAttempts((prev) => prev + 1);
+
+		// Clear current OTP
+		setOtp("");
 	};
 
 	const renderInput = (inputProps: InputProps, index: number) => (
@@ -206,4 +189,4 @@ export function OtpVerification({
 			</form>
 		</>
 	);
-}
+};

@@ -34,7 +34,7 @@ export default async function DashBoardLayout({
 		<html lang={lang} dir={"ltr"} suppressHydrationWarning>
 			<body
 				className={cn(
-					"min-h-screen bg-gradient-to-br from-background via-background to-muted/20",
+					"min-h-screen bg-linear-to-br from-background via-background to-muted/20",
 					"rtl",
 				)}
 			>

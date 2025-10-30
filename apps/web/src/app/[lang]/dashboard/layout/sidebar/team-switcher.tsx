@@ -16,11 +16,11 @@ import {
 	useSidebar,
 } from "@workspace/ui/components/sidebar";
 import { Skeleton } from "@workspace/ui/components/skeleton";
+import { useMounted } from "@workspace/ui/hooks/use-mounted";
 import { Building2, ChevronsUpDown, Plus, Settings } from "lucide-react";
 import Image from "next/image";
 import * as React from "react";
 import { useModal } from "@/components/modals/modal-context";
-import { useMounted } from "@/hooks/use-mounted";
 import { authClient } from "@/lib/auth-client";
 
 type Organization = {

@@ -7,6 +7,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from "@workspace/ui/components/dropdown-menu";
+import { GitHubIcon } from "@workspace/ui/components/icons/brands/github-icon";
 import {
 	BookOpen,
 	Globe,
@@ -18,7 +19,6 @@ import {
 } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useLocale } from "next-intl";
-import { GitHubIcon } from "@/components/icons/brands/github-icon";
 import { useModal } from "@/components/modals/modal-context";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useSession } from "@/lib/auth-client";

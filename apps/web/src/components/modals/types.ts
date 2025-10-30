@@ -4,7 +4,15 @@ export type ModalMap = {
 	signIn: null;
 	signUp: null;
 	forgetPassword: null;
-	resetPasswordOtp: { email: string }; // Add this line for the new OTP reset modal
+	resetPasswordOtp: {
+		email: string;
+		handleResetPassword: (
+			email: string,
+			otp: string,
+			newPassword: string,
+		) => Promise<void>;
+		onResendOtp: () => Promise<void>;
+	}; // Add this line for the new OTP reset modal
 	resetPassword: { title: string; description: string; email?: string };
 	verificationOtp: {
 		email?: string;

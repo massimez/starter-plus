@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@workspace/ui/components/button";
 import {
 	DialogDescription,
@@ -10,16 +8,17 @@ import {
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
-import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client"; // Import authClient
-import { useModal } from "../modals/modal-context";
 
-export default function ForgetPassword() {
+export const ForgetPassword = ({
+	sentResetCode,
+	openSignIn,
+}: {
+	sentResetCode: (email: string) => Promise<void>;
+	openSignIn: () => void;
+}) => {
 	const [email, setEmail] = useState("");
 	const [loading, setLoading] = useState(false);
-	const { openModal } = useModal();
 
 	return (
 		<div className="">
@@ -50,16 +49,7 @@ export default function ForgetPassword() {
 					disabled={loading}
 					onClick={async () => {
 						setLoading(true);
-						const { error } = await authClient.forgetPassword.emailOtp({
-							email,
-						});
-
-						if (error) {
-							toast.error(error.message || error.statusText);
-						} else {
-							toast.success("Password reset OTP sent to your email.");
-							openModal("resetPasswordOtp", { email }); // Open the new OTP verification modal
-						}
+						await sentResetCode(email);
 						setLoading(false);
 					}}
 				>
@@ -73,15 +63,11 @@ export default function ForgetPassword() {
 			<DialogFooter className="flex sm:justify-start">
 				<div className="mt-6 text-sm">
 					Remember your password?{" "}
-					<Link
-						href="#"
-						className="underline"
-						onClick={() => openModal("signIn", null)}
-					>
+					<button className="underline" onClick={() => openSignIn()}>
 						Sign in
-					</Link>
+					</button>
 				</div>
 			</DialogFooter>
 		</div>
 	);
-}
+};
