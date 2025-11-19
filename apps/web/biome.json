@@ -1,4 +1,57 @@
 {
-	"root": false,
-	"extends": "//"
+  "root": false,
+  "extends": "//",
+  "linter": {
+    "rules": {
+      "correctness": {
+        "noChildrenProp": "error",
+        "noNestedComponentDefinitions": "error",
+        "noReactPropAssignments": "error",
+        "noRenderReturnValue": "error",
+        "noVoidElementsWithChildren": "error",
+        "useExhaustiveDependencies": "error",
+        "useHookAtTopLevel": "error",
+        "useJsxKeyInIterable": "error"
+      },
+      "nursery": {
+        "noReactForwardRef": "error",
+        "noNextAsyncClientComponent": "error"
+      },
+      "suspicious": {
+        "noArrayIndexKey": "error",
+        "noDuplicateJsxProps": "error",
+        "noSuspiciousSemicolonInJsx": "error",
+        "noReactSpecificProps": "off",
+        "noDocumentImportInPage": "error",
+
+        "noHeadImportInDocument": "error"
+      },
+      "style": {
+        "useReactFunctionComponents": "error",
+        "noHeadElement": "error"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": ["next.config.*"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "useAwait": "off"
+          }
+        }
+      }
+    },
+    {
+      "includes": ["**/page.{ts,tsx,js,jsx}", "**/layout.{ts,tsx,js,jsx}"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "useAwait": "off"
+          }
+        }
+      }
+    }
+  ]
 }
