@@ -70,7 +70,7 @@ export const getProducts = async ({
 		throw new Error(json.error.message || "Failed to fetch products");
 	}
 
-	if (!json.data || !Array.isArray(json.data)) {
+	if (!json.data) {
 		throw new Error("Invalid response format");
 	}
 

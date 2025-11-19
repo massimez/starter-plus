@@ -35,14 +35,14 @@ export function useProductCollections(languageCode?: string) {
 				return { data: [] };
 			}
 			const result = await res.json();
-			if ("error" in result && result.error) {
+			if (result.error) {
 				console.error(
 					"Failed to fetch collections: API returned an error",
 					result.error,
 				);
 				return { data: [] };
 			}
-			if ("data" in result && Array.isArray(result.data)) {
+			if (result.data && Array.isArray(result.data)) {
 				return { data: result.data as ProductCollection[] };
 			}
 			console.error(

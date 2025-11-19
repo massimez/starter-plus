@@ -18,7 +18,7 @@ export const useBrands = () => {
 
 			const json = await response.json();
 
-			if ("error" in json) {
+			if (json.error) {
 				throw new Error(json.error?.message || "Failed to fetch brands");
 			}
 
