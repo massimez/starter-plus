@@ -51,11 +51,11 @@ export function CartItem({ item }: CartItemProps) {
 	const totalPrice = item.price * quantity;
 
 	return (
-		<Card className="overflow-hidden">
-			<CardContent className="p-4">
+		<Card className="overflow-hidden py-4">
+			<CardContent className="p-2">
 				<div className="flex gap-4">
 					{/* Product Image */}
-					<div className="flex-shrink-0">
+					<div className="shrink-0">
 						<div className="relative size-16 overflow-hidden rounded-md bg-muted">
 							{item.image ? (
 								<Image

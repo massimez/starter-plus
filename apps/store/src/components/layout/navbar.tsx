@@ -23,7 +23,7 @@ import { LogIn, LogOut, Settings, User } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
-import { CartButton } from "@/components/features/cart-button";
+import { CartButton } from "@/components/features/cart/cart-button";
 import { Link, usePathname, useRouter } from "@/i18n/routing";
 import { signOut, useSession } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";

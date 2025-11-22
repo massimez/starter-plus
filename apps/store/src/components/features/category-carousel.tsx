@@ -66,6 +66,7 @@ export function CategoryCarousel({
 				opts={{
 					align: "start",
 					dragFree: true,
+					loop: true,
 				}}
 				className="w-full"
 			>

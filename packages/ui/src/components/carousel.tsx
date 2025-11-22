@@ -58,10 +58,39 @@ const Carousel = React.forwardRef<
 		},
 		ref,
 	) => {
+		const [direction, setDirection] = React.useState<"ltr" | "rtl">("ltr");
+
+		React.useEffect(() => {
+			const htmlDir = document.documentElement.dir as "ltr" | "rtl";
+			if (htmlDir) {
+				setDirection(htmlDir);
+			}
+
+			const observer = new MutationObserver((mutations) => {
+				mutations.forEach((mutation) => {
+					if (
+						mutation.type === "attributes" &&
+						mutation.attributeName === "dir"
+					) {
+						const newDir = document.documentElement.dir as "ltr" | "rtl";
+						setDirection(newDir || "ltr");
+					}
+				});
+			});
+
+			observer.observe(document.documentElement, {
+				attributes: true,
+				attributeFilter: ["dir"],
+			});
+
+			return () => observer.disconnect();
+		}, []);
+
 		const [carouselRef, api] = useEmblaCarousel(
 			{
 				...opts,
 				axis: orientation === "horizontal" ? "x" : "y",
+				direction: opts?.direction || direction,
 			},
 			plugins,
 		);
@@ -164,7 +193,7 @@ const CarouselContent = React.forwardRef<
 				ref={ref}
 				className={cn(
 					"flex",
-					orientation === "horizontal" ? "-ml-4" : "-mt-4 flex-col",
+					orientation === "horizontal" ? "-ms-4" : "-mt-4 flex-col",
 					className,
 				)}
 				{...props}
@@ -188,7 +217,7 @@ const CarouselItem = React.forwardRef<
 			aria-roledescription="slide"
 			className={cn(
 				"min-w-0 shrink-0 grow-0 basis-full",
-				orientation === "horizontal" ? "pl-4" : "pt-4",
+				orientation === "horizontal" ? "ps-4" : "pt-4",
 				className,
 			)}
 			{...props}
@@ -211,7 +240,7 @@ const CarouselPrevious = React.forwardRef<
 			className={cn(
 				"absolute h-8 w-8 rounded-full",
 				orientation === "horizontal"
-					? "-left-12 -translate-y-1/2 top-1/2"
+					? "-start-12 -translate-y-1/2 top-1/2 rtl:rotate-180"
 					: "-top-12 -translate-x-1/2 left-1/2 rotate-90",
 				className,
 			)}
@@ -240,7 +269,7 @@ const CarouselNext = React.forwardRef<
 			className={cn(
 				"absolute h-8 w-8 rounded-full",
 				orientation === "horizontal"
-					? "-right-12 -translate-y-1/2 top-1/2"
+					? "-end-12 -translate-y-1/2 top-1/2 rtl:rotate-180"
 					: "-bottom-12 -translate-x-1/2 left-1/2 rotate-90",
 				className,
 			)}
@@ -255,6 +284,63 @@ const CarouselNext = React.forwardRef<
 });
 CarouselNext.displayName = "CarouselNext";
 
+const CarouselDots = React.forwardRef<
+	HTMLDivElement,
+	React.HTMLAttributes<HTMLDivElement>
+>(({ className, ...props }, ref) => {
+	const { api } = useCarousel();
+	const [selectedIndex, setSelectedIndex] = React.useState(0);
+	const [scrollSnaps, setScrollSnaps] = React.useState<number[]>([]);
+
+	React.useEffect(() => {
+		if (!api) {
+			return;
+		}
+
+		setScrollSnaps(api.scrollSnapList());
+		setSelectedIndex(api.selectedScrollSnap());
+
+		const onSelect = () => {
+			setSelectedIndex(api.selectedScrollSnap());
+		};
+
+		api.on("select", onSelect);
+		api.on("reInit", () => {
+			setScrollSnaps(api.scrollSnapList());
+			setSelectedIndex(api.selectedScrollSnap());
+		});
+
+		return () => {
+			api.off("select", onSelect);
+		};
+	}, [api]);
+
+	return (
+		<div
+			ref={ref}
+			className={cn("flex justify-center gap-2 py-4", className)}
+			{...props}
+		>
+			{scrollSnaps.map((_, index) => (
+				<button
+					// biome-ignore lint/suspicious/noArrayIndexKey: Index is the only stable identifier for carousel dots
+					key={index}
+					type="button"
+					className={cn(
+						"h-2 rounded-full transition-all",
+						index === selectedIndex
+							? "w-8 bg-primary"
+							: "w-2 bg-primary/30 hover:bg-primary/50",
+					)}
+					onClick={() => api?.scrollTo(index)}
+					aria-label={`Go to slide ${index + 1}`}
+				/>
+			))}
+		</div>
+	);
+});
+CarouselDots.displayName = "CarouselDots";
+
 export {
 	type CarouselApi,
 	Carousel,
@@ -262,4 +348,5 @@ export {
 	CarouselItem,
 	CarouselPrevious,
 	CarouselNext,
+	CarouselDots,
 };

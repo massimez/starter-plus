@@ -44,7 +44,7 @@ export function CartModal({ open, onOpenChange }: CartModalProps) {
 		<Sheet open={open} onOpenChange={onOpenChange}>
 			<SheetContent side="right" className="flex w-full flex-col sm:max-w-lg">
 				<SheetHeader className="shrink-0">
-					<div className="mt-6 flex items-center justify-between">
+					<div className="mt-2 flex items-center justify-between">
 						<SheetTitle className="flex items-center gap-2">
 							<ShoppingBag className="size-5" />
 							{t("title")}
@@ -52,17 +52,6 @@ export function CartModal({ open, onOpenChange }: CartModalProps) {
 								<span className="text-muted-foreground">({itemCount()})</span>
 							)}
 						</SheetTitle>
-						{!isEmpty && (
-							<Button
-								variant="ghost"
-								size="icon"
-								className=""
-								onClick={handleClearCart}
-								title={t("clearCart")}
-							>
-								<Trash2 className="size-4" />
-							</Button>
-						)}
 					</div>
 				</SheetHeader>
 
@@ -78,7 +67,7 @@ export function CartModal({ open, onOpenChange }: CartModalProps) {
 						</div>
 					) : (
 						<div className="h-full overflow-y-auto px-1">
-							<div className="space-y-4 py-4">
+							<div className="space-y-3">
 								{items.map((item) => (
 									<CartItem key={item.id} item={item} />
 								))}
@@ -91,7 +80,7 @@ export function CartModal({ open, onOpenChange }: CartModalProps) {
 					<div className="shrink-0">
 						<CartSummary subtotal={subtotal} taxes={taxes} total={total} />
 
-						<div className="mt-6 space-y-3">
+						<div className="mt-4 mb-3 space-y-3">
 							{session ? (
 								<Link href="/checkout" onClick={() => onOpenChange(false)}>
 									<Button className="w-full" size="lg">
@@ -105,14 +94,6 @@ export function CartModal({ open, onOpenChange }: CartModalProps) {
 									</Button>
 								</Link>
 							)}
-
-							<Button
-								variant="outline"
-								className="w-full"
-								onClick={() => onOpenChange(false)}
-							>
-								{t("continueShopping")}
-							</Button>
 						</div>
 					</div>
 				)}

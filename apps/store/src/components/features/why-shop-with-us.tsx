@@ -1,8 +1,5 @@
 import {
 	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
 } from "@workspace/ui/components/card";
 import {
 	CreditCard,
@@ -57,30 +54,36 @@ export function WhyShopWithUs() {
 	const t = useTranslations("Advantages");
 
 	return (
-		<section className="bg-background py-16">
+		<section className="py-16">
 			<div className="container mx-auto px-4">
-				<h2 className="mb-12 text-center font-bold text-4xl">{t("title")}</h2>
-				<div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+				<div className="mb-12 text-center">
+					<h2 className="font-bold text-3xl tracking-tight sm:text-4xl">
+						{t("title")}
+					</h2>
+					<div className="mx-auto mt-4 h-1 w-20 rounded bg-primary" />
+				</div>
+
+				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 					{advantages.map((advantage) => {
 						const Icon = advantage.icon;
 						return (
 							<Card
 								key={advantage.titleKey}
-								className="text-center transition-shadow duration-300 hover:shadow-lg"
+								className="group hover:-translate-y-1 relative overflow-hidden border-muted/40 bg-card/50 transition-all duration-300 hover:border-primary/20 hover:bg-card hover:shadow-lg"
 							>
-								<CardHeader>
-									<div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary">
-										<Icon size={32} />
+								<div className="flex items-start gap-4 p-5">
+									<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary transition-colors duration-300 group-hover:bg-primary group-hover:text-primary-foreground">
+										<Icon size={24} strokeWidth={2} />
 									</div>
-									<CardTitle className="text-xl">
-										{t(advantage.titleKey)}
-									</CardTitle>
-								</CardHeader>
-								<CardContent>
-									<p className="text-muted-foreground">
-										{t(advantage.descriptionKey)}
-									</p>
-								</CardContent>
+									<div className="space-y-1">
+										<h3 className="font-semibold leading-none tracking-tight">
+											{t(advantage.titleKey)}
+										</h3>
+										<p className="text-muted-foreground text-sm leading-relaxed">
+											{t(advantage.descriptionKey)}
+										</p>
+									</div>
+								</div>
 							</Card>
 						);
 					})}

@@ -26,12 +26,13 @@ export function CategoryGrid() {
 	return (
 		<section className="py-12">
 			<div className="container mx-auto px-4">
-				<h2 className="mb-8 text-center font-bold text-3xl">
+				<h2 className="mb-8 text-center font-bold text-xl md:text-3xl">
 					Shop by Category
 				</h2>
 				<Carousel
 					opts={{
 						align: "start",
+						loop: true,
 					}}
 					className="mx-auto w-full max-w-5xl"
 				>

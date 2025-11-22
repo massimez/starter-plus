@@ -65,7 +65,7 @@ export function Footer() {
 			label: "Facebook",
 			color: "hover:text-blue-500",
 		},
-		{ icon: Twitter, href: "#", label: "Twitter", color: "hover:text-sky-400" },
+		{ icon: Twitter, href: "#", label: "Twitter", color: "hover:text-sky-700" },
 		{
 			icon: Instagram,
 			href: "#",
@@ -82,7 +82,7 @@ export function Footer() {
 			icon: Github,
 			href: "#",
 			label: "GitHub",
-			color: "hover:text-gray-600 dark:hover:text-gray-300",
+			color: "hover:text-gray-600 dark:hover:text-purple-600",
 		},
 	];
 
@@ -242,10 +242,7 @@ export function Footer() {
 								key={social.label}
 								variant="ghost"
 								size="icon"
-								className={cn(
-									"h-10 w-10 transition-all hover:scale-110",
-									social.color,
-								)}
+								className={cn("transition-all hover:scale-110", social.color)}
 								asChild
 							>
 								<a
@@ -254,7 +251,7 @@ export function Footer() {
 									rel="noopener noreferrer"
 									aria-label={social.label}
 								>
-									<social.icon className="h-5 w-5" />
+									<social.icon className="size-6" />
 								</a>
 							</Button>
 						))}

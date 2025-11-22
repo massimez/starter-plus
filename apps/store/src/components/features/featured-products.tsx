@@ -73,6 +73,9 @@ export function FeaturedProducts() {
 			title="Featured Products"
 			showWishlist
 			compact
+			showArrows={false}
+			showDots
+			enableAutoplay
 		/>
 	);
 }

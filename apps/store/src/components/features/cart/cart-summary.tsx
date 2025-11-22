@@ -15,7 +15,7 @@ export function CartSummary({ subtotal, taxes, total }: CartSummaryProps) {
 
 	return (
 		<Card>
-			<CardContent className="space-y-3 p-4">
+			<CardContent className="space-y-2">
 				{/* Subtotal */}
 				<div className="flex items-center justify-between text-sm">
 					<span className="text-muted-foreground">{t("subtotal")}</span>

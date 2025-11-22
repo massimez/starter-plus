@@ -1,7 +1,7 @@
-export { CartButton } from "./cart-button";
-export { CartItem } from "./cart-item";
-export { CartModal } from "./cart-modal";
-export { CartSummary } from "./cart-summary";
+export { CartButton } from "./cart/cart-button";
+export { CartItem } from "./cart/cart-item";
+export { CartModal } from "./cart/cart-modal";
+export { CartSummary } from "./cart/cart-summary";
 export { FeaturedProducts } from "./featured-products";
 export { FrequentlyBoughtTogether } from "./frequently-bought-together";
 export { ProductCard } from "./product-card";
