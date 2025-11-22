@@ -1,5 +1,5 @@
-export * from "../../routes/organization/location/schema";
-export * from "../../routes/organization/schema";
+export * from "../../routes/admin-organization/organization/location/schema";
+export * from "../../routes/admin-organization/organization/schema";
 export {
 	insertProductVariantBatchSchema,
 	insertProductVariantStockSchema as insertInventoryVariantStockSchema,
@@ -7,7 +7,7 @@ export {
 	updateProductVariantBatchSchema,
 	updateProductVariantStockSchema as updateInventoryVariantStockSchema,
 	updateProductVariantStockTransactionSchema,
-} from "../../routes/store/inventory/schema";
-export * from "../../routes/store/order/schema";
-export * from "../../routes/store/product/schema";
-export * from "../../routes/store/supplier/schema";
+} from "../../routes/admin-organization/store/inventory/schema";
+export * from "../../routes/admin-organization/store/order/schema";
+export * from "../../routes/admin-organization/store/product/schema";
+export * from "../../routes/admin-organization/store/supplier/schema";

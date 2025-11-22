@@ -7,7 +7,7 @@ import {
 	SheetHeader,
 	SheetTitle,
 } from "@workspace/ui/components/sheet";
-import { ShoppingBag, Trash2 } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 import { useSession } from "@/lib/auth-client";
@@ -35,7 +35,7 @@ export function CartModal({ open, onOpenChange }: CartModalProps) {
 	const taxes = subtotal * 0.08; // 8% tax rate (or optional)
 	const total = subtotal + taxes;
 
-	const handleClearCart = () => {
+	const _handleClearCart = () => {
 		clearCart();
 		// Could show a toast notification here
 	};

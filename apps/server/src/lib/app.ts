@@ -1,9 +1,10 @@
+import { locationRoute } from "@/routes/admin-organization/organization/location/location";
+import { organizationInfoRoute } from "@/routes/admin-organization/organization/organization-info";
+import { storeRoute } from "@/routes/admin-organization/store";
 import auth from "@/routes/auth";
 import healthRoutes from "@/routes/health";
-import { locationRoute } from "@/routes/organization/location/location";
-import { organizationInfoRoute } from "@/routes/organization/organization-info";
 import storageRoutes from "@/routes/storage/storage";
-import { storeRoute } from "@/routes/store";
+import storefrontRoutes from "@/routes/storefront";
 import createApp from "./create-hono-app";
 
 const app = createApp()
@@ -13,7 +14,8 @@ const app = createApp()
 	.route("/organizations", locationRoute)
 	.route("/organizations", organizationInfoRoute)
 	.route("/storage", storageRoutes)
-	.route("/store", storeRoute);
+	.route("/store", storeRoute)
+	.route("/storefront", storefrontRoutes);
 
 export const honoApp = app;
 export type App = typeof honoApp;
