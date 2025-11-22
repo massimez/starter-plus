@@ -91,11 +91,11 @@ export function HomeCategoryCarousel() {
 						]}
 						className="w-full"
 					>
-						<CarouselContent className="-ml-2 md:-ml-4 p-8">
+						<CarouselContent className="pt-2">
 							{categories.map((category) => (
 								<CarouselItem
 									key={category.slug}
-									className="basis-[100px] pl-2 md:basis-[140px] md:pl-4 lg:basis-[160px]"
+									className="basis-[100px] md:basis-[140px]"
 								>
 									<Link
 										href={{
@@ -106,7 +106,7 @@ export function HomeCategoryCarousel() {
 										<div className="group flex cursor-pointer flex-col items-center gap-3 transition-transform hover:scale-105">
 											<div
 												className={cn(
-													"flex h-[80px] w-[80px] items-center justify-center rounded-full bg-linear-to-br from-primary/10 to-primary/5 transition-all group-hover:from-primary/20 group-hover:to-primary/10 group-hover:shadow-lg md:h-[90px] md:w-[90px]",
+													"flex h-20 w-20 items-center justify-center rounded-full bg-linear-to-br from-primary/10 to-primary/5 transition-all group-hover:from-primary/20 group-hover:to-primary/10 group-hover:shadow-lg md:h-[90px] md:w-[90px]",
 												)}
 											>
 												<div className="text-primary transition-colors group-hover:text-primary/80">
