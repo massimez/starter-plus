@@ -109,7 +109,7 @@ export const VariantsBlock = ({
 														{field.optionValues && (
 															<div className="mt-0.5 text-muted-foreground text-xs">
 																{Object.entries(field.optionValues)
-																	.map(([_key, value]) => `${value}`)
+																	.map(([key, value]) => `${key}: ${value}`)
 																	.join(" • ")}
 															</div>
 														)}

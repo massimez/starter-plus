@@ -316,7 +316,10 @@ export function ProductEditForm({
 						</Card>
 
 						{/* Variant Options */}
-						<VariantOptions initialOptions={initialOptions} />
+						<VariantOptions
+							initialOptions={initialOptions}
+							selectedLanguage={editingLanguage}
+						/>
 
 						{/* Variants */}
 						<VariantsBlock

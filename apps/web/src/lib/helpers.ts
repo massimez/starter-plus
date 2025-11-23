@@ -211,3 +211,44 @@ export function getSlug(title: string): string {
 		.replace(/-+/g, "-") // Collapse multiple hyphens
 		.replace(/^-|-$/g, ""); // Remove leading/trailing hyphens
 }
+
+/**
+ * Generates a SKU for a product variant using 2 letters from product name and combining first 2 letters of each option.
+ * @param productName - The product name
+ * @param variantIdentifier - The variant combination (e.g., "Red / Large / Gold")
+ * @returns A SKU string in format "PRODUCTINITIALS-OPTIONLETTERS"
+ */
+export function generateProductSku(
+	productName: string,
+	variantIdentifier: string,
+): string {
+	// Get first 2 letters of product name, uppercase
+	const productPrefix = productName
+		.replace(/[^a-zA-Z]/g, "") // Keep only letters
+		.slice(0, 2) // Take first 2
+		.toUpperCase(); // Convert to uppercase
+
+	// Split variant identifier by " / " and get first 2 letters of each option, then combine
+	const variantLetters = variantIdentifier
+		.split(/\s*\/\s*/) // Split by " / "
+		.filter(Boolean) // Remove empty strings
+		.map((option) =>
+			option
+				.replace(/[^a-zA-Z]/g, "")
+				.slice(0, 2)
+				.toUpperCase(),
+		) // Get first 2 letters of each option
+		.join(""); // Combine without separators
+
+	// Combine product prefix and variant letters
+	if (productPrefix && variantLetters) {
+		return `${productPrefix}-${variantLetters}`;
+	}
+
+	if (productPrefix) {
+		return productPrefix;
+	}
+
+	// Fallback if no product name
+	return variantLetters || "";
+}

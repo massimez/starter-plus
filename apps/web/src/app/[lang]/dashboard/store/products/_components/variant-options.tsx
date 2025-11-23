@@ -14,6 +14,7 @@ import { Input } from "@workspace/ui/components/input";
 import { Plus, Trash2, X } from "lucide-react";
 import React, { useCallback, useState } from "react";
 import { useFormContext } from "react-hook-form";
+import { generateProductSku } from "@/lib/helpers";
 import type { ProductFormValues } from "./product-schema";
 
 export interface VariantOption {
@@ -25,11 +26,13 @@ export interface VariantOption {
 interface VariantOptionsProps {
 	initialOptions?: VariantOption[];
 	onOptionsChange?: (options: VariantOption[]) => void;
+	selectedLanguage?: string;
 }
 
 export const VariantOptions = ({
 	initialOptions = [],
 	onOptionsChange,
+	selectedLanguage,
 }: VariantOptionsProps) => {
 	const { setValue, watch } = useFormContext<ProductFormValues>();
 
@@ -89,7 +92,25 @@ export const VariantOptions = ({
 			const productCost = watch("cost");
 			const productCompareAtPrice = watch("compareAtPrice");
 
-			// Create variant objects
+			// Get available languages from product translations
+			const productTranslations = watch("translations") || {};
+			const availableLanguages = Object.keys(productTranslations);
+
+			// Get product name for SKU generation
+			let productName = "";
+			if (selectedLanguage) {
+				productName =
+					watch(`translations.${selectedLanguage}.name`) ||
+					watch("translations.en.name") ||
+					"";
+			} else {
+				// Fallback: get first available translation
+				const firstLang = availableLanguages[0];
+				if (firstLang) {
+					productName = productTranslations[firstLang]?.name || "";
+				}
+			}
+
 			const variants = combinations.map((combination) => {
 				// Create option values object
 				const optionValues: Record<string, string> = {};
@@ -116,11 +137,22 @@ export const VariantOptions = ({
 					return existingKey === combinationKey || displayNameMatch;
 				});
 
+				// Generate SKU using helper function
+				const generatedSku = generateProductSku(productName, combinationKey);
+
+				// Prefill translations with the combination key for all available languages
+				let translations = existing?.translations || [];
+				if (translations.length === 0) {
+					translations = availableLanguages.map((langCode) => ({
+						languageCode: langCode,
+						name: combinationKey,
+						attributes: {},
+					}));
+				}
+
 				return {
 					id: existing?.id,
-					sku:
-						existing?.sku ||
-						`${combinationKey.replace(/\s+/g, "-").toUpperCase()}`,
+					sku: existing?.sku || generatedSku,
 					price: existing?.price ?? productPrice ?? 0,
 					cost: existing?.cost ?? productCost ?? 0,
 					compareAtPrice:
@@ -129,7 +161,7 @@ export const VariantOptions = ({
 					weightKg: existing?.weightKg,
 					barcode: existing?.barcode,
 					isActive: existing?.isActive ?? true,
-					translations: existing?.translations || [],
+					translations,
 					optionValues, // Store the option values
 					displayName: combinationKey, // For display purposes
 				};
@@ -137,7 +169,7 @@ export const VariantOptions = ({
 
 			setValue("variants", variants);
 		},
-		[setValue, watch, generateCombinations],
+		[setValue, watch, generateCombinations, selectedLanguage],
 	);
 
 	const [options, setOptions] = useState<VariantOption[]>(initialOptions);
