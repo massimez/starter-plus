@@ -14,10 +14,15 @@ import {
 	Star,
 	Truck,
 } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { use, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { FrequentlyBoughtTogether } from "@/components/features";
+import {
+	useDefaultLocation,
+	useOrganization,
+	useProduct,
+} from "@/lib/hooks/use-storefront";
 import { useCartStore } from "@/store/use-cart-store";
 
 interface ProductPageProps {
@@ -26,56 +31,117 @@ interface ProductPageProps {
 
 export default function ProductPage({ params }: ProductPageProps) {
 	const t = useTranslations("Product");
+	const locale = useLocale();
 	const { addItem } = useCartStore();
 	const { id } = use(params);
+	const [selectedVariantId, setSelectedVariantId] = useState<string>("");
 	const [quantity, setQuantity] = useState(1);
 	const [isWishlisted, setIsWishlisted] = useState(false);
 
-	// In a real app, this would come from an API or database
-	const productData = useMemo(
-		() => ({
-			id,
-			name: `Product ${id}`,
-			price: 99.99,
-			originalPrice: 129.99,
-			description:
-				"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
-			image: "/placeholder-product.jpg",
-			category: "Electronics",
-			rating: 4.5,
-			reviewsCount: 128,
-			inStock: true,
-			stockQuantity: 15,
-			isOnSale: true,
-			discountPercentage: 23,
-			specifications: [
-				"Warranty: 2 years",
-				'Dimensions: 12" x 8" x 2"',
-				"Weight: 1.5 lbs",
-				"Connectivity: Wireless & USB-C",
-			],
-		}),
-		[id],
+	// Get organization info
+	const { data: org, isLoading: isLoadingOrg } = useOrganization("yam");
+	const organizationId = org?.id || "qGH0Uy2lnzoOfVeU6kcaLSuqfdKon8qe";
+
+	// Get default location
+	const { data: location, isLoading: isLoadingLocation } = useDefaultLocation(
+		organizationId,
+		!!organizationId,
 	);
+
+	// Get product data
+	const { data: product, isLoading: isLoadingProduct } = useProduct(
+		{
+			organizationId,
+			productId: id,
+		},
+		!!organizationId,
+	);
+
+	// Get the localized translation
+	const translation =
+		product?.translations?.find((t) => t.languageCode === locale) ||
+		product?.translations?.find((t) => t.languageCode === "en");
+
+	// Process product data
+	const productData = useMemo(() => {
+		if (!product) return null;
+
+		let selectedVariant: (typeof product.variants)[number] | null = null;
+		if (product?.variants && product.variants.length > 0) {
+			const found = product.variants.find((v) => v.id === selectedVariantId);
+			selectedVariant = (
+				selectedVariantId && found ? found! : product.variants[0]!
+			) as (typeof product.variants)[number] | null;
+		}
+
+		return {
+			id: product.id,
+			name: translation?.name || product.name || "Unnamed Product",
+			price: selectedVariant ? Number.parseFloat(selectedVariant.price) : 0,
+			compareAtPrice: selectedVariant?.compareAtPrice
+				? Number.parseFloat(selectedVariant.compareAtPrice)
+				: undefined,
+			description: translation?.description || "",
+			shortDescription: translation?.shortDescription || "",
+			image:
+				product.thumbnailImage?.url ||
+				product.images?.[0]?.url ||
+				"/placeholder-product.jpg",
+			category: "General", // TODO: Get category from collections
+			rating: 4.5, // TODO: Get from reviews
+			reviewsCount: 0, // TODO: Get from reviews
+			inStock: true, // TODO: Implement stock checking
+			stockQuantity: 10, // TODO: Implement proper stock
+			isOnSale: selectedVariant?.compareAtPrice
+				? Number.parseFloat(selectedVariant.compareAtPrice) >
+					Number.parseFloat(selectedVariant.price)
+				: false,
+			discountPercentage: selectedVariant?.compareAtPrice
+				? Math.round(
+						(1 -
+							Number.parseFloat(selectedVariant.price) /
+								Number.parseFloat(selectedVariant.compareAtPrice)) *
+							100,
+					)
+				: 0,
+			specifications: Object.entries(translation?.specifications || {}).map(
+				([key, value]) => `${key}: ${value}`,
+			),
+			variants: product.variants || [],
+			selectedVariant,
+		};
+	}, [product, translation, selectedVariantId]);
+
+	// Set initial variant if not set and variants exist
+	if (
+		product?.variants &&
+		!selectedVariantId &&
+		product.variants.length > 0 &&
+		product.variants[0]
+	) {
+		setSelectedVariantId(product.variants[0].id);
+	}
 
 	const handleAddToCart = () => {
 		const cartItem = {
-			id: productData.id,
-			name: productData.name,
-			price: productData.price,
+			id: productData!.id,
+			name: productData!.name,
+			price: productData!.price,
 			quantity,
-			description: productData.description,
-			image: productData.image,
+			description: productData!.description,
+			image: productData!.image,
+			productVariantId: productData!.selectedVariant?.id || "",
+			locationId: location?.id || "",
 		};
 
 		addItem(cartItem);
 		toast.success(
-			`${quantity}x ${productData.name} has been added to your cart!`,
+			`${quantity}x ${productData!.name} has been added to your cart!`,
 		);
 	};
 
 	const handleQuantityChange = (newQuantity: number) => {
-		if (newQuantity >= 1 && newQuantity <= productData.stockQuantity) {
+		if (newQuantity >= 1 && newQuantity <= productData!.stockQuantity) {
 			setQuantity(newQuantity);
 		}
 	};
@@ -83,8 +149,8 @@ export default function ProductPage({ params }: ProductPageProps) {
 	const handleShare = () => {
 		if (navigator.share) {
 			navigator.share({
-				title: productData.name,
-				text: productData.description,
+				title: productData?.name || "Product",
+				text: productData?.description || "Check out this product!",
 				url: window.location.href,
 			});
 		} else {
@@ -92,6 +158,15 @@ export default function ProductPage({ params }: ProductPageProps) {
 			toast.success("Product link copied!");
 		}
 	};
+
+	// Loading state
+	if (isLoadingOrg || isLoadingProduct || !productData) {
+		return (
+			<div className="flex min-h-screen items-center justify-center">
+				<div className="h-32 w-32 animate-spin rounded-full border-violet-500 border-t-2 border-b-2" />
+			</div>
+		);
+	}
 
 	return (
 		<div className="min-h-screen bg-linear-to-br from-background to-muted/20">
@@ -164,28 +239,28 @@ export default function ProductPage({ params }: ProductPageProps) {
 									<span className="font-bold text-3xl text-primary md:text-4xl">
 										${productData.price.toFixed(2)}
 									</span>
-									{productData.isOnSale && productData.originalPrice && (
+									{productData.isOnSale && productData.compareAtPrice && (
 										<span className="text-lg text-muted-foreground line-through md:text-xl">
-											${productData.originalPrice.toFixed(2)}
+											${productData.compareAtPrice.toFixed(2)}
 										</span>
 									)}
 								</div>
-								{productData.isOnSale && (
+								{productData.isOnSale && productData.compareAtPrice && (
 									<Badge
 										variant="outline"
 										className="border-green-200 text-green-600"
 									>
 										Save $
-										{(
-											(productData.originalPrice || 0) - productData.price
-										).toFixed(2)}
+										{(productData.compareAtPrice - productData.price).toFixed(
+											2,
+										)}
 									</Badge>
 								)}
 							</div>
 
 							{/* Description */}
 							<p className="text-base text-muted-foreground leading-relaxed md:text-lg">
-								{productData.description}
+								{productData.shortDescription}
 							</p>
 
 							{/* Stock Status */}
@@ -195,6 +270,39 @@ export default function ProductPage({ params }: ProductPageProps) {
 									In Stock ({productData.stockQuantity} available)
 								</span>
 							</div>
+
+							{/* Variants Selector - Show only if more than 2 variants */}
+							{productData.variants.length > 2 && (
+								<div className="space-y-3">
+									<span className="font-medium">Options</span>
+									<div className="grid grid-cols-3 gap-2">
+										{productData.variants.map((variant) => {
+											const variantTranslation =
+												variant.translations?.find(
+													(t) => t.languageCode === locale,
+												) ||
+												variant.translations?.find(
+													(t) => t.languageCode === "en",
+												);
+
+											return (
+												<Button
+													key={variant.id}
+													variant={
+														selectedVariantId === variant.id
+															? "primary"
+															: "outline"
+													}
+													onClick={() => setSelectedVariantId(variant.id)}
+													className="w-full"
+												>
+													{variantTranslation?.name || variant.sku}
+												</Button>
+											);
+										})}
+									</div>
+								</div>
+							)}
 
 							{/* Quantity & Actions */}
 							<div className="space-y-6">
@@ -304,27 +412,15 @@ export default function ProductPage({ params }: ProductPageProps) {
 					</div>
 				</div>
 
-				{/* Specifications - Mobile Optimized */}
+				{/* Description - Mobile Optimized */}
 				<div className="mt-12 md:mt-16">
 					<Card className="border-border/50 shadow-sm">
 						<CardContent className="p-4 md:p-8">
 							<h2 className="mb-4 font-semibold text-xl md:mb-6 md:text-2xl">
-								Specifications
+								Description
 							</h2>
-							<div className="grid grid-cols-1 gap-2 md:grid-cols-2 md:gap-4">
-								{productData.specifications.map((spec) => (
-									<div
-										key={spec.split(":")[0]}
-										className="flex flex-col space-y-1 border-border/30 border-b py-3 last:border-b-0 md:flex-row md:items-center md:justify-between md:space-y-0"
-									>
-										<span className="font-medium text-muted-foreground text-sm md:text-base">
-											{spec.split(":")[0]}
-										</span>
-										<span className="font-medium text-sm md:text-base">
-											{spec.split(":")[1]}
-										</span>
-									</div>
-								))}
+							<div className="text-base text-muted-foreground leading-relaxed md:text-lg">
+								{productData.description}
 							</div>
 						</CardContent>
 					</Card>

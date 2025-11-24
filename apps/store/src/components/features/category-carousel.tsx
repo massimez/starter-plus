@@ -61,7 +61,7 @@ export function CategoryCarousel({
 	};
 
 	return (
-		<div className={cn("w-full py-6", className)}>
+		<div className={cn("w-full py-0", className)}>
 			<Carousel
 				opts={{
 					align: "start",

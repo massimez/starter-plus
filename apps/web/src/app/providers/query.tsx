@@ -7,6 +7,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // extracting this part out into it's own file with 'use client' on top
 import type { PropsWithChildren } from "react";
 
+// This code is only for TypeScript
+declare global {
+	interface Window {
+		__TANSTACK_QUERY_CLIENT__: QueryClient;
+	}
+}
+
 function makeQueryClient() {
 	return new QueryClient({
 		defaultOptions: {
@@ -31,6 +38,7 @@ function getQueryClient() {
 	// supsends during the initial render. This may not be needed if we
 	// have a suspense boundary BELOW the creation of the query client
 	if (!browserQueryClient) browserQueryClient = makeQueryClient();
+	window.__TANSTACK_QUERY_CLIENT__ = browserQueryClient;
 	return browserQueryClient;
 }
 

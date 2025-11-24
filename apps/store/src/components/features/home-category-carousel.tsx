@@ -69,7 +69,24 @@ const categories: CategoryItem[] = [
 	},
 ];
 
-export function HomeCategoryCarousel() {
+interface Collection {
+	name: string;
+	slug: string;
+}
+
+export function HomeCategoryCarousel({
+	collections,
+}: {
+	collections?: Collection[];
+}) {
+	const items = collections?.length
+		? collections.map((c) => ({
+				name: c.name,
+				slug: c.slug,
+				icon: <ShoppingBag className="h-8 w-8" />,
+			}))
+		: categories;
+
 	return (
 		<section className="-mt-20 bg-background py-8">
 			<div className="container mx-auto px-4">
@@ -92,7 +109,7 @@ export function HomeCategoryCarousel() {
 						className="w-full"
 					>
 						<CarouselContent className="pt-2">
-							{categories.map((category) => (
+							{items.map((category) => (
 								<CarouselItem
 									key={category.slug}
 									className="basis-[100px] md:basis-[140px]"

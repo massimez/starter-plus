@@ -1,23 +1,34 @@
 "use client";
 
-import { Button } from "@workspace/ui/components/button";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@workspace/ui/components/card";
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
+import { CheckoutForm } from "@/components/features/checkout-form";
 import { useRouter } from "@/i18n/routing";
 import { useSession } from "@/lib/auth-client";
-import { useCartStore } from "@/store/use-cart-store";
+import { useDefaultLocation } from "@/lib/hooks/use-storefront";
 
 export default function CheckoutPage() {
 	const t = useTranslations("Navigation");
-	const { items, total, clearCart } = useCartStore();
 	const { data: session, isPending } = useSession();
 	const router = useRouter();
+
+	// Get organization ID from environment
+	const organizationId = process.env.NEXT_PUBLIC_ORGANIZATION_ID || "";
+
+	// Fetch default location for the organization
+	const {
+		data: defaultLocation,
+		isLoading: isLocationLoading,
+		error: locationError,
+	} = useDefaultLocation(organizationId, !!organizationId);
+
+	// Debug logging
+	useEffect(() => {
+		console.log("Organization ID:", organizationId);
+		console.log("Location loading:", isLocationLoading);
+		console.log("Location data:", defaultLocation);
+		console.log("Location error:", locationError);
+	}, [organizationId, isLocationLoading, defaultLocation, locationError]);
 
 	useEffect(() => {
 		if (!isPending && !session) {
@@ -25,61 +36,51 @@ export default function CheckoutPage() {
 		}
 	}, [session, isPending, router]);
 
-	if (isPending) {
-		return <div>Loading...</div>;
+	if (isPending || isLocationLoading) {
+		return (
+			<div className="container mx-auto flex min-h-[400px] items-center justify-center px-4 py-10">
+				<div className="text-center">
+					<div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-current border-r-transparent border-solid" />
+					<p className="text-muted-foreground">Loading checkout...</p>
+				</div>
+			</div>
+		);
 	}
 
 	if (!session) {
 		return null; // Will redirect
 	}
 
-	return (
-		<div className="container py-10">
-			<h1 className="mb-8 font-bold text-4xl">{t("checkout")}</h1>
-			<div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-				<div className="md:col-span-2">
-					<Card>
-						<CardHeader>
-							<CardTitle>Order Summary</CardTitle>
-						</CardHeader>
-						<CardContent>
-							{items.length === 0 ? (
-								<p>Your cart is empty.</p>
-							) : (
-								<div className="space-y-4">
-									{items.map((item) => (
-										<div
-											key={item.id}
-											className="flex items-center justify-between border-b pb-4"
-										>
-											<div>
-												<p className="font-medium">{item.name}</p>
-												<p className="text-muted-foreground text-sm">
-													Qty: {item.quantity}
-												</p>
-											</div>
-											<p>${(item.price * item.quantity).toFixed(2)}</p>
-										</div>
-									))}
-								</div>
-							)}
-						</CardContent>
-					</Card>
-				</div>
-				<div>
-					<Card>
-						<CardHeader>
-							<CardTitle>Total</CardTitle>
-						</CardHeader>
-						<CardContent>
-							<p className="mb-6 font-bold text-3xl">${total().toFixed(2)}</p>
-							<Button className="w-full" onClick={() => clearCart()}>
-								Place Order
-							</Button>
-						</CardContent>
-					</Card>
-				</div>
+	if (!organizationId) {
+		return (
+			<div className="container mx-auto px-4 py-10">
+				<p className="text-destructive">
+					Organization not configured. Please contact support.
+				</p>
 			</div>
+		);
+	}
+
+	if (locationError || !defaultLocation) {
+		return (
+			<div className="container mx-auto px-4 py-10">
+				<p className="text-destructive">
+					{locationError
+						? "Failed to load location information. Please try again."
+						: "No active location found. Please contact support."}
+				</p>
+			</div>
+		);
+	}
+
+	return (
+		<div className="container mx-auto px-4 py-10">
+			<h1 className="mb-8 font-bold text-4xl">{t("checkout")}</h1>
+			<CheckoutForm
+				organizationId={organizationId}
+				locationId={defaultLocation.id}
+				currency="USD"
+			/>
 		</div>
 	);
 }

@@ -15,7 +15,12 @@ import { parseAsArrayOf, parseAsString, useQueryState } from "nuqs";
 import { useState } from "react";
 import { CategoryCarousel } from "@/components/features/category-carousel";
 import { type Product, ProductCard } from "@/components/features/product-card";
-import { filters, ProductFilters } from "@/components/features/product-filters";
+import { ProductFilters } from "@/components/features/product-filters";
+import {
+	useCollections,
+	useOrganization,
+	useProducts,
+} from "@/lib/hooks/use-storefront";
 
 // Extended Product type for filters
 interface ExtendedProduct extends Product {
@@ -26,164 +31,10 @@ interface ExtendedProduct extends Product {
 	subcategory?: string;
 }
 
-// Mock products data - in real app this would come from an API
-const allProducts: ExtendedProduct[] = [
-	{
-		id: "1",
-		name: "Wireless Headphones",
-		price: 199.99,
-		category: "Electronics",
-		subcategory: "Headphones",
-		description:
-			"High-quality wireless headphones with noise cancellation technology for immersive listening experience",
-		rating: 4.5,
-		reviews: 123,
-		isOnSale: true,
-		discountPercentage: 20,
-		color: "Black",
-		brand: "Sony",
-		material: "Plastic",
-	},
-	{
-		id: "2",
-		name: "Running Shoes",
-		price: 89.99,
-		category: "Sports",
-		subcategory: "Running",
-		description:
-			"Comfortable running shoes with advanced cushioning and breathable materials",
-		rating: 4.2,
-		reviews: 89,
-		isNew: true,
-		color: "Blue",
-		brand: "Nike",
-		size: "M",
-		material: "Mesh",
-	},
-	{
-		id: "3",
-		name: "Smart Watch",
-		price: 249.99,
-		category: "Electronics",
-		subcategory: "Smartwatches",
-		description:
-			"Feature-rich smartwatch with health monitoring, GPS, and long battery life",
-		rating: 4.7,
-		reviews: 256,
-		color: "Black",
-		brand: "Apple",
-		material: "Metal",
-	},
-	{
-		id: "4",
-		name: "Coffee Maker",
-		price: 129.99,
-		category: "Home",
-		subcategory: "Kitchen",
-		description:
-			"Automatic coffee maker with programmable timer and multiple brewing modes",
-		rating: 4.0,
-		reviews: 67,
-		isOnSale: true,
-		discountPercentage: 15,
-		color: "Black",
-		brand: "Generic",
-		material: "Plastic",
-	},
-	{
-		id: "5",
-		name: "Bluetooth Speaker",
-		price: 59.99,
-		category: "Electronics",
-		subcategory: "Speakers",
-		description:
-			"Portable Bluetooth speaker with excellent sound quality and waterproof design",
-		rating: 4.3,
-		reviews: 145,
-		color: "Red",
-		brand: "JBL",
-		material: "Plastic",
-	},
-	{
-		id: "6",
-		name: "Yoga Mat",
-		price: 29.99,
-		category: "Sports",
-		subcategory: "Yoga",
-		description:
-			"Non-slip yoga mat made from eco-friendly materials, perfect for all exercise routines",
-		rating: 4.1,
-		reviews: 98,
-		isNew: true,
-		color: "Green",
-		brand: "Generic",
-		material: "Rubber",
-	},
-	{
-		id: "7",
-		name: "Laptop Stand",
-		price: 39.99,
-		category: "Electronics",
-		subcategory: "Laptops",
-		description:
-			"Adjustable laptop stand with ergonomic design for better posture and cooling",
-		rating: 4.4,
-		reviews: 72,
-		color: "Silver",
-		brand: "Generic",
-		material: "Metal",
-	},
-	{
-		id: "8",
-		name: "Water Bottle",
-		price: 19.99,
-		category: "Sports",
-		subcategory: "Accessories",
-		description:
-			"Insulated stainless steel water bottle that keeps drinks cold for 24 hours",
-		rating: 4.6,
-		reviews: 203,
-		isNew: true,
-		isOnSale: true,
-		discountPercentage: 25,
-		color: "Blue",
-		brand: "Generic",
-		material: "Metal",
-	},
-	{
-		id: "9",
-		name: "Cotton T-Shirt",
-		price: 24.99,
-		category: "Clothing",
-		subcategory: "Men",
-		description: "Premium cotton t-shirt",
-		rating: 4.5,
-		reviews: 45,
-		color: "White",
-		brand: "Nike",
-		material: "Cotton",
-		size: "L",
-	},
-	{
-		id: "10",
-		name: "Leather Jacket",
-		price: 199.99,
-		category: "Clothing",
-		subcategory: "Women",
-		description: "Genuine leather jacket",
-		rating: 4.8,
-		reviews: 32,
-		color: "Black",
-		brand: "Generic",
-		material: "Leather",
-		size: "L",
-	},
-];
-
 export function ProductsView() {
 	const t = useTranslations("Navigation");
-	const [categories, setCategories] = useQueryState(
-		"category",
+	const [selectedCollections, setSelectedCollections] = useQueryState(
+		"collection",
 		parseAsArrayOf(parseAsString).withDefault([]),
 	);
 	const [colors] = useQueryState(
@@ -206,13 +57,82 @@ export function ProductsView() {
 	const [isFilterOpen, setIsFilterOpen] = useState(false);
 	const [isSortOpen, setIsSortOpen] = useState(false);
 
+	// Fetch organization and products from API
+	const { data: org } = useOrganization("yam");
+	const organizationId = org?.id || "qGH0Uy2lnzoOfVeU6kcaLSuqfdKon8qe";
+
+	// Fetch collections
+	const { data: collections = [] } = useCollections(
+		organizationId,
+		!!organizationId,
+	);
+
+	// Create a mapping of collection names to IDs for API calls
+	const collectionNameToId = collections.reduce(
+		(acc, c) => {
+			const name =
+				c.translations?.find((t) => t.languageCode === "en")?.name ||
+				c.name ||
+				"";
+			acc[name] = c.id;
+			return acc;
+		},
+		{} as Record<string, string>,
+	);
+
+	// Convert selected collection names to IDs for API
+	const selectedCollectionIds = selectedCollections
+		.map((name) => collectionNameToId[name])
+		.filter(Boolean);
+	const collectionId =
+		selectedCollectionIds.length === 1 ? selectedCollectionIds[0] : undefined;
+
+	// Map sort order to API format
+	const apiSort =
+		sortOrder === "price-low"
+			? "price_asc"
+			: sortOrder === "price-high"
+				? "price_desc"
+				: sortOrder === "rating"
+					? "newest" // fallback since rating sort isn't in API
+					: sortOrder === "newest"
+						? "newest"
+						: undefined;
+
+	const { data: products = [], isLoading } = useProducts(
+		{
+			organizationId,
+			sort: apiSort,
+			limit: 100, // Get more products for filtering
+			...(collectionId ? { collectionId } : {}),
+		},
+		!!organizationId,
+	);
+
+	// Map API products to component format
+	const allProducts: ExtendedProduct[] = products.map((p) => ({
+		id: p.id,
+		name: p.translations?.find((t) => t.languageCode === "en")?.name || "",
+		price: p.minPrice || 0,
+		category: "General", // Keep for compatibility with ProductCard
+		description:
+			(Array.isArray(p.translations)
+				? p.translations.find(
+						(t: { languageCode: string; description?: string }) =>
+							t.languageCode === "en",
+					)?.description
+				: "") ||
+			p.name ||
+			"",
+		image: p.thumbnailImage?.url,
+		rating: 4.5, // Placeholder - add rating system later
+		reviews: 0,
+		isNew:
+			new Date(p.createdAt).getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000,
+	}));
+
 	const filteredProducts = allProducts.filter((p) => {
-		if (categories.length > 0) {
-			const matchesCategory = categories.includes(p.category);
-			const matchesSubcategory =
-				p.subcategory && categories.includes(p.subcategory);
-			if (!matchesCategory && !matchesSubcategory) return false;
-		}
+		// Collection filtering is now handled by API
 		if (colors.length > 0 && (!p.color || !colors.includes(p.color)))
 			return false;
 		if (
@@ -226,47 +146,76 @@ export function ProductsView() {
 		return true;
 	});
 
-	// Sort products
+	// Sort products (client-side for rating, since API doesn't support it)
 	const sortedProducts = [...filteredProducts].sort((a, b) => {
 		switch (sortOrder) {
-			case "price-low":
-				return a.price - b.price;
-			case "price-high":
-				return b.price - a.price;
 			case "rating":
 				return (b.rating || 0) - (a.rating || 0);
-			case "newest":
-				return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
 			default:
-				return 0;
+				return 0; // API handles other sorting
 		}
 	});
 
 	// Calculate active filter count
 	const activeFilterCount =
-		categories.length +
+		selectedCollections.length +
 		colors.length +
 		materials.length +
 		brands.length +
 		sizes.length;
 
-	const handleCategorySelect = (category: string) => {
-		if (categories.includes(category)) {
-			const newCategories = categories.filter((c) => c !== category);
-			setCategories(newCategories.length > 0 ? newCategories : null);
+	const handleCollectionSelect = (collectionId: string) => {
+		if (selectedCollections.includes(collectionId)) {
+			const newCollections = selectedCollections.filter(
+				(c) => c !== collectionId,
+			);
+			setSelectedCollections(newCollections.length > 0 ? newCollections : null);
 		} else {
-			setCategories([...categories, category]);
+			setSelectedCollections([collectionId]);
 		}
 	};
+
+	if (isLoading) {
+		return (
+			<div className="flex min-h-screen items-center justify-center">
+				<div className="h-32 w-32 animate-spin rounded-full border-violet-500 border-t-2 border-b-2" />
+			</div>
+		);
+	}
+
+	// Map collections to carousel format - use name for display with parent-child relationships
+	const rootCollections = collections.filter((c) => !c.parentId);
+
+	const carouselCollections = rootCollections.map((parent) => {
+		// Find child collections for this parent
+		const children = collections.filter((c) => c.parentId === parent.id);
+
+		const parentName =
+			parent.translations?.find((t) => t.languageCode === "en")?.name ||
+			parent.name ||
+			"";
+
+		const childNames = children.map(
+			(child) =>
+				child.translations?.find((t) => t.languageCode === "en")?.name ||
+				child.name ||
+				"",
+		);
+
+		return {
+			name: parentName,
+			subcategories: childNames,
+		};
+	});
 
 	return (
 		<div className="container mx-auto px-4 py-10">
 			<h1 className="mb-8 font-bold text-4xl">{t("products")}</h1>
 
 			<CategoryCarousel
-				categories={filters.categories}
-				selectedCategories={categories}
-				onSelectCategory={handleCategorySelect}
+				categories={carouselCollections}
+				selectedCategories={selectedCollections}
+				onSelectCategory={handleCollectionSelect}
 				className="mb-10"
 			/>
 

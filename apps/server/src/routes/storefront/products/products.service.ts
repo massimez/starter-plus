@@ -84,7 +84,6 @@ export async function getStorefrontProducts(params: {
 	const products = await db
 		.select({
 			id: product.id,
-			name: product.name,
 			translations: product.translations,
 			thumbnailImage: product.thumbnailImage,
 			createdAt: product.createdAt,

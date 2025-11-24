@@ -1,11 +1,65 @@
-import { useTranslations } from "next-intl";
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
 import { FeaturedProducts } from "@/components/features/featured-products";
 import { HomeCategoryCarousel } from "@/components/features/home-category-carousel";
 import { PromoBanner } from "@/components/features/promo-banner";
 import { WhyShopWithUs } from "@/components/features/why-shop-with-us";
+import {
+	useCollections,
+	useOrganization,
+	useProducts,
+} from "@/lib/hooks/use-storefront";
 
 export default function HomePage() {
+	const locale = useLocale();
 	const t = useTranslations("HomePage");
+
+	// Fetch data
+	const { data: org, isLoading: isLoadingOrg } = useOrganization("yam");
+	const organizationId = org?.id || "qGH0Uy2lnzoOfVeU6kcaLSuqfdKon8qe";
+
+	const { data: products = [] } = useProducts(
+		{
+			organizationId,
+			limit: 8,
+			sort: "newest",
+		},
+		!!organizationId,
+	);
+
+	const { data: collections = [] } = useCollections(
+		organizationId,
+		!!organizationId,
+	);
+
+	// Map products to match component interface
+	const mappedProducts = products.map((p) => {
+		const translation =
+			p.translations?.find((t) => t.languageCode === locale) ||
+			p.translations?.find((t) => t.languageCode === "en");
+
+		return {
+			id: p.id,
+			name: translation?.name || "",
+			price: p.minPrice || 0,
+			category: "General", // TODO: Get category
+			description: translation?.description || translation?.name || "",
+			image: p.thumbnailImage?.url,
+			rating: 4.5, // Placeholder
+			reviews: 0,
+			isNew:
+				new Date(p.createdAt).getTime() > Date.now() - 30 * 24 * 60 * 60 * 1000,
+		};
+	});
+
+	if (isLoadingOrg && !org) {
+		return (
+			<div className="flex min-h-screen items-center justify-center">
+				<div className="h-32 w-32 animate-spin rounded-full border-violet-500 border-t-2 border-b-2" />
+			</div>
+		);
+	}
 
 	return (
 		<div className="flex min-h-screen flex-col">
@@ -41,8 +95,8 @@ export default function HomePage() {
 				<div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-background to-transparent" />
 			</section>
 
-			<HomeCategoryCarousel />
-			<FeaturedProducts />
+			<HomeCategoryCarousel collections={collections} />
+			<FeaturedProducts products={mappedProducts} />
 			<WhyShopWithUs />
 			<PromoBanner />
 		</div>

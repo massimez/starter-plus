@@ -5,10 +5,56 @@ import {
 	createSuccessResponse,
 	handleRouteError,
 } from "@/lib/utils/route-helpers";
-import { paramValidator, queryValidator } from "@/lib/utils/validator";
-import { getStorefrontOrder, getStorefrontOrders } from "./orders.service";
+import {
+	jsonValidator,
+	paramValidator,
+	queryValidator,
+} from "@/lib/utils/validator";
+import {
+	createStorefrontOrder,
+	getStorefrontOrder,
+	getStorefrontOrders,
+} from "./orders.service";
+
+// Validation schemas
+const shippingAddressSchema = z.object({
+	street: z.string().min(1),
+	city: z.string().min(1),
+	state: z.string().min(1),
+	country: z.string().min(1),
+	postalCode: z.string().min(1),
+});
+
+const orderItemSchema = z.object({
+	productVariantId: z.string().uuid(),
+	quantity: z.number().int().positive(),
+	locationId: z.string().uuid(),
+});
+
+const createOrderSchema = z.object({
+	organizationId: z.string().uuid(),
+	shippingAddress: shippingAddressSchema,
+	items: z.array(orderItemSchema).min(1),
+	currency: z.string().length(3),
+	customerEmail: z.string().email().optional(),
+	customerPhone: z.string().optional(),
+	customerFullName: z.string().optional(),
+	locationId: z.string().uuid(),
+	userId: z.string().uuid().optional(),
+});
 
 export const ordersRoutes = createRouter()
+	// Create order
+	.post("/", jsonValidator(createOrderSchema), async (c) => {
+		try {
+			const payload = c.req.valid("json");
+			const result = await createStorefrontOrder(payload);
+			return c.json(createSuccessResponse(result), 201);
+		} catch (error) {
+			return handleRouteError(c, error, "create order");
+		}
+	})
+	// Get orders
 	.get(
 		"/",
 		queryValidator(

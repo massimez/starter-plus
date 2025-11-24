@@ -13,6 +13,7 @@ import { Heart, ShoppingCart, Star } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Link } from "@/i18n/routing";
+import { useDefaultLocationId } from "@/lib/hooks/use-default-location";
 import { useCartStore } from "@/store/use-cart-store";
 
 export interface Product {
@@ -45,8 +46,14 @@ export function ProductCard({
 }: ProductCardProps) {
 	const t = useTranslations("Product");
 	const { addItem } = useCartStore();
+	const { locationId } = useDefaultLocationId();
 
 	const handleAddToCart = () => {
+		if (!locationId) {
+			toast.error("Unable to add to cart. Location not available.");
+			return;
+		}
+
 		const cartItem = {
 			id: product.id,
 			name: product.name,
@@ -54,6 +61,8 @@ export function ProductCard({
 			quantity: 1,
 			description: product.description || `${product.category} product`,
 			image: product.image,
+			productVariantId: product.id, // Using product ID as variant ID for now
+			locationId: locationId,
 		};
 
 		addItem(cartItem);
@@ -61,7 +70,7 @@ export function ProductCard({
 	};
 
 	return (
-		<Card className="group hover:-translate-y-1 relative h-full overflow-hidden transition-all duration-300 hover:shadow-lg">
+		<Card className="group hover:-translate-y-1 relative flex h-full flex-col overflow-hidden transition-all duration-300 hover:shadow-lg">
 			<CardHeader className="p-2 sm:p-4">
 				<Link href={`/product/${product.id}`}>
 					<CardTitle
@@ -82,7 +91,7 @@ export function ProductCard({
 				</Link>
 			</CardHeader>
 
-			<CardContent className="p-2 pt-0 sm:p-4 sm:pt-0">
+			<CardContent className="flex flex-1 flex-col p-2 pt-0 sm:p-4 sm:pt-0">
 				{/* Product Image */}
 				<div className="relative mb-3 aspect-square w-full overflow-hidden rounded-lg bg-muted/30">
 					{product.image ? (
@@ -149,12 +158,15 @@ export function ProductCard({
 					)}
 				</div>
 
-				{/* Product Description */}
+				{/* Product Description - Fixed height */}
 				{product.description && !compact && (
 					<p className="mb-3 line-clamp-2 text-muted-foreground text-sm">
 						{product.description}
 					</p>
 				)}
+
+				{/* Spacer to push price to bottom */}
+				<div className="flex-1" />
 
 				{/* Product Price */}
 				<div className="flex flex-wrap items-center gap-2">
