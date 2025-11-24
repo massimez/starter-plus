@@ -1,4 +1,4 @@
-import "@workspace/ui/styles/globals.css";
+import "@workspace/ui/globals.css";
 
 import {
 	SidebarInset,

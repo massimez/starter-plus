@@ -24,10 +24,11 @@
 	},
 	"dependencies": {},
 	"devDependencies": {
+		"@types/node": "24.10.1",
+		"@types/bun": "latest",
 		"@biomejs/biome": "^2.3.2",
 		"@commitlint/cli": "^20.1.0",
 		"@commitlint/config-conventional": "^20.0.0",
-		"@types/bun": "latest",
 		"simple-git-hooks": "^2.13.1",
 		"turbo": "^2.5.8"
 	},

@@ -1,4 +1,4 @@
-import "@workspace/ui/styles/globals.css";
+import "@workspace/ui/globals.css";
 
 import { Toaster } from "@workspace/ui/components//sonner";
 import { cn } from "@workspace/ui/lib/utils";

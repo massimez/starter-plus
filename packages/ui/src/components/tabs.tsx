@@ -1,8 +1,13 @@
 "use client";
 
+import {
+	TabsContent as TabsContentPrimitive,
+	TabsList as TabsListPrimitive,
+	Tabs as TabsRoot,
+	TabsTrigger as TabsTriggerPrimitive,
+} from "@radix-ui/react-tabs";
 import { cn } from "@workspace/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
-import { Tabs as TabsPrimitive } from "radix-ui";
 import * as React from "react";
 
 // Variants for TabsList
@@ -145,17 +150,8 @@ const TabsContext = React.createContext<TabsContextType>({
 });
 
 // Components
-function Tabs({
-	className,
-	...props
-}: React.ComponentProps<typeof TabsPrimitive.Root>) {
-	return (
-		<TabsPrimitive.Root
-			data-slot="tabs"
-			className={cn("", className)}
-			{...props}
-		/>
-	);
+function Tabs({ className, ...props }: React.ComponentProps<typeof TabsRoot>) {
+	return <TabsRoot data-slot="tabs" className={cn("", className)} {...props} />;
 }
 
 function TabsList({
@@ -164,13 +160,13 @@ function TabsList({
 	shape = "default",
 	size = "md",
 	...props
-}: React.ComponentProps<typeof TabsPrimitive.List> &
+}: React.ComponentProps<typeof TabsListPrimitive> &
 	VariantProps<typeof tabsListVariants>) {
 	return (
 		<TabsContext.Provider
 			value={{ variant: variant || "default", size: size || "md" }}
 		>
-			<TabsPrimitive.List
+			<TabsListPrimitive
 				data-slot="tabs-list"
 				className={cn(tabsListVariants({ variant, shape, size }), className)}
 				{...props}
@@ -182,11 +178,11 @@ function TabsList({
 function TabsTrigger({
 	className,
 	...props
-}: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+}: React.ComponentProps<typeof TabsTriggerPrimitive>) {
 	const { variant, size } = React.useContext(TabsContext);
 
 	return (
-		<TabsPrimitive.Trigger
+		<TabsTriggerPrimitive
 			data-slot="tabs-trigger"
 			className={cn(tabsTriggerVariants({ variant, size }), className)}
 			{...props}
@@ -198,10 +194,10 @@ function TabsContent({
 	className,
 	variant,
 	...props
-}: React.ComponentProps<typeof TabsPrimitive.Content> &
+}: React.ComponentProps<typeof TabsContentPrimitive> &
 	VariantProps<typeof tabsContentVariants>) {
 	return (
-		<TabsPrimitive.Content
+		<TabsContentPrimitive
 			data-slot="tabs-content"
 			className={cn(tabsContentVariants({ variant }), className)}
 			{...props}
