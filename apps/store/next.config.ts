@@ -9,6 +9,14 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 const nextConfig: NextConfig = {
 	/* config options here */
+	images: {
+		remotePatterns: [
+			{
+				protocol: "https",
+				hostname: "pub-ef277dcb0af245febad87a6805ad5cca.r2.dev",
+			},
+		],
+	},
 	trailingSlash: false,
 	output: "standalone",
 	async headers() {

@@ -26,6 +26,7 @@ export const productsRoutes = createRouter()
 				q: z.string().optional(),
 				limit: z.coerce.number().default(20),
 				offset: z.coerce.number().default(0),
+				locationId: z.string().optional(),
 			}),
 		),
 		async (c) => {
@@ -48,15 +49,17 @@ export const productsRoutes = createRouter()
 		queryValidator(
 			z.object({
 				organizationId: z.string().min(1),
+				locationId: z.string().optional(),
 			}),
 		),
 		async (c) => {
 			try {
 				const { productId } = c.req.valid("param");
-				const { organizationId } = c.req.valid("query");
+				const { organizationId, locationId } = c.req.valid("query");
 				const product = await getStorefrontProduct({
 					organizationId,
 					productId,
+					locationId,
 				});
 
 				if (!product) {

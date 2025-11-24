@@ -32,7 +32,7 @@ const orderItemSchema = z.object({
 });
 
 const createOrderSchema = z.object({
-	organizationId: z.string().uuid(),
+	organizationId: z.string(),
 	shippingAddress: shippingAddressSchema,
 	items: z.array(orderItemSchema).min(1),
 	currency: z.string().length(3),
@@ -40,7 +40,7 @@ const createOrderSchema = z.object({
 	customerPhone: z.string().optional(),
 	customerFullName: z.string().optional(),
 	locationId: z.string().uuid(),
-	userId: z.string().uuid().optional(),
+	userId: z.string().optional(),
 });
 
 export const ordersRoutes = createRouter()
@@ -51,6 +51,19 @@ export const ordersRoutes = createRouter()
 			const result = await createStorefrontOrder(payload);
 			return c.json(createSuccessResponse(result), 201);
 		} catch (error) {
+			// Handle stock errors specifically
+			if (error instanceof Error && error.name === "StockError") {
+				return c.json(
+					createErrorResponse("BadRequestError", error.message, [
+						{
+							code: "INSUFFICIENT_STOCK",
+							path: ["items"],
+							message: error.message,
+						},
+					]),
+					400,
+				);
+			}
 			return handleRouteError(c, error, "create order");
 		}
 	})

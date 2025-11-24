@@ -26,6 +26,7 @@ export async function getStorefrontProducts(params: {
 	q?: string;
 	limit?: number;
 	offset?: number;
+	locationId?: string;
 }) {
 	const {
 		organizationId,
@@ -36,6 +37,7 @@ export async function getStorefrontProducts(params: {
 		q,
 		limit = 20,
 		offset = 0,
+		locationId,
 	} = params;
 
 	const conditions = [
@@ -84,9 +86,11 @@ export async function getStorefrontProducts(params: {
 	const products = await db
 		.select({
 			id: product.id,
+			name: product.name,
 			translations: product.translations,
 			thumbnailImage: product.thumbnailImage,
 			createdAt: product.createdAt,
+			allowBackorders: product.allowBackorders,
 			minPrice: sql<number>`min(${productVariant.price})`.mapWith(Number),
 			maxPrice: sql<number>`max(${productVariant.price})`.mapWith(Number),
 		})
@@ -98,14 +102,61 @@ export async function getStorefrontProducts(params: {
 		.limit(limit)
 		.offset(offset);
 
-	return products;
+	// Fetch variants with stock for each product
+	const productsWithVariants = await Promise.all(
+		products.map(async (p) => {
+			const variants = await db
+				.select()
+				.from(productVariant)
+				.where(eq(productVariant.productId, p.id));
+
+			// Get stock for each variant if locationId provided
+			const variantsWithStock = locationId
+				? await Promise.all(
+						variants.map(async (variant) => {
+							const [stockInfo] = await db.query.productVariantStock.findMany({
+								where: (stock, { and, eq }) =>
+									and(
+										eq(stock.productVariantId, variant.id),
+										eq(stock.organizationId, organizationId),
+										eq(stock.locationId, locationId),
+									),
+								limit: 1,
+							});
+
+							const availableQuantity = stockInfo
+								? Number(stockInfo.quantity || 0) -
+									Number(stockInfo.reservedQuantity || 0)
+								: 0;
+
+							return {
+								...variant,
+								stock: {
+									quantity: stockInfo?.quantity || 0,
+									reservedQuantity: stockInfo?.reservedQuantity || 0,
+									availableQuantity,
+								},
+							};
+						}),
+					)
+				: variants.map((v) => ({ ...v, stock: null }));
+
+			return {
+				...p,
+				variants: variantsWithStock,
+			};
+		}),
+	);
+
+	return productsWithVariants;
 }
 
 export async function getStorefrontProduct(params: {
 	organizationId: string;
 	productId: string;
+	locationId?: string;
 }) {
-	const { organizationId, productId } = params;
+	const { organizationId, productId, locationId } = params;
 
 	const foundProduct = await db
 		.select()
@@ -126,8 +177,41 @@ export async function getStorefrontProduct(params: {
 		.from(productVariant)
 		.where(eq(productVariant.productId, productId));
 
+	// Get stock information for each variant if locationId is provided
+	const variantsWithStock = await Promise.all(
+		variants.map(async (variant) => {
+			if (!locationId) {
+				return { ...variant, stock: null };
+			}
+
+			const [stockInfo] = await db.query.productVariantStock.findMany({
+				where: (stock, { and, eq }) =>
+					and(
+						eq(stock.productVariantId, variant.id),
+						eq(stock.organizationId, organizationId),
+						eq(stock.locationId, locationId),
+					),
+				limit: 1,
+			});
+
+			const availableQuantity = stockInfo
+				? Number(stockInfo.quantity || 0) -
+					Number(stockInfo.reservedQuantity || 0)
+				: 0;
+
+			return {
+				...variant,
+				stock: {
+					quantity: stockInfo?.quantity || 0,
+					reservedQuantity: stockInfo?.reservedQuantity || 0,
+					availableQuantity,
+				},
+			};
+		}),
+	);
+
 	return {
 		...foundProduct[0],
-		variants,
+		variants: variantsWithStock,
 	};
 }

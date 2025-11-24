@@ -41,6 +41,30 @@ async function getOrganizationBonusPercentage(
 	return orgInfo?.bonusPercentage ? Number(orgInfo.bonusPercentage) / 100 : 0;
 }
 
+// Custom error for stock issues
+class StockError extends Error {
+	productName: string;
+	sku: string;
+	available: number;
+	requested: number;
+
+	constructor(
+		productName: string,
+		sku: string,
+		available: number,
+		requested: number,
+	) {
+		super(
+			`Insufficient stock for product variant ${productName} (SKU: ${sku}). Available: ${available}, Requested: ${requested}. Backorders are not allowed.`,
+		);
+		this.name = "StockError";
+		this.productName = productName;
+		this.sku = sku;
+		this.available = available;
+		this.requested = requested;
+	}
+}
+
 async function validateOrderItems(
 	items: CreateOrderInput["items"],
 	activeOrgId: string,
@@ -61,9 +85,7 @@ async function validateOrderItems(
 		});
 
 		if (!foundProductVariant) {
-			throw new Error(
-				`Product variant not found: " + ${item.productVariantId}`,
-			);
+			throw new Error(`Product variant not found: ${item.productVariantId}`);
 		}
 
 		const productInfo = await tx.query.product.findFirst({
@@ -105,8 +127,11 @@ async function validateOrderItems(
 			Number(currentStock?.quantity || 0) -
 			Number(currentStock?.reservedQuantity || 0);
 		if (availableQuantity < item.quantity && !allowBackorders) {
-			throw new Error(
-				`Insufficient stock for product variant ${productName} (SKU: ${foundProductVariant.sku}). Available: ${availableQuantity}, Requested: ${item.quantity}. Backorders are not allowed.`,
+			throw new StockError(
+				productName,
+				foundProductVariant.sku,
+				availableQuantity,
+				item.quantity,
 			);
 		}
 
