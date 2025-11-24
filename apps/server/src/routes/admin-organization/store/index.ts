@@ -5,6 +5,9 @@ import { productRoute } from "./product/product";
 import { productCollectionRoute } from "./product/product-collection/product-collection";
 import { productReviewRoute } from "./product/product-review/product-review";
 import { productVariantRoute } from "./product/product-variant/product-variant";
+import { shippingMethodZoneRoute } from "./shipping/method-zone";
+import { shippingMethodRoute } from "./shipping/shipping";
+import { shippingZoneRoute } from "./shipping/zone";
 import { brandRoute } from "./supplier/brand/brand";
 import { supplierRoute } from "./supplier/supplier";
 
@@ -17,4 +20,7 @@ export const storeRoute = createRouter()
 	.route("/", inventoryRoute)
 	.route("/", supplierRoute)
 	.route("/", brandRoute)
+	.route("/", shippingMethodRoute)
+	.route("/", shippingZoneRoute)
+	.route("/", shippingMethodZoneRoute)
 	.route("/", orderRoute);
