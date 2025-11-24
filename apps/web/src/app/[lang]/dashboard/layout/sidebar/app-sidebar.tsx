@@ -53,6 +53,10 @@ const data = {
 					url: "/dashboard/store/brands",
 				},
 				{
+					title: "Shipping",
+					url: "/dashboard/store/shipping",
+				},
+				{
 					title: "Settings",
 					url: "/dashboard/store/settings",
 				},

@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createErrorResponse,
@@ -70,7 +71,7 @@ export const shippingMethodZoneRoute = createRouter()
 		"/shipping-methods/:methodId/zones",
 		authMiddleware,
 		hasOrgPermission("shipping:read"),
-		paramValidator(idParamSchema.extend({ methodId: idParamSchema.shape.id })),
+		paramValidator(z.object({ methodId: idParamSchema.shape.id })),
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
@@ -89,7 +90,7 @@ export const shippingMethodZoneRoute = createRouter()
 		"/shipping-zones/:zoneId/methods",
 		authMiddleware,
 		hasOrgPermission("shipping:read"),
-		paramValidator(idParamSchema.extend({ zoneId: idParamSchema.shape.id })),
+		paramValidator(z.object({ zoneId: idParamSchema.shape.id })),
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;

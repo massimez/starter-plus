@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 export function CTASection() {
 	const t = useTranslations("CTA");
 	return (
-		<section className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 py-20">
+		<section className="bg-linear-to-r from-blue-600 via-purple-600 to-pink-600 py-20">
 			<div className="container mx-auto px-4 text-center">
 				<div className="mx-auto max-w-2xl text-white">
 					<Zap className="mx-auto mb-6 h-16 w-16 opacity-90" />
