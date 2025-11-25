@@ -11,25 +11,22 @@ import { Separator } from "@workspace/ui/components/separator";
 import { useMounted } from "@workspace/ui/hooks/use-mounted";
 import { useTranslations } from "next-intl";
 import { useQueryState } from "nuqs";
-import { toast } from "sonner";
-import { OrderHistory } from "@/components/profile/order-history";
+import { AddressManager } from "@/components/profile/address-manager";
+import { PrivacySettings } from "@/components/profile/privacy-settings";
+import { ProfileForm } from "@/components/profile/profile-form";
 import { ProfileSidebar } from "@/components/profile/profile-sidebar";
-import { useRouter } from "@/i18n/routing";
-import { signOut, useSession } from "@/lib/auth-client";
-import { useOrders, useOrganization } from "@/lib/hooks/use-storefront";
-
-// ...
+import { useSession } from "@/lib/auth-client";
+import { useProfile } from "@/lib/hooks/use-profile";
 
 export default function ProfilePage() {
 	const t = useTranslations("Navigation");
 	const { data: session, isPending } = useSession();
-	const router = useRouter();
 	const [activeTab, setActiveTab] = useQueryState("tab", {
 		defaultValue: "overview",
 		parse: (value) => {
 			if (
 				typeof value === "string" &&
-				["overview", "orders", "settings"].includes(value)
+				["overview", "settings", "addresses", "privacy"].includes(value)
 			) {
 				return value;
 			}
@@ -38,33 +35,13 @@ export default function ProfilePage() {
 	});
 	const isClient = useMounted();
 
-	// Fetch organization
-	const { data: org } = useOrganization("yam");
-	const organizationId = org?.id;
-
-	// Fetch orders
-	const { data: orders, isLoading: isLoadingOrders } = useOrders(
-		{
-			organizationId: organizationId || "",
-			userId: session?.user?.id || "",
-		},
-		!!session?.user?.id && !!organizationId,
-	);
-
-	const handleLogout = async () => {
-		await signOut({
-			fetchOptions: {
-				onSuccess: () => {
-					toast.success("Logged out successfully");
-					router.push("/");
-					router.refresh();
-				},
-				onError: (ctx) => {
-					toast.error(ctx.error.message || "Failed to logout");
-				},
-			},
-		});
-	};
+	// Fetch client profile
+	const {
+		profile,
+		loading: profileLoading,
+		updating,
+		updateProfile,
+	} = useProfile();
 
 	if (isPending || !isClient) {
 		return (
@@ -89,11 +66,7 @@ export default function ProfilePage() {
 			<Separator className="my-6" />
 			<div className="flex flex-col space-y-8 lg:flex-row lg:space-x-12 lg:space-y-0">
 				<aside className="-mx-4 lg:mx-0 lg:w-1/5">
-					<ProfileSidebar
-						activeTab={activeTab}
-						onTabChange={setActiveTab}
-						onLogout={handleLogout}
-					/>
+					<ProfileSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 				</aside>
 				<div className="w-full flex-1">
 					{activeTab === "overview" && (
@@ -120,26 +93,69 @@ export default function ProfilePage() {
 							</Card>
 						</div>
 					)}
-					{activeTab === "orders" && (
-						<OrderHistory orders={orders} isLoadingOrders={isLoadingOrders} />
-					)}
-					{activeTab === "settings" && (
+					{activeTab === "settings" && profile && (
 						<div className="space-y-6">
 							<Card>
 								<CardHeader>
-									<CardTitle>Account Settings</CardTitle>
+									<CardTitle>Personal Information</CardTitle>
 									<CardDescription>
-										Manage your account preferences.
+										Update your personal details.
 									</CardDescription>
 								</CardHeader>
 								<CardContent>
-									<p className="text-muted-foreground text-sm">
-										Settings placeholder.
-									</p>
+									<ProfileForm
+										profile={profile}
+										onUpdate={(data) =>
+											updateProfile(data as Parameters<typeof updateProfile>[0])
+										}
+										updating={updating}
+									/>
 								</CardContent>
 							</Card>
 						</div>
 					)}
+					{activeTab === "addresses" && profile && (
+						<div className="space-y-6">
+							<Card>
+								<CardContent>
+									<AddressManager
+										addresses={profile.addresses || []}
+										onUpdate={(addresses) => updateProfile({ addresses })}
+										updating={updating}
+									/>
+								</CardContent>
+							</Card>
+						</div>
+					)}
+					{activeTab === "privacy" && profile && (
+						<div className="space-y-6">
+							<Card>
+								<CardHeader>
+									<CardTitle>Privacy & Consent</CardTitle>
+									<CardDescription>
+										Manage your privacy settings and consent preferences.
+									</CardDescription>
+								</CardHeader>
+								<CardContent>
+									<PrivacySettings
+										profile={profile}
+										onUpdate={(data) =>
+											updateProfile(data as Parameters<typeof updateProfile>[0])
+										}
+										updating={updating}
+									/>
+								</CardContent>
+							</Card>
+						</div>
+					)}
+					{(activeTab === "settings" ||
+						activeTab === "addresses" ||
+						activeTab === "privacy") &&
+						profileLoading && (
+							<div className="flex items-center justify-center py-12">
+								<div className="h-8 w-8 animate-spin rounded-full border-primary border-t-2" />
+							</div>
+						)}
 				</div>
 			</div>
 		</div>

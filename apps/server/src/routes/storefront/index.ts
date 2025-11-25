@@ -1,4 +1,5 @@
 import { createRouter } from "@/lib/create-hono-app";
+import { clientRoute } from "./client";
 import { collectionsRoutes } from "./collections";
 import { locationRoutes } from "./locations";
 import { ordersRoutes } from "./orders";
@@ -10,6 +11,7 @@ export const storefrontRoutes = createRouter()
 	.route("/orders", ordersRoutes)
 	.route("/collections", collectionsRoutes)
 	.route("/locations", locationRoutes)
-	.route("/organizations", organizationRoutes);
+	.route("/organizations", organizationRoutes)
+	.route("/client", clientRoute);
 
 export default storefrontRoutes;

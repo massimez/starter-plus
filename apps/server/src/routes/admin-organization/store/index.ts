@@ -1,4 +1,5 @@
 import { createRouter } from "@/lib/create-hono-app";
+import { clientRoute } from "./client/client";
 import { inventoryRoute } from "./inventory/route";
 import { orderRoute } from "./order/route";
 import { productRoute } from "./product/product";
@@ -13,6 +14,7 @@ import { supplierRoute } from "./supplier/supplier";
 
 // Combine all store-related routes into a single router
 export const storeRoute = createRouter()
+	.route("/", clientRoute)
 	.route("/", productRoute)
 	.route("/", productVariantRoute)
 	.route("/", productCollectionRoute)

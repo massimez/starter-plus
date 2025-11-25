@@ -141,10 +141,17 @@ export const storefrontClient = {
 		});
 		const json = await response.json();
 		if (!json.success) {
-			throw new StorefrontError(
-				json.error?.message || "Failed to create order",
-				json.error?.issues,
-			);
+			const errorData = json;
+			const errorMessage =
+				typeof errorData.error === "string"
+					? errorData.error
+					: errorData.error?.message || "Failed to create order";
+			const errorIssues =
+				typeof errorData.error === "object"
+					? errorData.error?.issues
+					: undefined;
+
+			throw new StorefrontError(errorMessage, errorIssues);
 		}
 		return json.data;
 	},
@@ -185,6 +192,67 @@ export const storefrontClient = {
 		const json = await response.json();
 		if (!json.success) {
 			throw new Error(json.error?.message || "Failed to fetch order");
+		}
+		return json.data;
+	},
+
+	// Client Profile Management
+	getMyProfile: async () => {
+		const response = await hc.api.storefront.client.me.$get();
+		const json = await response.json();
+		if (!json.success) {
+			const errorData = json;
+			const errorMessage =
+				typeof errorData.error === "string"
+					? errorData.error
+					: errorData.error?.message || "Failed to fetch profile";
+			const errorIssues =
+				typeof errorData.error === "object"
+					? errorData.error?.issues
+					: undefined;
+
+			throw new StorefrontError(errorMessage, errorIssues);
+		}
+		return json.data;
+	},
+
+	updateMyProfile: async (data: {
+		firstName?: string;
+		lastName?: string;
+		email?: string;
+		phone?: string;
+		addresses?: Array<{
+			type: "billing" | "shipping";
+			street: string;
+			city: string;
+			country: string;
+			state?: string;
+			postalCode?: string;
+			isDefault?: boolean;
+		}>;
+		preferredContactMethod?: "email" | "phone" | "sms";
+		language?: string;
+		timezone?: string;
+		marketingConsent?: boolean;
+		gdprConsent?: boolean;
+		notes?: string;
+	}) => {
+		const response = await hc.api.storefront.client.me.$put({
+			json: data,
+		});
+		const json = await response.json();
+		if (!json.success) {
+			const errorData = json;
+			const errorMessage =
+				typeof errorData.error === "string"
+					? errorData.error
+					: errorData.error?.message || "Failed to update profile";
+			const errorIssues =
+				typeof errorData.error === "object"
+					? errorData.error?.issues
+					: undefined;
+
+			throw new StorefrontError(errorMessage, errorIssues);
 		}
 		return json.data;
 	},

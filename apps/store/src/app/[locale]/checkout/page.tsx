@@ -2,10 +2,10 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
-import { CheckoutForm } from "@/components/features/checkout-form";
 import { useRouter } from "@/i18n/routing";
 import { useSession } from "@/lib/auth-client";
 import { useDefaultLocation } from "@/lib/hooks/use-storefront";
+import { CheckoutForm } from "./_components";
 
 export default function CheckoutPage() {
 	const t = useTranslations("Navigation");

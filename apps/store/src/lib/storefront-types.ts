@@ -71,3 +71,13 @@ export interface Product {
 	images?: { url: string; alt?: string | null }[];
 	thumbnailImage?: { url: string; alt?: string | null };
 }
+
+export interface Address {
+	type: "billing" | "shipping";
+	street: string;
+	city: string;
+	country: string;
+	state?: string;
+	postalCode?: string;
+	isDefault?: boolean;
+}

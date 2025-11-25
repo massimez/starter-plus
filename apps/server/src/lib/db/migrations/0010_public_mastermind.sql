@@ -1,0 +1,41 @@
+CREATE TABLE "client" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"organization_id" text NOT NULL,
+	"first_name" varchar(100),
+	"last_name" varchar(100),
+	"email" varchar(255),
+	"email_verified" boolean DEFAULT false,
+	"phone" varchar(50),
+	"phone_verified" boolean DEFAULT false,
+	"addresses" jsonb,
+	"total_orders" integer DEFAULT 0,
+	"total_uncompleted_orders" integer DEFAULT 0,
+	"total_spent" numeric(12, 2) DEFAULT '0',
+	"first_purchase_date" timestamp,
+	"last_purchase_date" timestamp,
+	"preferred_contact_method" varchar(20),
+	"language" varchar(10) DEFAULT 'en',
+	"timezone" varchar(50) DEFAULT 'UTC',
+	"source" varchar(50),
+	"tags" jsonb,
+	"notes" text,
+	"marketing_consent" boolean DEFAULT false,
+	"marketing_consent_date" timestamp,
+	"gdpr_consent" boolean DEFAULT false,
+	"gdpr_consent_date" timestamp,
+	"is_blacklisted" boolean DEFAULT false,
+	"fraud_score" numeric(5, 2) DEFAULT '0',
+	"external_ids" jsonb,
+	"data_anonymized_at" timestamp,
+	"is_active" boolean DEFAULT true,
+	"metadata" jsonb,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now(),
+	"deleted_at" timestamp,
+	"created_by" text,
+	"updated_by" text
+);
+--> statement-breakpoint
+ALTER TABLE "client" ADD CONSTRAINT "client_organization_id_organization_id_fk" FOREIGN KEY ("organization_id") REFERENCES "public"."organization"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "client" ADD CONSTRAINT "client_created_by_user_id_fk" FOREIGN KEY ("created_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "client" ADD CONSTRAINT "client_updated_by_user_id_fk" FOREIGN KEY ("updated_by") REFERENCES "public"."user"("id") ON DELETE set null ON UPDATE no action;

@@ -71,6 +71,20 @@
 			"when": 1763998265079,
 			"tag": "0009_elite_magma",
 			"breakpoints": true
+		},
+		{
+			"idx": 10,
+			"version": "7",
+			"when": 1764006422646,
+			"tag": "0010_public_mastermind",
+			"breakpoints": true
+		},
+		{
+			"idx": 11,
+			"version": "7",
+			"when": 1764017510048,
+			"tag": "0011_lowly_thing",
+			"breakpoints": true
 		}
 	]
 }

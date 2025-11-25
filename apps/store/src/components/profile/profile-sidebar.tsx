@@ -1,20 +1,20 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
-import { LogOut, Settings, ShoppingBag, User } from "lucide-react";
+import { MapPin, Settings, Shield, ShoppingBag, User } from "lucide-react";
+import { Link } from "@/i18n/routing";
+
 import { cn } from "@/lib/utils";
 
 interface ProfileSidebarProps extends React.HTMLAttributes<HTMLElement> {
 	activeTab: string;
 	onTabChange: (tab: string) => void;
-	onLogout: () => void;
 }
 
 export function ProfileSidebar({
 	className,
 	activeTab,
 	onTabChange,
-	onLogout,
 	...props
 }: ProfileSidebarProps) {
 	const items = [
@@ -24,14 +24,19 @@ export function ProfileSidebar({
 			icon: User,
 		},
 		{
-			id: "orders",
-			title: "Orders",
-			icon: ShoppingBag,
-		},
-		{
 			id: "settings",
 			title: "Settings",
 			icon: Settings,
+		},
+		{
+			id: "addresses",
+			title: "Addresses",
+			icon: MapPin,
+		},
+		{
+			id: "privacy",
+			title: "Privacy",
+			icon: Shield,
 		},
 	];
 
@@ -58,13 +63,11 @@ export function ProfileSidebar({
 						{item.title}
 					</Button>
 				))}
-				<Button
-					variant="ghost"
-					className="w-full justify-start text-red-500 hover:bg-red-50 hover:text-red-600"
-					onClick={onLogout}
-				>
-					<LogOut className="mr-2 h-4 w-4" />
-					Logout
+				<Button variant="ghost" className="w-full justify-start" asChild>
+					<Link href="/orders">
+						<ShoppingBag className="mr-2 h-4 w-4" />
+						Orders
+					</Link>
 				</Button>
 			</nav>
 		</div>
