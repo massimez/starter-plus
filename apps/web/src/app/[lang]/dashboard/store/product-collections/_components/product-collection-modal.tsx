@@ -10,30 +10,11 @@ import {
 import { toast } from "sonner";
 import { hc } from "@/lib/api-client";
 import { useActiveOrganization } from "@/lib/auth-client";
+import type { ProductCollection } from "../hooks/use-product-collection";
 import {
 	ProductCollectionForm,
 	type ProductCollectionFormValues,
 } from "./product-collection-form";
-
-interface ProductCollection {
-	id: string;
-	name: string;
-	slug: string;
-	description?: string | null;
-	parentId?: string | null;
-	translations?:
-		| {
-				languageCode: string;
-				name: string;
-				slug: string;
-				description?: string;
-				metaTitle?: string;
-				metaDescription?: string;
-		  }[]
-		| null;
-	createdAt: string;
-	updatedAt: string | null;
-}
 
 interface ProductCollectionModalProps {
 	collection?: ProductCollection;
@@ -69,6 +50,9 @@ export const ProductCollectionModal = ({
 					metaTitle: "",
 					metaDescription: "",
 				},
+				isActive: collection.isActive ?? true,
+				isVisible: collection.isVisible ?? true,
+				image: collection.image ?? null,
 			}
 		: {
 				parentId: null,
@@ -80,6 +64,9 @@ export const ProductCollectionModal = ({
 					metaTitle: "",
 					metaDescription: "",
 				},
+				isActive: true,
+				isVisible: true,
+				image: null,
 			};
 
 	const onSubmit = async (values: ProductCollectionFormValues) => {
@@ -114,6 +101,9 @@ export const ProductCollectionModal = ({
 					json: {
 						parentId: values.parentId,
 						translations: updatedTranslations,
+						isActive: values.isActive,
+						isVisible: values.isVisible,
+						image: values.image,
 					},
 				});
 				toast.success("Collection updated successfully!");
@@ -126,6 +116,9 @@ export const ProductCollectionModal = ({
 						slug: values.translation.slug,
 						organizationId: activeOrganizationData.id,
 						translations: [values.translation],
+						isActive: values.isActive,
+						isVisible: values.isVisible,
+						image: values.image,
 					},
 				});
 				toast.success("Collection created successfully!");
@@ -141,13 +134,18 @@ export const ProductCollectionModal = ({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent>
+			<DialogContent className="max-h-[90vh] max-w-5xl overflow-y-auto md:min-w-[800px]">
 				<DialogHeader>
 					<DialogTitle>
 						{isEdit
-							? `Edit Collection (${currentLanguage.toUpperCase()})`
-							: `Add Collection (${currentLanguage.toUpperCase()})`}
+							? `Edit Collection: ${collection.name}`
+							: "Create New Collection"}
 					</DialogTitle>
+					{isEdit && (
+						<p className="text-muted-foreground text-sm">
+							Editing {currentLanguage.toUpperCase()} translation
+						</p>
+					)}
 				</DialogHeader>
 				<ProductCollectionForm
 					onSubmit={onSubmit}

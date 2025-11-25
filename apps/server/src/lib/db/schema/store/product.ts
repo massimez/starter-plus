@@ -37,6 +37,7 @@ export const productCollection = pgTable("product_collection", {
 	image: text("image"),
 	sortOrder: integer("sort_order").default(0).notNull(),
 	isActive: boolean("is_active").default(true).notNull(),
+	isVisible: boolean("is_visible").default(true).notNull(),
 	translations:
 		jsonb("translations").$type<
 			{

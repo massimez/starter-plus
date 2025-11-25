@@ -1,0 +1,1 @@
+ALTER TABLE "product_collection" ADD COLUMN "is_visible" boolean DEFAULT true NOT NULL;

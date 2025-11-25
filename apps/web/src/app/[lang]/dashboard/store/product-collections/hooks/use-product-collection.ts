@@ -7,6 +7,9 @@ export interface ProductCollection {
 	slug: string;
 	description?: string | null;
 	parentId?: string | null;
+	image?: string | null;
+	isActive?: boolean;
+	isVisible?: boolean;
 	translations?:
 		| {
 				languageCode: string;

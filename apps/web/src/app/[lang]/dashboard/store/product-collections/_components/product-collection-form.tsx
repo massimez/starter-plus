@@ -3,7 +3,16 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/button";
 import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/card";
+import {
 	Form,
+	FormControl,
+	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
@@ -17,11 +26,15 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@workspace/ui/components/select";
+import { Switch } from "@workspace/ui/components/switch";
 import { Textarea } from "@workspace/ui/components/textarea";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { debounce, getSlug } from "@/lib/helpers";
 import { useProductCollections } from "../hooks/use-product-collection";
+
+import { CollectionImageSlot } from "./collection-image-slot";
+import { SeoPreview } from "./seo-preview";
 
 // Simplified schema - single translation
 const translationSchema = z.object({
@@ -29,13 +42,22 @@ const translationSchema = z.object({
 	name: z.string().min(1, "Name is required"),
 	slug: z.string().min(1, "Slug is required"),
 	description: z.string().optional(),
-	metaTitle: z.string().optional(),
-	metaDescription: z.string().optional(),
+	metaTitle: z
+		.string()
+		.max(60, "Meta title should be under 60 characters")
+		.optional(),
+	metaDescription: z
+		.string()
+		.max(160, "Meta description should be under 160 characters")
+		.optional(),
 });
 
 const productCollectionFormSchema = z.object({
 	parentId: z.string().nullable(),
 	translation: translationSchema,
+	isActive: z.boolean().default(true),
+	isVisible: z.boolean().default(true),
+	image: z.string().nullable().optional(),
 });
 
 export type ProductCollectionFormValues = z.infer<
@@ -64,6 +86,9 @@ export function ProductCollectionForm({
 				metaTitle: "",
 				metaDescription: "",
 			},
+			isActive: true,
+			isVisible: true,
+			image: null,
 		},
 	});
 
@@ -76,115 +101,251 @@ export function ProductCollectionForm({
 		}, 300)();
 	};
 
+	const watchedTranslation = form.watch("translation");
+
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-				{/* Parent Collection */}
-				<FormField
-					control={form.control}
-					name="parentId"
-					render={({ field }) => (
-						<FormItem>
-							<FormLabel>Parent Collection</FormLabel>
-							<Select
-								onValueChange={(val) =>
-									field.onChange(val === "none" ? null : val)
-								}
-								value={field.value ?? "none"}
-							>
-								<SelectTrigger>
-									<SelectValue placeholder="Select parent collection" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="none">Top Level</SelectItem>
-									{collections?.data?.map((col) => (
-										<SelectItem key={col.id} value={col.id}>
-											{col.name}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-							<FormMessage />
-						</FormItem>
-					)}
-				/>
-
-				{/* Translation Fields */}
-				<div className="space-y-4 rounded-lg border p-4">
-					<FormField
-						control={form.control}
-						name="translation.name"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Name</FormLabel>
-								<Input
-									placeholder="Enter collection name"
-									{...field}
-									onChange={(e) => {
-										field.onChange(e);
-										handleNameChange(e.target.value);
-									}}
+			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+				<div className="grid gap-8 md:grid-cols-[1fr_300px] lg:grid-cols-[1fr_350px]">
+					{/* Left Column: Main Content */}
+					<div className="space-y-8">
+						{/* General Info */}
+						<Card>
+							<CardHeader>
+								<CardTitle>General Information</CardTitle>
+								<CardDescription>
+									Basic details about your collection
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								<FormField
+									control={form.control}
+									name="translation.name"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Name</FormLabel>
+											<FormControl>
+												<Input
+													placeholder="e.g. Summer Collection"
+													{...field}
+													onChange={(e) => {
+														field.onChange(e);
+														handleNameChange(e.target.value);
+													}}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
 								/>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
 
-					<FormField
-						control={form.control}
-						name="translation.slug"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Slug</FormLabel>
-								<Input placeholder="Enter collection slug" {...field} />
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-
-					<FormField
-						control={form.control}
-						name="translation.description"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Description</FormLabel>
-								<Textarea
-									placeholder="Enter collection description"
-									{...field}
+								<FormField
+									control={form.control}
+									name="translation.description"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Description</FormLabel>
+											<FormControl>
+												<Textarea
+													placeholder="Describe this collection..."
+													className="min-h-[60px]"
+													{...field}
+												/>
+											</FormControl>
+											<FormMessage />
+										</FormItem>
+									)}
 								/>
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
+							</CardContent>
+						</Card>
 
-					<FormField
-						control={form.control}
-						name="translation.metaTitle"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Meta Title</FormLabel>
-								<Input placeholder="Enter meta title" {...field} />
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
+						{/* Media */}
+						<Card>
+							<CardHeader>
+								<CardTitle>Media</CardTitle>
+								<CardDescription>
+									Add a cover image for this collection
+								</CardDescription>
+							</CardHeader>
+							<CardContent>
+								<CollectionImageSlot
+									image={form.watch("image")}
+									onImageChange={(url) => form.setValue("image", url)}
+								/>
+							</CardContent>
+						</Card>
 
-					<FormField
-						control={form.control}
-						name="translation.metaDescription"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel>Meta Description</FormLabel>
-								<Textarea placeholder="Enter meta description" {...field} />
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
+						{/* SEO */}
+						<Card>
+							<CardHeader>
+								<CardTitle>Search Engine Optimization</CardTitle>
+								<CardDescription>
+									Optimize how this collection appears in search results
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-6">
+								<div className="space-y-4">
+									<FormField
+										control={form.control}
+										name="translation.metaTitle"
+										render={({ field }) => (
+											<FormItem>
+												<div className="flex justify-between">
+													<FormLabel>Meta Title</FormLabel>
+													<span className="text-muted-foreground text-xs">
+														{field.value?.length || 0}/60
+													</span>
+												</div>
+												<FormControl>
+													<Input placeholder="SEO Title" {...field} />
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="translation.metaDescription"
+										render={({ field }) => (
+											<FormItem>
+												<div className="flex justify-between">
+													<FormLabel>Meta Description</FormLabel>
+													<span className="text-muted-foreground text-xs">
+														{field.value?.length || 0}/160
+													</span>
+												</div>
+												<FormControl>
+													<Textarea
+														placeholder="SEO Description"
+														className="min-h-[80px]"
+														{...field}
+													/>
+												</FormControl>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+
+									<FormField
+										control={form.control}
+										name="translation.slug"
+										render={({ field }) => (
+											<FormItem>
+												<FormLabel>URL Handle</FormLabel>
+												<FormControl>
+													<div className="flex rounded-md shadow-sm ring-offset-background">
+														<span className="inline-flex items-center rounded-l-md border border-r-0 bg-muted px-3 text-muted-foreground text-sm">
+															/collections/
+														</span>
+														<Input
+															className="rounded-l-none"
+															placeholder="collection-slug"
+															{...field}
+														/>
+													</div>
+												</FormControl>
+												<FormDescription>
+													Unique identifier for the collection URL
+												</FormDescription>
+												<FormMessage />
+											</FormItem>
+										)}
+									/>
+								</div>
+							</CardContent>
+						</Card>
+					</div>
+
+					{/* Right Column: Settings */}
+					<div className="space-y-8">
+						{/* Organization */}
+						<Card>
+							<CardContent>
+								<FormField
+									control={form.control}
+									name="parentId"
+									render={({ field }) => (
+										<FormItem>
+											<FormLabel>Parent Collection</FormLabel>
+											<Select
+												onValueChange={(val) =>
+													field.onChange(val === "none" ? null : val)
+												}
+												value={field.value ?? "none"}
+											>
+												<FormControl>
+													<SelectTrigger className="min-w-52">
+														<SelectValue placeholder="Select parent" />
+													</SelectTrigger>
+												</FormControl>
+												<SelectContent>
+													<SelectItem value="none">Top Level</SelectItem>
+													{collections?.data?.map((col) => (
+														<SelectItem key={col.id} value={col.id}>
+															{col.name}
+														</SelectItem>
+													))}
+												</SelectContent>
+											</Select>
+											<FormDescription>
+												Nest this collection under another
+											</FormDescription>
+											<FormMessage />
+										</FormItem>
+									)}
+								/>
+							</CardContent>
+						</Card>
+
+						{/* Visibility */}
+						<Card>
+							<CardContent className="space-y-4">
+								<FormField
+									control={form.control}
+									name="isActive"
+									render={({ field }) => (
+										<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+											<div className="space-y-0.5">
+												<FormLabel>Active</FormLabel>
+											</div>
+											<FormControl>
+												<Switch
+													checked={field.value}
+													onCheckedChange={field.onChange}
+												/>
+											</FormControl>
+										</FormItem>
+									)}
+								/>
+
+								<FormField
+									control={form.control}
+									name="isVisible"
+									render={({ field }) => (
+										<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+											<div className="space-y-0.5">
+												<FormLabel>Visible</FormLabel>
+											</div>
+											<FormControl>
+												<Switch
+													checked={field.value}
+													onCheckedChange={field.onChange}
+												/>
+											</FormControl>
+										</FormItem>
+									)}
+								/>
+							</CardContent>
+						</Card>
+					</div>
 				</div>
 
-				<Button type="submit" disabled={form.formState.isSubmitting}>
-					{form.formState.isSubmitting ? "Saving..." : "Submit"}
-				</Button>
+				<div className="flex justify-end gap-4">
+					<Button type="submit" disabled={form.formState.isSubmitting}>
+						{form.formState.isSubmitting ? "Saving..." : "Save Collection"}
+					</Button>
+				</div>
 			</form>
 		</Form>
 	);

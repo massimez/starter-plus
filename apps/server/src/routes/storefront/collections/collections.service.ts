@@ -14,6 +14,7 @@ export async function getStorefrontCollections(params: {
 			and(
 				eq(productCollection.organizationId, organizationId),
 				eq(productCollection.isActive, true),
+				eq(productCollection.isVisible, true),
 			),
 		);
 
