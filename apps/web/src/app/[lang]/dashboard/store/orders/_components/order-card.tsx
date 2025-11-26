@@ -160,7 +160,7 @@ export const OrderCard = ({
 
 	return (
 		<>
-			<Card className="hover:-translate-y-0.5 w-full transition-all duration-200 hover:shadow-lg">
+			<Card className="hover:-translate-y-0.5 flex h-full w-full flex-col transition-all duration-200 hover:shadow-lg">
 				<CardHeader className="pb-3">
 					<div className="flex items-start justify-between gap-4">
 						<div className="min-w-0 flex-1">
@@ -270,7 +270,7 @@ export const OrderCard = ({
 					</div>
 				</CardHeader>
 
-				<CardContent className="space-y-4 pt-0">
+				<CardContent className="flex-1 space-y-4 pt-0">
 					{/* Quick Info Grid */}
 					<div className="grid grid-cols-2 gap-3 rounded-lg bg-muted/50 p-3">
 						<div className="space-y-1">

@@ -81,7 +81,7 @@ export const ProductList = ({
 					</p>
 				</div>
 			) : (
-				<div className="grid grid-cols-[repeat(auto-fit,minmax(200px,400px))] gap-4">
+				<div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
 					{filteredProducts.map((product) => (
 						<ProductCard
 							key={product.id}

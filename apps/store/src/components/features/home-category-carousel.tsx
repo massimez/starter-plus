@@ -106,7 +106,7 @@ export function HomeCategoryCarousel({
 								stopOnMouseEnter: true,
 							}),
 						]}
-						className="w-full"
+						className="mx-auto w-fit max-w-full"
 					>
 						<CarouselContent className="pt-2">
 							{items.map((category) => (

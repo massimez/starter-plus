@@ -72,7 +72,7 @@ export const ProductCard = ({
 	};
 
 	return (
-		<Card className="flex flex-col overflow-hidden transition-shadow hover:shadow-md">
+		<Card className="flex h-full flex-col overflow-hidden transition-shadow hover:shadow-md">
 			<CardHeader className="space-y-2 pb-3">
 				<div className="flex items-start justify-between gap-2">
 					<div className="flex-1 space-y-1">
