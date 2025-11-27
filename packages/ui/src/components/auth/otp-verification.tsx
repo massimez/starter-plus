@@ -8,7 +8,7 @@ import { Input } from "@workspace/ui/components/input";
 import OTPInput, { type InputProps } from "@workspace/ui/components/inputs/otp";
 import { useCallback, useEffect, useState } from "react";
 
-interface OtpVerificationProps {
+export interface OtpVerificationProps {
 	title?: string;
 	description?: string;
 	length?: number;
@@ -132,10 +132,12 @@ export const OtpVerification = ({
 	};
 
 	return (
-		<>
-			<DialogHeader className="text-center">
-				<DialogTitle>{title}</DialogTitle>
-				<DialogDescription>{description}</DialogDescription>
+		<div className="flex flex-col gap-6">
+			<DialogHeader className="space-y-2 text-center">
+				<DialogTitle className="font-semibold text-2xl">{title}</DialogTitle>
+				<DialogDescription className="text-muted-foreground text-sm">
+					{description}
+				</DialogDescription>
 			</DialogHeader>
 			<form onSubmit={handleSubmit} className="space-y-6">
 				<div className="flex justify-center">
@@ -153,7 +155,7 @@ export const OtpVerification = ({
 
 				<Button
 					type="submit"
-					className="w-full"
+					className="h-12 w-full font-medium text-base"
 					disabled={otp.length !== length || isLoading}
 				>
 					{isLoading ? "Verifying..." : "Verify"}
@@ -187,6 +189,6 @@ export const OtpVerification = ({
 					</div>
 				)}
 			</form>
-		</>
+		</div>
 	);
 };

@@ -1,6 +1,5 @@
 import { Button } from "@workspace/ui/components/button";
 import {
-	DialogDescription,
 	DialogFooter,
 	DialogHeader,
 	DialogTitle,
@@ -21,31 +20,34 @@ export const ForgetPassword = ({
 	const [loading, setLoading] = useState(false);
 
 	return (
-		<div className="">
-			<DialogHeader>
-				<DialogTitle>Forgot Password</DialogTitle>
-				<DialogDescription>
-					Enter your email below to receive a password reset link.
-				</DialogDescription>
+		<div className="flex flex-col gap-6">
+			<DialogHeader className="space-y-2 text-center">
+				<DialogTitle className="font-semibold text-2xl">
+					Forgot Password
+				</DialogTitle>
 			</DialogHeader>
-			<div className="mt-8 grid gap-4">
-				<div className="grid gap-2">
-					<Label htmlFor="email">Email</Label>
+
+			<div className="space-y-4">
+				<div className="space-y-2">
+					<Label htmlFor="email" className="font-medium text-sm">
+						Email Address
+					</Label>
 					<Input
 						id="email"
 						type="email"
-						placeholder="m@example.com"
+						placeholder="Email Address"
 						required
 						onChange={(e) => {
 							setEmail(e.target.value);
 						}}
 						value={email}
+						className="h-12"
 					/>
 				</div>
 
 				<Button
 					type="submit"
-					className="w-full"
+					className="h-12 w-full font-medium text-base"
 					disabled={loading}
 					onClick={async () => {
 						setLoading(true);
@@ -54,16 +56,21 @@ export const ForgetPassword = ({
 					}}
 				>
 					{loading ? (
-						<Loader2 size={16} className="animate-spin" />
+						<Loader2 size={20} className="animate-spin" />
 					) : (
-						<p> Send Reset Link </p>
+						"Send Reset Link"
 					)}
 				</Button>
 			</div>
-			<DialogFooter className="flex sm:justify-start">
-				<div className="mt-6 text-sm">
+
+			<DialogFooter className="flex justify-center sm:justify-center">
+				<div className="text-center text-sm">
 					Remember your password?{" "}
-					<button className="underline" onClick={() => openSignIn()}>
+					<button
+						type="button"
+						className="font-medium underline hover:no-underline"
+						onClick={() => openSignIn()}
+					>
 						Sign in
 					</button>
 				</div>
