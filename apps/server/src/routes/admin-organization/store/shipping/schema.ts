@@ -19,8 +19,9 @@ export const updateShippingZoneSchema = createSelectSchema(shippingZone)
 	.partial();
 
 // Shipping Method Zone schemas
-export const insertShippingMethodZoneSchema =
-	createInsertSchema(shippingMethodZone);
+export const insertShippingMethodZoneSchema = createInsertSchema(
+	shippingMethodZone,
+).omit({ organizationId: true });
 export const updateShippingMethodZoneSchema = createSelectSchema(
 	shippingMethodZone,
 )

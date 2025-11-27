@@ -12,6 +12,7 @@ import { Command as CommandPrimitive, useCommandState } from "cmdk";
 import { ChevronDownIcon, X } from "lucide-react";
 import * as React from "react";
 import { forwardRef, useEffect } from "react";
+import { useDebounce } from "../hooks/use-debounce";
 
 export interface Option {
 	value: string;
@@ -88,20 +89,6 @@ export interface MultipleSelectorRef {
 	input: HTMLInputElement;
 	focus: () => void;
 	reset: () => void;
-}
-
-export function useDebounce<T>(value: T, delay?: number): T {
-	const [debouncedValue, setDebouncedValue] = React.useState<T>(value);
-
-	useEffect(() => {
-		const timer = setTimeout(() => setDebouncedValue(value), delay || 500);
-
-		return () => {
-			clearTimeout(timer);
-		};
-	}, [value, delay]);
-
-	return debouncedValue;
 }
 
 function transToGroupOption(options: Option[], groupBy?: string) {

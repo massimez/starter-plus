@@ -52,27 +52,91 @@ export async function createProduct(productData: InsertProduct, orgId: string) {
  * Get products with pagination
  */
 export async function getProducts(
-	paginationParams: OffsetPaginationParams,
+	paginationParams: OffsetPaginationParams & {
+		search?: string;
+		collectionId?: string;
+	},
 	orgId: string,
 ) {
+	const { search, collectionId, ...basePaginationParams } = paginationParams;
+	const validatedOrgId = validateOrgId(orgId);
+
+	// Build base filters
+	let productIds: string[] | undefined;
+
+	// If filtering by collection, get product IDs from collection assignments
+	if (collectionId) {
+		const { productCollectionAssignment } = await import("@/lib/db/schema");
+		const assignments = await db
+			.select({ productId: productCollectionAssignment.productId })
+			.from(productCollectionAssignment)
+			.where(
+				and(
+					eq(productCollectionAssignment.collectionId, collectionId),
+					eq(productCollectionAssignment.organizationId, validatedOrgId),
+				),
+			);
+		productIds = assignments.map((a) => a.productId);
+
+		// If no products in this collection, return empty result
+		if (productIds.length === 0) {
+			return { total: 0, data: [] };
+		}
+	}
+
+	// Build filters for the query
+	const filters = [];
+	filters.push(eq(product.organizationId, validatedOrgId));
+
+	if (productIds && productIds.length > 0) {
+		filters.push(inArray(product.id, productIds));
+	}
+
+	// For search, we need to filter after fetching since translations are JSONB
+	// We'll fetch all matching products and then filter by search term
+	const baseFilters = and(...filters);
+
 	const result = await withPaginationAndTotal({
 		db: db,
 		query: null,
 		table: product,
-		params: paginationParams,
-		orgId: validateOrgId(orgId),
+		params: basePaginationParams,
+		orgId: validatedOrgId,
+		baseFilters,
 	});
 
+	let filteredData = result.data;
+	let total = result.total;
+
+	// Apply search filter if provided
+	if (search?.trim()) {
+		const searchLower = search.toLowerCase().trim();
+		filteredData = result.data.filter((p) => {
+			// Search in product name
+			if (p.name?.toLowerCase().includes(searchLower)) {
+				return true;
+			}
+			// Search in translations
+			if (p.translations && Array.isArray(p.translations)) {
+				return p.translations.some((t: { name?: string }) =>
+					t.name?.toLowerCase().includes(searchLower),
+				);
+			}
+			return false;
+		});
+		total = filteredData.length;
+	}
+
 	// Fetch variants for all products in the current page
-	const productIds = result.data.map((p) => p.id);
+	const resultProductIds = filteredData.map((p) => p.id);
 
 	let variants: (typeof productVariant.$inferSelect)[] = [];
 	let collectionAssignments: { productId: string; collectionId: string }[] = [];
 
-	if (productIds.length > 0) {
+	if (resultProductIds.length > 0) {
 		const variantWhereConditions = [
-			inArray(productVariant.productId, productIds),
-			eq(productVariant.organizationId, orgId),
+			inArray(productVariant.productId, resultProductIds),
+			eq(productVariant.organizationId, validatedOrgId),
 		];
 
 		variants = await db
@@ -90,14 +154,14 @@ export async function getProducts(
 			.from(productCollectionAssignment)
 			.where(
 				and(
-					inArray(productCollectionAssignment.productId, productIds),
-					eq(productCollectionAssignment.organizationId, orgId),
+					inArray(productCollectionAssignment.productId, resultProductIds),
+					eq(productCollectionAssignment.organizationId, validatedOrgId),
 				),
 			);
 	}
 
 	// Map variants and collections to their respective products
-	const productsWithVariants = result.data.map((p) => ({
+	const productsWithVariants = filteredData.map((p) => ({
 		...p,
 		variants: variants.filter((v) => v.productId === p.id),
 		collectionIds: collectionAssignments
@@ -105,7 +169,7 @@ export async function getProducts(
 			.map((a) => a.collectionId),
 	}));
 
-	return { total: result.total, data: productsWithVariants };
+	return { total, data: productsWithVariants };
 }
 
 /**

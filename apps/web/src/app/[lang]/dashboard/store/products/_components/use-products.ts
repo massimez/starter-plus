@@ -63,15 +63,21 @@ type ProductsParams = {
 	limit?: string;
 	offset?: string;
 	languageCode?: string;
+	search?: string;
+	collectionId?: string;
+	setTotal?: (total: number) => void;
 };
 
 export const getProducts = async ({
 	limit = "10",
 	offset = "0",
 	languageCode,
+	search,
+	collectionId,
+	setTotal,
 }: ProductsParams = {}) => {
 	const res = await hc.api.store.products.$get({
-		query: { limit, offset, languageCode },
+		query: { limit, offset, languageCode, search, collectionId },
 	});
 
 	if (!res.ok) {
@@ -80,7 +86,6 @@ export const getProducts = async ({
 	}
 
 	const json = await res.json();
-
 	if (json.error) {
 		throw new Error(json.error.message || "Failed to fetch products");
 	}
@@ -89,6 +94,8 @@ export const getProducts = async ({
 		throw new Error("Invalid response format");
 	}
 
+	setTotal?.(json.data.total);
+
 	return json.data;
 };
 
@@ -96,9 +103,20 @@ export const useProducts = ({
 	limit = "20",
 	offset = "0",
 	languageCode,
+	search,
+	collectionId,
+	setTotal,
 }: ProductsParams = {}) => {
 	return useQuery({
-		queryKey: ["products", limit, offset, languageCode],
-		queryFn: () => getProducts({ limit, offset, languageCode }),
+		queryKey: ["products", limit, offset, languageCode, search, collectionId],
+		queryFn: () =>
+			getProducts({
+				limit,
+				offset,
+				languageCode,
+				search,
+				collectionId,
+				setTotal,
+			}),
 	});
 };

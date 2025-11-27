@@ -10,6 +10,7 @@ export const offsetPaginationSchema = z.object({
 export const orderPaginationSchema = offsetPaginationSchema.extend({
 	status: z.string().optional(),
 	userId: z.string().optional(),
+	search: z.string().optional(),
 });
 
 export const languageCodeSchema = z.object({

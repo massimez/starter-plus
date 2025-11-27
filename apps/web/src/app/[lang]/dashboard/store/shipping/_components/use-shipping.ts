@@ -83,12 +83,13 @@ export const useShippingMethodZones = (methodId: string) => {
 	});
 };
 
+export type CreateShippingMethodZone = Omit<ShippingMethodZone, "id">;
+export type UpdateShippingMethodZone = Partial<CreateShippingMethodZone>;
+
 export const useCreateShippingMethodZone = () => {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: async (
-			json: ShippingMethodZone & { organizationId: string },
-		) => {
+		mutationFn: async (json: Omit<ShippingMethodZone, "id">) => {
 			const res = await hc.api.store["shipping-method-zones"].$post({
 				json,
 			});
@@ -114,7 +115,7 @@ export const useUpdateShippingMethodZone = () => {
 			json,
 		}: {
 			id: string;
-			json: ShippingMethodZone;
+			json: Partial<ShippingMethodZone>;
 		}) => {
 			const res = await hc.api.store["shipping-method-zones"][":id"].$put({
 				param: { id },

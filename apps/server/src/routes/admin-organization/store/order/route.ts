@@ -55,7 +55,7 @@ export const orderRoute = createRouter()
 					c.get("session")?.activeOrganizationId as string,
 				);
 
-				const { limit, offset, orderBy, direction, status, userId } =
+				const { limit, offset, orderBy, direction, status, userId, search } =
 					c.req.valid("query");
 
 				const whereConditions = [
@@ -67,6 +67,30 @@ export const orderRoute = createRouter()
 				}
 				if (userId) {
 					whereConditions.push(eq(order.userId, userId));
+				}
+				if (search) {
+					const { or, ilike } = await import("drizzle-orm");
+
+					// Check if search is a valid UUID format
+					const uuidRegex =
+						/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+					const isValidUuid = uuidRegex.test(search);
+
+					const searchConditions = [
+						ilike(order.orderNumber, `%${search}%`),
+						ilike(order.customerEmail, `%${search}%`),
+						ilike(order.customerFullName, `%${search}%`),
+					];
+
+					// Only add UUID comparison if search is a valid UUID
+					if (isValidUuid) {
+						searchConditions.push(eq(order.id, search));
+					}
+
+					const searchCondition = or(...searchConditions);
+					if (searchCondition) {
+						whereConditions.push(searchCondition);
+					}
 				}
 
 				const result = await db.query.order.findMany({

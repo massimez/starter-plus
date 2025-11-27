@@ -5,12 +5,16 @@ interface UseOrdersParams {
 	status?: string;
 	limit?: string;
 	offset?: string;
+	search?: string;
+	setTotal?: (total: number) => void;
 }
 
 export const useOrders = ({
 	status,
 	limit = "10",
 	offset = "0",
+	search,
+	setTotal,
 }: UseOrdersParams = {}) => {
 	const query = {
 		limit,
@@ -18,16 +22,19 @@ export const useOrders = ({
 		orderBy: "createdAt",
 		direction: "desc" as const,
 		...(status && { status }),
+		...(search && { search }),
 	};
 
 	return useQuery({
-		queryKey: ["orders", status, limit, offset],
+		queryKey: ["orders", status, limit, offset, search],
 		queryFn: async () => {
 			const result = await hc.api.store.orders.$get({
 				query,
 			});
-			return (await result.json()).data;
+			const res = await result.json();
+			setTotal?.(res.data?.total || 0);
+			return res.data;
 		},
-		staleTime: 1000 * 60 * 5, // 5 minutes
+		staleTime: 1000,
 	});
 };

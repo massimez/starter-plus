@@ -118,12 +118,13 @@ export const ShippingMethodZones = ({ methodId }: ShippingMethodZonesProps) => {
 				priceOverride: values.priceOverride || null,
 				estimatedMinDaysOverride: values.estimatedMinDaysOverride || null,
 				estimatedMaxDaysOverride: values.estimatedMaxDaysOverride || null,
+				isActive: values.isActive ?? true,
 			};
 
 			if (editingZone) {
 				await updateMutation.mutateAsync({
 					id: editingZone.id,
-					json: payload,
+					json: { ...payload, id: editingZone.id },
 				});
 				toast.success("Zone association updated");
 			} else {

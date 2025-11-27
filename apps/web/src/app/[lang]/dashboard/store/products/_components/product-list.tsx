@@ -10,7 +10,7 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@workspace/ui/components/alert-dialog";
-import { Input } from "@workspace/ui/components/input";
+import { LoaderContainer } from "@workspace/ui/components/loader";
 import { Package } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -21,24 +21,19 @@ interface ProductListProps {
 	products: Product[];
 	selectedLanguage: string;
 	onDeleteProduct?: (productId: string) => Promise<void>;
+	isLoading?: boolean;
 }
 
 export const ProductList = ({
 	products,
 	selectedLanguage,
 	onDeleteProduct,
+	isLoading = false,
 }: ProductListProps) => {
 	const router = useRouter();
-	const [searchTerm, setSearchTerm] = useState("");
 	const [deleteProductId, setDeleteProductId] = useState<string | null>(null);
 
-	const filteredProducts = products.filter(
-		(product) =>
-			product.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			product.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			product.currency?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-			product.status.toLowerCase().includes(searchTerm.toLowerCase()),
-	);
+	const filteredProducts = products;
 
 	const handleEditClick = (product: Product) => {
 		router.push(`/${selectedLanguage}/dashboard/store/products/${product.id}`);
@@ -57,31 +52,15 @@ export const ProductList = ({
 
 	return (
 		<div className="space-y-4">
-			<div className="flex items-center gap-4">
-				<Input
-					placeholder="Search products by name, ID, currency, or status..."
-					value={searchTerm}
-					onChange={(e) => setSearchTerm(e.target.value)}
-					className="max-w-md"
-				/>
-				<p className="whitespace-nowrap text-muted-foreground text-sm">
-					{filteredProducts.length}{" "}
-					{filteredProducts.length === 1 ? "product" : "products"}
-				</p>
-			</div>
-
-			{filteredProducts.length === 0 ? (
-				<div className="flex flex-col items-center justify-center py-12 text-center">
+			{isLoading ? (
+				<LoaderContainer />
+			) : filteredProducts.length === 0 ? (
+				<div className="flex flex-col items-center justify-center py-24 text-center">
 					<Package className="mb-4 h-12 w-12 text-muted-foreground" />
 					<h3 className="mb-2 font-semibold text-lg">No products found</h3>
-					<p className="text-muted-foreground text-sm">
-						{searchTerm
-							? "Try adjusting your search terms"
-							: "Get started by creating your first product"}
-					</p>
 				</div>
 			) : (
-				<div className="grid grid-cols-[repeat(auto-fit,minmax(280px,1fr))] gap-4">
+				<div className="grid grid-cols-[repeat(auto-fill,minmax(280px,1fr))] gap-4">
 					{filteredProducts.map((product) => (
 						<ProductCard
 							key={product.id}

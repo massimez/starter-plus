@@ -1,3 +1,4 @@
+import z from "zod";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createErrorResponse,
@@ -12,11 +13,7 @@ import {
 } from "@/lib/utils/validator";
 import { authMiddleware } from "@/middleware/auth";
 import { hasOrgPermission } from "@/middleware/org-permission";
-import {
-	languageCodeSchema,
-	offsetPaginationSchema,
-} from "@/middleware/pagination";
-
+import { offsetPaginationSchema } from "@/middleware/pagination";
 import {
 	createProduct,
 	deleteProduct,
@@ -50,7 +47,13 @@ export const productRoute = createRouter()
 		"/products",
 		authMiddleware,
 		hasOrgPermission("product:read"),
-		queryValidator(offsetPaginationSchema.extend(languageCodeSchema)),
+		queryValidator(
+			offsetPaginationSchema.extend({
+				languageCode: z.string().max(2).optional(),
+				search: z.string().optional(),
+				collectionId: z.string().optional(),
+			}),
+		),
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;

@@ -166,7 +166,9 @@ export const OrderCard = ({
 						<div className="min-w-0 flex-1">
 							<div className="mb-1 flex flex-wrap items-center gap-2">
 								<CardTitle className="font-semibold text-base">
-									Order #{order.orderNumber}
+									<button className="text-left" onClick={() => onEdit?.(order)}>
+										Order #{order.orderNumber}
+									</button>
 								</CardTitle>
 								<Badge
 									className={`${statusConfig.color} flex items-center gap-1 border font-medium`}
@@ -225,7 +227,9 @@ export const OrderCard = ({
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end" className="w-48">
-								{["pending", "processing"].includes(order.status) && (
+								{["pending", "processing", "shipped"].includes(
+									order.status,
+								) && (
 									<DropdownMenuItem
 										onClick={handleComplete}
 										disabled={isLoading}

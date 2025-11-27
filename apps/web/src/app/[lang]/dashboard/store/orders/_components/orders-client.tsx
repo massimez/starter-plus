@@ -2,7 +2,14 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { Input } from "@workspace/ui/components/input";
-import { PaginationControls } from "@workspace/ui/components/pagination-controls";
+import {
+	Pagination,
+	PaginationContent,
+	PaginationItem,
+	PaginationLink,
+	PaginationNext,
+	PaginationPrevious,
+} from "@workspace/ui/components/pagination";
 import {
 	Select,
 	SelectContent,
@@ -11,15 +18,13 @@ import {
 	SelectValue,
 } from "@workspace/ui/components/select";
 import { Search, X } from "lucide-react";
-import { parseAsString, useQueryState } from "nuqs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PageDashboardHeader } from "@/components/sections/page-dashboard-header";
-import { useNuqsPagination } from "@/hooks/use-nuqs-pagination";
 import { hc } from "@/lib/api-client";
-import { EditOrderDialog } from "./_components/edit-order-dialog";
-import { OrderList } from "./_components/order-list";
-import type { ORDER_STATUS, Order } from "./_components/types";
-import { useOrders } from "./hooks/use-orders";
+import { useOrders } from "../hooks/use-orders";
+import { EditOrderDialog } from "./edit-order-dialog";
+import { OrderList } from "./order-list";
+import type { ORDER_STATUS, Order } from "./types";
 
 const ORDER_STATUSES: ORDER_STATUS[] = [
 	"draft",
@@ -36,34 +41,39 @@ const ORDER_STATUSES: ORDER_STATUS[] = [
 	"refunded",
 ];
 
-const OrdersPage = () => {
+export const OrdersClient = () => {
 	const queryClient = useQueryClient();
 	const [editingOrder, setEditingOrder] = useState<Order | null>(null);
 	const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-	const [statusFilter, setStatusFilter] = useQueryState(
-		"status",
-		parseAsString,
+	const [statusFilter, setStatusFilter] = useState<string | undefined>(
+		undefined,
 	);
-	const [searchQuery, setSearchQuery] = useQueryState(
-		"search",
-		parseAsString.withDefault("").withOptions({ throttleMs: 500 }),
-	);
+	const [page, setPage] = useState(1);
+	const [searchInput, setSearchInput] = useState("");
+	const [searchQuery, setSearchQuery] = useState("");
+	const limit = 10;
+	const offset = (page - 1) * limit;
 
-	const pagination = useNuqsPagination();
+	// Debounce search input
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setSearchQuery(searchInput);
+			setPage(1); // Reset to first page when search changes
+		}, 500);
 
-	const { data: paginatedOrdersResult, isLoading: isPaginatedLoading } =
-		useOrders({
-			status: statusFilter || undefined,
-			limit: pagination.limit.toString(),
-			offset: pagination.offset.toString(),
-			search: searchQuery || undefined,
-			setTotal: pagination.setTotal,
-		});
+		return () => clearTimeout(timer);
+	}, [searchInput]);
 
-	const orders = (paginatedOrdersResult?.data || []).map((order) => ({
-		...order,
-		userId: order.userId ?? undefined,
-	}));
+	const {
+		data: ordersQueryResult,
+		isLoading,
+		error,
+	} = useOrders({
+		status: statusFilter,
+		limit: limit.toString(),
+		offset: offset.toString(),
+		search: searchQuery || undefined,
+	});
 
 	const handleDeleteOrder = async (orderId: string) => {
 		try {
@@ -103,6 +113,18 @@ const OrdersPage = () => {
 		setIsEditDialogOpen(true);
 	};
 
+	if (isLoading) return <div>Loading...</div>;
+	if (error) return <div>Error: {error.message}</div>;
+	if (!ordersQueryResult || "error" in ordersQueryResult)
+		return <div>Error loading orders</div>;
+
+	const orders = (ordersQueryResult.data || []).map((order) => ({
+		...order,
+		userId: order.userId ?? undefined,
+	}));
+	const total = ordersQueryResult?.total || 0;
+	const totalPages = Math.ceil(total / limit);
+
 	return (
 		<div className="p-4">
 			<div className="mb-4 space-y-4">
@@ -112,20 +134,14 @@ const OrdersPage = () => {
 						<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
 						<Input
 							placeholder="Search orders..."
-							value={searchQuery}
-							onChange={(e) => {
-								setSearchQuery(e.target.value || null);
-								pagination.setPage(1);
-							}}
+							value={searchInput}
+							onChange={(e) => setSearchInput(e.target.value)}
 							className="pr-9 pl-9"
 						/>
-						{searchQuery && (
+						{searchInput && (
 							<button
 								type="button"
-								onClick={() => {
-									setSearchQuery(null);
-									pagination.setPage(1);
-								}}
+								onClick={() => setSearchInput("")}
 								className="-translate-y-1/2 absolute top-1/2 right-3 text-muted-foreground hover:text-foreground"
 							>
 								<X className="h-4 w-4" />
@@ -135,8 +151,8 @@ const OrdersPage = () => {
 					<Select
 						value={statusFilter || "all"}
 						onValueChange={(value) => {
-							setStatusFilter(value === "all" ? null : value);
-							pagination.setPage(1);
+							setStatusFilter(value === "all" ? undefined : value);
+							setPage(1); // Reset to first page when filter changes
 						}}
 					>
 						<SelectTrigger className="w-48">
@@ -153,17 +169,62 @@ const OrdersPage = () => {
 					</Select>
 				</div>
 			</div>
-
 			<OrderList
 				// biome-ignore lint/suspicious/noExplicitAny: <>
 				orders={orders as any}
-				isLoading={isPaginatedLoading}
 				onEditOrder={handleEditOrder}
 				onDeleteOrder={handleDeleteOrder}
 				onCompleteOrder={handleCompleteOrder}
 				onCancelOrder={handleCancelOrder}
 			/>
-			<PaginationControls pagination={pagination} className="mt-4" />
+			{totalPages > 1 && (
+				<Pagination className="mt-4">
+					<PaginationContent>
+						<PaginationItem>
+							<PaginationPrevious
+								href="#"
+								onClick={(e) => {
+									e.preventDefault();
+									setPage((p) => Math.max(1, p - 1));
+								}}
+								aria-disabled={page === 1}
+								className={
+									page === 1 ? "pointer-events-none opacity-50" : undefined
+								}
+							/>
+						</PaginationItem>
+						{Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+							<PaginationItem key={p}>
+								<PaginationLink
+									href="#"
+									isActive={page === p}
+									onClick={(e) => {
+										e.preventDefault();
+										setPage(p);
+									}}
+								>
+									{p}
+								</PaginationLink>
+							</PaginationItem>
+						))}
+						<PaginationItem>
+							<PaginationNext
+								href="#"
+								onClick={(e) => {
+									e.preventDefault();
+									setPage((p) => Math.min(totalPages, p + 1));
+								}}
+								aria-disabled={page === totalPages}
+								className={
+									page === totalPages
+										? "pointer-events-none opacity-50"
+										: undefined
+								}
+							/>
+						</PaginationItem>
+					</PaginationContent>
+				</Pagination>
+			)}
 			<EditOrderDialog
 				order={editingOrder}
 				open={isEditDialogOpen}
@@ -172,5 +233,3 @@ const OrdersPage = () => {
 		</div>
 	);
 };
-
-export default OrdersPage;
