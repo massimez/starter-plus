@@ -8,6 +8,7 @@ import {
 	pgTable,
 	text,
 	timestamp,
+	uniqueIndex,
 	uuid,
 	varchar,
 } from "drizzle-orm/pg-core";
@@ -110,44 +111,53 @@ export const product = pgTable("product", {
  * VARIANTS, ATTRIBUTES, PRICES & STOCK
  * ---------------------------------------------------------------------------
  */
-export const productVariant = pgTable("product_variant", {
-	id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
-	organizationId: text("organization_id")
-		.notNull()
-		.references(() => organization.id, { onDelete: "cascade" }),
+export const productVariant = pgTable(
+	"product_variant",
+	{
+		id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
+		organizationId: text("organization_id")
+			.notNull()
+			.references(() => organization.id, { onDelete: "cascade" }),
 
-	productId: uuid("product_id")
-		.notNull()
-		.references(() => product.id, { onDelete: "cascade" }),
+		productId: uuid("product_id")
+			.notNull()
+			.references(() => product.id, { onDelete: "cascade" }),
 
-	sku: varchar("sku", { length: 100 }).notNull(),
-	barcode: varchar("barcode", { length: 64 }), // optional UPC/EAN
-	barcodeType: varchar("barcode_type", { length: 50 }),
+		sku: varchar("sku", { length: 100 }).notNull(),
+		barcode: varchar("barcode", { length: 64 }), // optional UPC/EAN
+		barcodeType: varchar("barcode_type", { length: 50 }),
 
-	// Physical props
-	weightKg: numeric("weight_kg", { precision: 8, scale: 3 }),
-	dimensionsCm: jsonb("dimensions_cm"), // {length, width, height}
+		// Physical props
+		weightKg: numeric("weight_kg", { precision: 8, scale: 3 }),
+		dimensionsCm: jsonb("dimensions_cm"), // {length, width, height}
 
-	// Stock management
-	reorderPoint: integer("reorder_point").default(10).notNull(),
-	maxStock: integer("max_stock"),
-	reorderQuantity: integer("reorder_quantity").default(50).notNull(),
+		// Stock management
+		reorderPoint: integer("reorder_point").default(10).notNull(),
+		maxStock: integer("max_stock"),
+		reorderQuantity: integer("reorder_quantity").default(50).notNull(),
 
-	price: numeric("price", { precision: 12, scale: 2 }).notNull(),
-	compareAtPrice: numeric("compare_at_price", { precision: 12, scale: 2 }),
-	cost: numeric("cost", { precision: 12, scale: 2 }),
-	unit: varchar("unit", { length: 255 }),
-	isActive: boolean("is_active").default(true).notNull(),
-	translations:
-		jsonb("translations").$type<
-			{
-				languageCode: string;
-				name?: string; // e.g. "Red / L"
-				attributes?: Record<string, string>;
-			}[]
-		>(),
-	...softAudit,
-});
+		price: numeric("price", { precision: 12, scale: 2 }).notNull(),
+		compareAtPrice: numeric("compare_at_price", { precision: 12, scale: 2 }),
+		cost: numeric("cost", { precision: 12, scale: 2 }),
+		unit: varchar("unit", { length: 255 }),
+		isActive: boolean("is_active").default(true).notNull(),
+		translations:
+			jsonb("translations").$type<
+				{
+					languageCode: string;
+					name?: string; // e.g. "Red / L"
+					attributes?: Record<string, string>;
+				}[]
+			>(),
+		...softAudit,
+	},
+	(table) => [
+		uniqueIndex("product_variant_org_sku_idx").on(
+			table.organizationId,
+			table.sku,
+		),
+	],
+);
 
 export const productVariantOption = pgTable("product_variant_option", {
 	id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),

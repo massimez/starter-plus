@@ -78,14 +78,20 @@ export const organizationInfo = pgTable("organization_info", {
 	travelFeeType: varchar("travel_fee_type", {
 		length: 50,
 	}).$type<"fixed" | "per_km" | "varies" | "start_at" | "free">(),
-	travelFeeValue: integer("travel_fee_value"),
-	travelFeeValueByKm: integer("travel_fee_value_by_km"),
+	travelFeeValue: numeric("travel_fee_value", { precision: 12, scale: 2 }),
+	travelFeeValueByKm: numeric("travel_fee_value_by_km", {
+		precision: 12,
+		scale: 2,
+	}),
 
 	maxTravelDistance: integer("max_travel_distance"),
 
 	// Travel Fees Policy Text
 	travelFeesPolicyText: text("travel_fees_policy_text"),
-	minimumTravelFees: integer("minimum_travel_fees"),
+	minimumTravelFees: numeric("minimum_travel_fees", {
+		precision: 12,
+		scale: 2,
+	}),
 	taxRate: numeric("tax_rate", { precision: 5, scale: 2 })
 		.default("0.00")
 		.notNull(),
