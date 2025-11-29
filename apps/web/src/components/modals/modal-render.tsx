@@ -12,7 +12,7 @@ const ModalRenderer = () => {
 	const { modalType, modalProps, closeModal } = useModal();
 	const router = useRouter();
 	console.log(modalProps, "modalProps");
-	
+
 	const isAuthModal =
 		modalType === "signIn" ||
 		modalType === "signUp" ||

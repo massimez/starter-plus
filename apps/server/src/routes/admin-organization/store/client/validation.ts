@@ -15,10 +15,6 @@ export const emailSchema = z
  */
 export const phoneSchema = z
 	.string()
-	.regex(
-		/^\+?[1-9]\d{1,14}$/,
-		"Phone must be in E.164 format (e.g., +1234567890)",
-	)
 	.transform((val) => val.replace(/\s/g, "")); // Remove spaces
 
 /**

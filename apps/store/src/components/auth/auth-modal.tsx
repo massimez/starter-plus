@@ -178,7 +178,7 @@ export function AuthModal({
 
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
-			<DialogContent className="h-screen sm:h-auto w-screen sm:w-full sm:max-w-[500px] p-0 sm:p-8 flex flex-col gap-0 max-w-none sm:rounded-lg rounded-none">
+			<DialogContent className="flex h-screen w-screen max-w-none flex-col gap-0 rounded-none p-0 sm:h-auto sm:w-full sm:max-w-[500px] sm:rounded-lg sm:p-8">
 				{/* Back Button - Only on mobile */}
 				{showBackButton && (
 					<button
