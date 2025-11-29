@@ -1,14 +1,10 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import {
-	admin,
-	emailOTP,
-	organization,
-	phoneNumber,
-} from "better-auth/plugins";
+import { admin, emailOTP, organization } from "better-auth/plugins";
 import type { GoogleProfile } from "better-auth/social-providers";
 import { db } from "../db";
 import * as schema from "../db/schema";
+import { emailService } from "../email/service";
 export const auth = betterAuth({
 	trustedOrigins: [
 		"http://localhost:3000",
@@ -33,23 +29,20 @@ export const auth = betterAuth({
 	plugins: [
 		admin(),
 		organization(),
-		phoneNumber({
-			sendOTP: ({ phoneNumber, code }, _request) => {
-				console.log(phoneNumber, code);
-				// Implement sending OTP code via SMS
-			},
-		}),
+		// phoneNumber({
+		// 	sendOTP: ({ phoneNumber, code }, _request) => {
+		// 		// Implement sending OTP code via SMS
+		// 	},
+		// }),
 		emailOTP({
 			sendVerificationOnSignUp: true,
 			async sendVerificationOTP({ email, otp, type }) {
 				if (type === "sign-in") {
 					// Send the OTP for sign in
 				} else if (type === "email-verification") {
-					// Send the OTP for email verification
-					console.log(email, "type", type, otp);
+					await emailService.sendVerificationEmail(email, otp);
 				} else {
-					// Send the OTP for password reset
-					console.log(email, "type", type, otp);
+					await emailService.sendPasswordResetEmail(email, otp);
 				}
 			},
 		}),

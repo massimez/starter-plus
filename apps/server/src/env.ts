@@ -23,6 +23,7 @@ const EnvSchema = z.object({
 	// ]),
 	GOOGLE_CLIENT_ID: z.string().optional(),
 	GOOGLE_CLIENT_SECRET: z.string().optional(),
+	RESEND_KEY: z.string().optional(),
 });
 
 export type env = z.infer<typeof EnvSchema>;
