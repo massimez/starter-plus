@@ -5,6 +5,8 @@ import type { GoogleProfile } from "better-auth/social-providers";
 import { db } from "../db";
 import * as schema from "../db/schema";
 import { emailService } from "../email/service";
+import { redis } from "../redis";
+
 export const auth = betterAuth({
 	trustedOrigins: [
 		"http://localhost:3000",
@@ -26,6 +28,24 @@ export const auth = betterAuth({
 			invitation: schema.invitation,
 		},
 	}),
+
+	// Redis secondary storage for sessions and rate limiting
+	secondaryStorage: {
+		get: async (key) => {
+			return await redis.get(key);
+		},
+		set: async (key, value, ttl) => {
+			if (ttl) {
+				await redis.set(key, value, "EX", ttl);
+			} else {
+				await redis.set(key, value);
+			}
+		},
+		delete: async (key) => {
+			await redis.del(key);
+		},
+	},
+
 	plugins: [
 		admin(),
 		organization(),

@@ -1,3 +1,4 @@
+import { adminRoutes } from "@/routes/admin";
 import { locationRoute } from "@/routes/admin-organization/organization/location/location";
 import { organizationInfoRoute } from "@/routes/admin-organization/organization/organization-info";
 import { storeRoute } from "@/routes/admin-organization/store";
@@ -15,7 +16,8 @@ const app = createApp()
 	.route("/organizations", organizationInfoRoute)
 	.route("/storage", storageRoutes)
 	.route("/store", storeRoute)
-	.route("/storefront", storefrontRoutes);
+	.route("/storefront", storefrontRoutes)
+	.route("/admin", adminRoutes);
 
 export const honoApp = app;
 export type App = typeof honoApp;

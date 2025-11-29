@@ -1,9 +1,9 @@
 import type { Context, Next } from "hono";
 
 export async function adminMiddleware(c: Context, next: Next) {
-	const userRole = c.get("userRole");
+	const user = c.get("user");
 
-	if (userRole !== "admin") {
+	if (!user || user.role !== "admin") {
 		return c.json(
 			{
 				success: false,
