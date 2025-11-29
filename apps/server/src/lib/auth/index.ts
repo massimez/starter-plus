@@ -1,5 +1,5 @@
-import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { betterAuth } from "better-auth/minimal";
 import { admin, emailOTP, organization } from "better-auth/plugins";
 import type { GoogleProfile } from "better-auth/social-providers";
 import { db } from "../db";
