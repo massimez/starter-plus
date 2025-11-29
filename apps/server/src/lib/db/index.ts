@@ -7,7 +7,7 @@ console.log("DATABASE_URL is d", process.env.DATABASE_URL);
 // biome-ignore lint/style/noNonNullAssertion: <res>
 const client = postgres(process.env.DATABASE_URL!, {
 	prepare: false,
-	max: 10,
+	max: process.env.NODE_ENV === "production" ? 20 : 10,
 	idle_timeout: 20,
 	connect_timeout: 10,
 });

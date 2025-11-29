@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: <> */
-import { and, eq, inArray } from "drizzle-orm";
+import { and, eq, ilike, inArray, or, sql } from "drizzle-orm";
 import type { z } from "zod";
 import { withPaginationAndTotal } from "@/helpers/pagination";
 import { db } from "@/lib/db";
@@ -92,8 +92,21 @@ export async function getProducts(
 		filters.push(inArray(product.id, productIds));
 	}
 
-	// For search, we need to filter after fetching since translations are JSONB
-	// We'll fetch all matching products and then filter by search term
+	// Add search filter at database level
+	// Search in both product.name and translations JSONB field
+	if (search?.trim()) {
+		const searchPattern = `%${search.trim()}%`;
+		filters.push(
+			or(
+				ilike(product.name, searchPattern),
+				sql`EXISTS (
+					SELECT 1 FROM jsonb_array_elements(${product.translations}) AS t
+					WHERE t->>'name' ILIKE ${searchPattern}
+				)`,
+			)!,
+		);
+	}
+
 	const baseFilters = and(...filters);
 
 	const result = await withPaginationAndTotal({
@@ -105,30 +118,8 @@ export async function getProducts(
 		baseFilters,
 	});
 
-	let filteredData = result.data;
-	let total = result.total;
-
-	// Apply search filter if provided
-	if (search?.trim()) {
-		const searchLower = search.toLowerCase().trim();
-		filteredData = result.data.filter((p) => {
-			// Search in product name
-			if (p.name?.toLowerCase().includes(searchLower)) {
-				return true;
-			}
-			// Search in translations
-			if (p.translations && Array.isArray(p.translations)) {
-				return p.translations.some((t: { name?: string }) =>
-					t.name?.toLowerCase().includes(searchLower),
-				);
-			}
-			return false;
-		});
-		total = filteredData.length;
-	}
-
 	// Fetch variants for all products in the current page
-	const resultProductIds = filteredData.map((p) => p.id);
+	const resultProductIds = result.data.map((p) => p.id);
 
 	let variants: (typeof productVariant.$inferSelect)[] = [];
 	let collectionAssignments: { productId: string; collectionId: string }[] = [];
@@ -161,7 +152,7 @@ export async function getProducts(
 	}
 
 	// Map variants and collections to their respective products
-	const productsWithVariants = filteredData.map((p) => ({
+	const productsWithVariants = result.data.map((p) => ({
 		...p,
 		variants: variants.filter((v) => v.productId === p.id),
 		collectionIds: collectionAssignments
@@ -169,7 +160,7 @@ export async function getProducts(
 			.map((a) => a.collectionId),
 	}));
 
-	return { total, data: productsWithVariants };
+	return { total: result.total, data: productsWithVariants };
 }
 
 /**
