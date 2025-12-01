@@ -1,4 +1,4 @@
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
@@ -8,25 +8,14 @@ import {
 	incrementClientUncompletedOrders,
 	updateClientStatsOnOrderCompletion,
 } from "../client/client.service";
+import { checkMilestonesForEvent } from "../rewards/milestone.service";
+import {
+	cancelPendingPoints,
+	confirmPendingPoints,
+} from "../rewards/points.service";
 import type { createOrderSchema } from "./schema";
 
 type CreateOrderInput = z.infer<typeof createOrderSchema>;
-
-/**
- * Get organization's bonus percentage from database
- */
-export async function getOrganizationBonusPercentage(
-	organizationId: string,
-	tx: TransactionDb,
-): Promise<number> {
-	const [orgInfo] = await tx
-		.select({ bonusPercentage: schema.organizationInfo.bonusPercentage })
-		.from(schema.organizationInfo)
-		.where(eq(schema.organizationInfo.organizationId, organizationId))
-		.limit(1);
-
-	return orgInfo?.bonusPercentage ? Number(orgInfo.bonusPercentage) / 100 : 0;
-}
 
 /**
  * Validate stock availability and get product information for order items
@@ -175,36 +164,6 @@ export async function reserveStockForOrder(
 }
 
 /**
- * Add pending bonus for order
- */
-export async function addPendingBonus(
-	userId: string,
-	organizationId: string,
-	subtotal: number,
-	tx: TransactionDb,
-) {
-	const bonusPercentage = await getOrganizationBonusPercentage(
-		organizationId,
-		tx,
-	);
-	const bonusEarned = subtotal * bonusPercentage;
-	await tx
-		.insert(schema.userBonus)
-		.values({
-			userId: userId,
-			organizationId: organizationId,
-			bonusPending: bonusEarned.toString(),
-			bonus: "0",
-		})
-		.onConflictDoUpdate({
-			target: [schema.userBonus.userId, schema.userBonus.organizationId],
-			set: {
-				bonusPending: sql`${schema.userBonus.bonusPending} + ${bonusEarned}`,
-			},
-		});
-}
-
-/**
  * Create a new order
  */
 export async function createOrder(
@@ -275,10 +234,8 @@ export async function createOrder(
 		// Reserve stock
 		await reserveStockForOrder(createdOrderItems, tx);
 
-		// Add pending bonus
-		if (userId) {
-			await addPendingBonus(userId, activeOrgId, subtotal, tx);
-		}
+		// Note: Bonus awarding is now handled by storefront order creation
+		// Admin-created orders don't automatically award bonuses
 
 		// Update client statistics for pending order
 		if (userId) {
@@ -347,40 +304,51 @@ export async function adjustInventoryForCompletion(
 }
 
 /**
- * Move bonus from pending to earned
+ * Confirm pending bonus points for order completion
  */
 export async function processBonusCompletion(
 	userId: string,
 	organizationId: string,
-	totalAmount: string,
+	orderId: string,
 	tx: TransactionDb,
 ) {
-	const bonusPercentage = await getOrganizationBonusPercentage(
-		organizationId,
-		tx,
-	);
-	const bonusEarned = Number(totalAmount || 0) * bonusPercentage;
-
-	const currentUserBonus = await tx.query.userBonus.findFirst({
+	// Get user's bonus account
+	const account = await tx.query.userBonusAccount.findFirst({
 		where: and(
-			eq(schema.userBonus.userId, userId),
-			eq(schema.userBonus.organizationId, organizationId),
+			eq(schema.userBonusAccount.userId, userId),
+			eq(schema.userBonusAccount.organizationId, organizationId),
 		),
-		columns: { id: true, bonusPending: true, bonus: true },
 	});
 
-	if (currentUserBonus) {
-		const newBonusPending =
-			Number(currentUserBonus.bonusPending || 0) - bonusEarned;
-		const newBonus = Number(currentUserBonus.bonus || 0) + bonusEarned;
+	if (!account) {
+		return; // No bonus account, skip
+	}
 
-		await tx
-			.update(schema.userBonus)
-			.set({
-				bonusPending: newBonusPending.toString(),
-				bonus: newBonus.toString(),
-			})
-			.where(eq(schema.userBonus.id, currentUserBonus.id));
+	// Get all pending transactions for this order
+	const pendingTransactions = await tx.query.bonusTransaction.findMany({
+		where: and(
+			eq(schema.bonusTransaction.userBonusAccountId, account.id),
+			eq(schema.bonusTransaction.orderId, orderId),
+			eq(schema.bonusTransaction.status, "pending"),
+		),
+	});
+
+	// Confirm each pending transaction
+	for (const transaction of pendingTransactions) {
+		await confirmPendingPoints(transaction.id, organizationId, tx);
+	}
+
+	// Check milestones for order completion
+	if (pendingTransactions.length > 0) {
+		const bonusProgramId = account.bonusProgramId;
+		await checkMilestonesForEvent(
+			userId,
+			organizationId,
+			bonusProgramId,
+			"order_count",
+			1,
+			tx,
+		);
 	}
 }
 
@@ -409,12 +377,7 @@ export async function completeOrder(orderId: string, activeOrgId: string) {
 
 		// Process bonus completion
 		if (ord?.userId) {
-			await processBonusCompletion(
-				ord.userId,
-				ord.organizationId,
-				ord.totalAmount || "0",
-				tx,
-			);
+			await processBonusCompletion(ord.userId, ord.organizationId, ord.id, tx);
 		}
 
 		// Update client statistics on order completion
@@ -479,36 +442,38 @@ export async function reverseReservedStock(
 }
 
 /**
- * Reverse pending bonus for order cancellation
+ * Cancel pending bonus points for order cancellation
  */
 export async function reversePendingBonus(
 	userId: string,
 	organizationId: string,
-	totalAmount: string,
+	orderId: string,
 	tx: TransactionDb,
 ) {
-	const bonusPercentage = await getOrganizationBonusPercentage(
-		organizationId,
-		tx,
-	);
-	const bonusEarned = Number(totalAmount || 0) * bonusPercentage;
-
-	const currentUserBonus = await tx.query.userBonus.findFirst({
+	// Get user's bonus account
+	const account = await tx.query.userBonusAccount.findFirst({
 		where: and(
-			eq(schema.userBonus.userId, userId),
-			eq(schema.userBonus.organizationId, organizationId),
+			eq(schema.userBonusAccount.userId, userId),
+			eq(schema.userBonusAccount.organizationId, organizationId),
 		),
-		columns: { id: true, bonusPending: true },
 	});
 
-	if (currentUserBonus) {
-		const newBonusPending =
-			Number(currentUserBonus.bonusPending || 0) - bonusEarned;
+	if (!account) {
+		return; // No bonus account, skip
+	}
 
-		await tx
-			.update(schema.userBonus)
-			.set({ bonusPending: newBonusPending.toString() })
-			.where(eq(schema.userBonus.id, currentUserBonus.id));
+	// Get all pending transactions for this order
+	const pendingTransactions = await tx.query.bonusTransaction.findMany({
+		where: and(
+			eq(schema.bonusTransaction.userBonusAccountId, account.id),
+			eq(schema.bonusTransaction.orderId, orderId),
+			eq(schema.bonusTransaction.status, "pending"),
+		),
+	});
+
+	// Cancel each pending transaction
+	for (const transaction of pendingTransactions) {
+		await cancelPendingPoints(transaction.id, organizationId, tx);
 	}
 }
 
@@ -537,12 +502,7 @@ export async function cancelOrder(orderId: string, activeOrgId: string) {
 
 		// Reverse pending bonus
 		if (ord?.userId) {
-			await reversePendingBonus(
-				ord.userId,
-				ord.organizationId,
-				ord.totalAmount || "0",
-				tx,
-			);
+			await reversePendingBonus(ord.userId, ord.organizationId, ord.id, tx);
 		}
 
 		// Update client statistics on order cancellation

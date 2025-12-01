@@ -95,9 +95,6 @@ export const organizationInfo = pgTable("organization_info", {
 	taxRate: numeric("tax_rate", { precision: 5, scale: 2 })
 		.default("0.00")
 		.notNull(),
-	bonusPercentage: numeric("bonus_percentage", { precision: 5, scale: 2 })
-		.default("0")
-		.notNull(),
 	defaultLanguage: varchar("default_language", { length: 20 }),
 	activeLanguages: jsonb("active_languages").$type<string[]>(),
 	images: jsonb("images").$type<TImage[]>(),

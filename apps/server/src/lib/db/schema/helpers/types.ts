@@ -106,3 +106,11 @@ export type TRewardType =
 	| "cash_back";
 
 export type TCouponStatus = "active" | "used" | "expired" | "cancelled";
+
+export type TMilestoneType =
+	| "first_purchase"
+	| "total_spent"
+	| "order_count"
+	| "product_review"
+	| "referral_count"
+	| "custom";

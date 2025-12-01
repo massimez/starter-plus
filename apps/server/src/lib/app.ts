@@ -10,8 +10,8 @@ import createApp from "./create-hono-app";
 
 const app = createApp()
 	.basePath("/api")
-	.route("/", healthRoutes)
-	.route("/", auth)
+	.route("/health", healthRoutes)
+	.route("/auth", auth)
 	.route("/organizations", locationRoute)
 	.route("/organizations", organizationInfoRoute)
 	.route("/storage", storageRoutes)

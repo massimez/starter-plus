@@ -6,6 +6,7 @@ import { productRoute } from "./product/product";
 import { productCollectionRoute } from "./product/product-collection/product-collection";
 import { productReviewRoute } from "./product/product-review/product-review";
 import { productVariantRoute } from "./product/product-variant/product-variant";
+import { rewardsRoutes } from "./rewards";
 import { shippingMethodZoneRoute } from "./shipping/method-zone";
 import { shippingMethodRoute } from "./shipping/shipping";
 import { shippingZoneRoute } from "./shipping/zone";
@@ -25,4 +26,5 @@ export const storeRoute = createRouter()
 	.route("/", shippingMethodRoute)
 	.route("/", shippingZoneRoute)
 	.route("/", shippingMethodZoneRoute)
-	.route("/", orderRoute);
+	.route("/", orderRoute)
+	.route("/", rewardsRoutes);

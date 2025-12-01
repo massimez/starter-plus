@@ -107,7 +107,6 @@ export async function getOrganizationBasicInfoBySlug(orgSlug: string) {
 			travelFeesPolicyText: true,
 			minimumTravelFees: true,
 			taxRate: true,
-			bonusPercentage: true,
 			defaultLanguage: true,
 			activeLanguages: true,
 			images: true,

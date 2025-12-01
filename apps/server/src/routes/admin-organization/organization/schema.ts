@@ -10,21 +10,23 @@ export const insertOrganizationInfoSchema = createInsertSchema(
 		travelFeeType: z
 			.enum(["fixed", "per_km", "varies", "start_at", "free"])
 			.optional(),
-		travelFeeValue: z.number().int().optional(),
-		travelFeeValueByKm: z.number().int().optional(),
+		travelFeeValue: z
+			.string()
+			.regex(/^\d+(\.\d{1,2})?$/, "Must be a valid decimal number")
+			.optional(),
+		travelFeeValueByKm: z
+			.string()
+			.regex(/^\d+(\.\d{1,2})?$/, "Must be a valid decimal number")
+			.optional(),
 		maxTravelDistance: z.number().int().optional(),
 		travelFeesPolicyText: z.string().optional().or(z.literal("")),
-		minimumTravelFees: z.number().int().optional(),
+		minimumTravelFees: z
+			.string()
+			.regex(/^\d+(\.\d{1,2})?$/, "Must be a valid decimal number")
+			.optional(),
 		taxRate: z
 			.string()
 			.regex(/^\d+(\.\d{1,2})?$/, "Tax rate must be a valid monetary value")
-			.optional(),
-		bonusPercentage: z
-			.string()
-			.regex(
-				/^\d+(\.\d{1,2})?$/,
-				"Bonus percentage must be a valid monetary value",
-			)
 			.optional(),
 		defaultLanguage: z.string().optional(),
 		activeLanguages: z.array(z.string()).optional(),
@@ -65,23 +67,24 @@ export const updateOrganizationInfoSchema = createSelectSchema(
 		travelFeeType: z
 			.enum(["fixed", "per_km", "varies", "start_at", "free"])
 			.optional(),
-		travelFeeValue: z.number().int().optional(),
-		travelFeeValueByKm: z.number().int().optional(),
+		travelFeeValue: z
+			.string()
+			.regex(/^\d+(\.\d{1,2})?$/, "Must be a valid decimal number")
+			.optional(),
+		travelFeeValueByKm: z
+			.string()
+			.regex(/^\d+(\.\d{1,2})?$/, "Must be a valid decimal number")
+			.optional(),
 		maxTravelDistance: z.number().int().optional(),
 		travelFeesPolicyText: z.string().optional().or(z.literal("")),
-		minimumTravelFees: z.number().int().optional(),
+		minimumTravelFees: z
+			.string()
+			.regex(/^\d+(\.\d{1,2})?$/, "Must be a valid decimal number")
+			.optional(),
 		taxRate: z
 			.string()
 			.regex(/^\d+(\.\d{1,2})?$/, "Tax rate must be a valid monetary value")
 			.optional(),
-		bonusPercentage: z
-			.string()
-			.regex(
-				/^\d+(\.\d{1,2})?$/,
-				"Bonus percentage must be a valid monetary value",
-			)
-			.optional(),
-		defaultLanguage: z.string().optional(),
 		activeLanguages: z.array(z.string()).optional(),
 		images: z
 			.array(

@@ -3,6 +3,8 @@ import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { order, orderItem } from "@/lib/db/schema/store/order";
 import { incrementClientUncompletedOrders } from "@/routes/admin-organization/store/client/client.service";
+import { awardCashback } from "@/routes/admin-organization/store/rewards/cashback.service";
+import { checkMilestonesForEvent } from "@/routes/admin-organization/store/rewards/milestone.service";
 import type { TransactionDb } from "@/types/db";
 
 // Types
@@ -28,19 +30,8 @@ type CreateOrderInput = {
 	userId?: string;
 };
 
-// Helper functions
-async function getOrganizationBonusPercentage(
-	organizationId: string,
-	tx: TransactionDb,
-): Promise<number> {
-	const [orgInfo] = await tx
-		.select({ bonusPercentage: schema.organizationInfo.bonusPercentage })
-		.from(schema.organizationInfo)
-		.where(eq(schema.organizationInfo.organizationId, organizationId))
-		.limit(1);
-
-	return orgInfo?.bonusPercentage ? Number(orgInfo.bonusPercentage) / 100 : 0;
-}
+// Helper functions (legacy - kept for backward compatibility)
+// This function is deprecated - use cashback.service instead
 
 // Custom error for stock issues
 class StockError extends Error {
@@ -207,28 +198,20 @@ async function reserveStockForOrder(
 async function addPendingBonus(
 	userId: string,
 	organizationId: string,
+	orderId: string,
 	subtotal: number,
 	tx: TransactionDb,
 ) {
-	const bonusPercentage = await getOrganizationBonusPercentage(
+	// Award cashback points (pending status)
+	const cashbackResult = await awardCashback(
+		userId,
 		organizationId,
-		tx,
+		orderId,
+		subtotal,
+		"pending",
 	);
-	const bonusEarned = subtotal * bonusPercentage;
-	await tx
-		.insert(schema.userBonus)
-		.values({
-			userId: userId,
-			organizationId: organizationId,
-			bonusPending: bonusEarned.toString(),
-			bonus: "0",
-		})
-		.onConflictDoUpdate({
-			target: [schema.userBonus.userId, schema.userBonus.organizationId],
-			set: {
-				bonusPending: sql`${schema.userBonus.bonusPending} + ${bonusEarned}`,
-			},
-		});
+
+	// Note: Milestone checking for first_purchase happens in cashback service
 }
 
 // Main service functions
@@ -278,7 +261,13 @@ export async function createStorefrontOrder(payload: CreateOrderInput) {
 
 		// Add pending bonus
 		if (userId) {
-			await addPendingBonus(userId, payload.organizationId, subtotal, tx);
+			await addPendingBonus(
+				userId,
+				payload.organizationId,
+				newOrder.id,
+				subtotal,
+				tx,
+			);
 		}
 
 		// Update client statistics for pending order

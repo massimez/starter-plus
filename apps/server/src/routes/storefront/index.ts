@@ -5,6 +5,7 @@ import { locationRoutes } from "./locations";
 import { ordersRoutes } from "./orders";
 import { organizationRoutes } from "./organization";
 import { productsRoutes } from "./products";
+import { rewardsRoutes } from "./rewards/route";
 
 export const storefrontRoutes = createRouter()
 	.route("/products", productsRoutes)
@@ -12,6 +13,7 @@ export const storefrontRoutes = createRouter()
 	.route("/collections", collectionsRoutes)
 	.route("/locations", locationRoutes)
 	.route("/organizations", organizationRoutes)
-	.route("/client", clientRoute);
+	.route("/client", clientRoute)
+	.route("/rewards", rewardsRoutes);
 
 export default storefrontRoutes;

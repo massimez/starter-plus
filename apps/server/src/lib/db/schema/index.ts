@@ -3,6 +3,7 @@ export * from "./organization";
 export * from "./relations/auth";
 export * from "./relations/inventory";
 export * from "./relations/order";
+export * from "./relations/reward";
 export * from "./storage";
 export * from "./store/bonus";
 export * from "./store/client";

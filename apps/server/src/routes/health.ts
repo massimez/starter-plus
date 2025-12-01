@@ -5,7 +5,7 @@ import {
 	createSuccessResponse,
 } from "@/lib/utils/route-helpers";
 
-const healthRoutes = createRouter().get("/health", async (c) => {
+const healthRoutes = createRouter().get("/", async (c) => {
 	try {
 		// Test database connection
 		await db.execute("SELECT 1");
