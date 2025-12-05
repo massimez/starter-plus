@@ -358,6 +358,64 @@ export async function processBonusCompletion(
 }
 
 /**
+ * Create customer payment (receivable) for completed order
+ * This records the order revenue in the financial receivables system
+ */
+async function createReceivableForOrder(
+	orderId: string,
+	organizationId: string,
+	tx: TransactionDb,
+) {
+	// Get the completed order
+	const order = await tx.query.order.findFirst({
+		where: eq(schema.order.id, orderId),
+	});
+
+	if (!order) {
+		throw new Error("Order not found");
+	}
+
+	// Only create receivable if there's a customer (userId)
+	if (!order.userId) {
+		console.log("Order has no userId, skipping receivable creation");
+		return;
+	}
+
+	// Find the client record for this user
+	const client = await tx.query.client.findFirst({
+		where: and(
+			eq(schema.client.userId, order.userId),
+			eq(schema.client.organizationId, organizationId),
+		),
+	});
+
+	if (!client) {
+		console.warn(
+			`No client record found for user ${order.userId}, skipping receivable creation`,
+		);
+		return;
+	}
+
+	// Create customer payment record (receivable)
+	const paymentNumber = `PAY-${order.orderNumber}`;
+	await tx.insert(schema.customerPayment).values({
+		organizationId,
+		customerId: client.id, // Use client.id (UUID) instead of order.userId
+		paymentNumber,
+		paymentDate: new Date(),
+		amount: order.totalAmount || "0",
+		paymentMethod: "online", // Assuming online payment for storefront orders
+		referenceNumber: order.orderNumber,
+		status: "cleared",
+		notes: `Payment for order ${order.orderNumber}`,
+	});
+
+	console.log(
+		`Created payment ${paymentNumber} for order ${order.orderNumber}`,
+	);
+}
+
+/**
  * Complete an order
  */
 export async function completeOrder(orderId: string, activeOrgId: string) {
@@ -393,6 +451,14 @@ export async function completeOrder(orderId: string, activeOrgId: string) {
 				ord.totalAmount || "0",
 				tx,
 			);
+		}
+
+		// Create receivable for the order
+		try {
+			await createReceivableForOrder(orderId, activeOrgId, tx);
+		} catch (error) {
+			console.error("Failed to create receivable for order:", error);
+			// Don't fail the order completion if receivable creation fails
 		}
 
 		return [ord];
