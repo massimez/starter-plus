@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Badge } from "@workspace/ui/components/badge";
 import { Button } from "@workspace/ui/components/button";
 import {
@@ -47,6 +47,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { hc } from "@/lib/api-client";
+import { OrderStatusHistory } from "./order-status-history";
 import type { Order } from "./types";
 
 const editOrderSchema = z.object({
@@ -179,12 +180,27 @@ export const EditOrderDialog = ({
 		onSuccess: () => {
 			toast.success("Order updated successfully");
 			queryClient.invalidateQueries({ queryKey: ["orders"] });
+			queryClient.invalidateQueries({
+				queryKey: ["order-status-history", order?.id],
+			});
 			onOpenChange(false);
 		},
 		onError: (error) => {
 			console.error("Failed to update order:", error);
 			toast.error("Failed to update order");
 		},
+	});
+
+	const { data: historyData, isLoading: isLoadingHistory } = useQuery({
+		queryKey: ["order-status-history", order?.id],
+		queryFn: async () => {
+			if (!order?.id) return [];
+			const result = await hc.api.store.orders[":id"]["status-history"].$get({
+				param: { id: order.id },
+			});
+			return result.json().then((res) => res.data);
+		},
+		enabled: !!order?.id && open,
 	});
 
 	const onSubmit = (data: EditOrderForm) => {
@@ -344,7 +360,7 @@ export const EditOrderDialog = ({
 										<FormControl>
 											<Textarea
 												placeholder="Special requests, preferences, or important customer information..."
-												className="min-h-[80px] resize-none"
+												className="min-h-20 resize-none"
 												{...field}
 											/>
 										</FormControl>
@@ -456,6 +472,15 @@ export const EditOrderDialog = ({
 								)}
 							/>
 						</div>
+
+						<Separator />
+
+						{/* Order Status History */}
+						<OrderStatusHistory
+							orderId={order.id}
+							history={(historyData as any) || []}
+							isLoading={isLoadingHistory}
+						/>
 
 						<DialogFooter className="gap-2 sm:gap-0">
 							<Button

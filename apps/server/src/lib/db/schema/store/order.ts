@@ -56,7 +56,7 @@ export const order = pgTable("order", {
 	userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
 
 	orderNumber: varchar("order_number", { length: 50 }).notNull(),
-	status: text("status").default("pending").notNull(),
+	status: text("status").default("pending").notNull().$type<TOrderStatus>(),
 
 	// Currency-aware totals
 	currency: varchar("currency", { length: 3 }).notNull(), // ISO 4217

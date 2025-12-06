@@ -2,6 +2,8 @@ import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
+import { customerPayment } from "@/lib/db/schema/financial/receivables";
+import type { TOrderStatus } from "@/lib/db/schema/helpers/types";
 import type { TransactionDb } from "@/types/db";
 import {
 	decrementClientUncompletedOrders,
@@ -398,7 +400,7 @@ async function createReceivableForOrder(
 
 	// Create customer payment record (receivable)
 	const paymentNumber = `PAY-${order.orderNumber}`;
-	await tx.insert(schema.customerPayment).values({
+	await tx.insert(customerPayment).values({
 		organizationId,
 		customerId: client.id, // Use client.id (UUID) instead of order.userId
 		paymentNumber,
@@ -416,10 +418,44 @@ async function createReceivableForOrder(
 }
 
 /**
+ * Create order status history record
+ */
+export async function createOrderStatusHistory(
+	orderId: string,
+	organizationId: string,
+	previousStatus: string | null,
+	newStatus: TOrderStatus,
+	tx: TransactionDb,
+	notes?: string,
+) {
+	await tx.insert(schema.orderStatusHistory).values({
+		organizationId,
+		orderId,
+		status: newStatus,
+		previousStatus:
+			newStatus !== previousStatus
+				? (previousStatus as TOrderStatus | null)
+				: null,
+		notes,
+	});
+}
+
+/**
  * Complete an order
  */
 export async function completeOrder(orderId: string, activeOrgId: string) {
 	const [ord] = await db.transaction(async (tx) => {
+		// Get current status before updating
+		const currentOrder = await tx.query.order.findFirst({
+			where: and(
+				eq(schema.order.id, orderId),
+				eq(schema.order.organizationId, activeOrgId),
+			),
+			columns: { status: true },
+		});
+
+		const previousStatus = currentOrder?.status || "pending";
+
 		const [ord] = await tx
 			.update(schema.order)
 			.set({ status: "completed" })
@@ -460,6 +496,15 @@ export async function completeOrder(orderId: string, activeOrgId: string) {
 			console.error("Failed to create receivable for order:", error);
 			// Don't fail the order completion if receivable creation fails
 		}
+
+		// Record status change in history
+		await createOrderStatusHistory(
+			orderId,
+			activeOrgId,
+			previousStatus,
+			"completed",
+			tx,
+		);
 
 		return [ord];
 	});
@@ -553,6 +598,17 @@ export async function reversePendingBonus(
  */
 export async function cancelOrder(orderId: string, activeOrgId: string) {
 	const [ord] = await db.transaction(async (tx) => {
+		// Get current status before updating
+		const currentOrder = await tx.query.order.findFirst({
+			where: and(
+				eq(schema.order.id, orderId),
+				eq(schema.order.organizationId, activeOrgId),
+			),
+			columns: { status: true },
+		});
+
+		const previousStatus = currentOrder?.status || "pending";
+
 		const [ord] = await tx
 			.update(schema.order)
 			.set({ status: "cancelled" })
@@ -584,6 +640,15 @@ export async function cancelOrder(orderId: string, activeOrgId: string) {
 				tx,
 			);
 		}
+
+		// Record status change in history
+		await createOrderStatusHistory(
+			orderId,
+			activeOrgId,
+			previousStatus,
+			"cancelled",
+			tx,
+		);
 
 		return [ord];
 	});

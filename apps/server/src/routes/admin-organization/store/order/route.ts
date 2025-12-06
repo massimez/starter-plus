@@ -1,7 +1,8 @@
 import { type AnyColumn, and, asc, count, desc, eq, isNull } from "drizzle-orm";
 import { createRouter } from "@/lib/create-hono-app";
 import { db } from "@/lib/db";
-import { order } from "@/lib/db/schema";
+import { order, orderStatusHistory } from "@/lib/db/schema";
+import type { TOrderStatus } from "@/lib/db/schema/helpers/types";
 import {
 	createErrorResponse,
 	createSuccessResponse,
@@ -17,7 +18,12 @@ import {
 import { authMiddleware } from "@/middleware/auth";
 import { hasOrgPermission } from "@/middleware/org-permission";
 import { orderPaginationSchema } from "@/middleware/pagination";
-import { cancelOrder, completeOrder, createOrder } from "./order.service";
+import {
+	cancelOrder,
+	completeOrder,
+	createOrder,
+	createOrderStatusHistory,
+} from "./order.service";
 import { createOrderSchema, updateOrderSchema } from "./schema";
 
 export const orderRoute = createRouter()
@@ -63,7 +69,7 @@ export const orderRoute = createRouter()
 					isNull(order.deletedAt),
 				];
 				if (status) {
-					whereConditions.push(eq(order.status, status));
+					whereConditions.push(eq(order.status, status as TOrderStatus));
 				}
 				if (userId) {
 					whereConditions.push(eq(order.userId, userId));
@@ -168,6 +174,32 @@ export const orderRoute = createRouter()
 		},
 	)
 
+	// GET order status history
+	.get(
+		"/orders/:id/status-history",
+		authMiddleware,
+		hasOrgPermission("order:read"),
+		paramValidator(idParamSchema),
+		async (c) => {
+			try {
+				const { id } = c.req.valid("param");
+				const activeOrgId = validateOrgId(
+					c.get("session")?.activeOrganizationId as string,
+				);
+
+				const result = await db.query.orderStatusHistory.findMany({
+					where: (record, { and, eq }) =>
+						and(eq(record.orderId, id), eq(record.organizationId, activeOrgId)),
+					orderBy: desc(orderStatusHistory.createdAt),
+				});
+
+				return c.json(createSuccessResponse(result));
+			} catch (error) {
+				return handleRouteError(c, error, "fetch order status history");
+			}
+		},
+	)
+
 	// UPDATE order
 	.patch(
 		"/orders/:id",
@@ -183,6 +215,20 @@ export const orderRoute = createRouter()
 				);
 
 				const payload = c.req.valid("json");
+
+				// Get current order status before update if status is being updated
+				let previousStatus: string | null = null;
+				if (payload.status) {
+					const currentOrder = await db.query.order.findFirst({
+						where: and(
+							eq(order.id, id),
+							eq(order.organizationId, activeOrgId),
+							isNull(order.deletedAt),
+						),
+						columns: { status: true },
+					});
+					previousStatus = currentOrder?.status || null;
+				}
 
 				const [updated] = await db
 					.update(order)
@@ -207,6 +253,24 @@ export const orderRoute = createRouter()
 						]),
 						404,
 					);
+				}
+
+				// Record status change in history if status was updated
+				if (
+					payload.status &&
+					previousStatus &&
+					previousStatus !== payload.status
+				) {
+					await db.transaction(async (tx) => {
+						await createOrderStatusHistory(
+							id,
+							activeOrgId,
+							previousStatus,
+							payload.status as TOrderStatus,
+							tx,
+							"Status updated via edit",
+						);
+					});
 				}
 
 				const result = await db.query.order.findFirst({

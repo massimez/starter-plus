@@ -15,7 +15,7 @@ import {
 	StoreIcon,
 	Trophy,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 import type * as React from "react";
 import { hc } from "@/lib/api-client";
@@ -31,7 +31,7 @@ const baseNavMain = [
 		title: "Store",
 		url: "#",
 		icon: StoreIcon,
-		isActive: true,
+		isActive: false,
 		items: [
 			{ title: "Products", url: "/dashboard/store/products" },
 			{ title: "Orders", url: "/dashboard/store/orders" },
@@ -45,7 +45,7 @@ const baseNavMain = [
 		title: "Inventory",
 		url: "/dashboard/store/inventory",
 		icon: ContainerIcon,
-		isActive: true,
+		isActive: false,
 		items: [
 			{ title: "Overview", url: "/dashboard/store/inventory" },
 			{ title: "Suppliers", url: "/dashboard/store/suppliers" },
@@ -55,14 +55,14 @@ const baseNavMain = [
 		title: "Rewards",
 		url: "#",
 		icon: Trophy,
-		isActive: true,
+		isActive: false,
 		items: [], // dynamic
 	},
 	{
 		title: "Financial",
 		url: "#",
 		icon: Landmark,
-		isActive: true,
+		isActive: false,
 		items: [
 			{ title: "Transactions", url: "/dashboard/financial/transactions" },
 			{ title: "Invoices", url: "/dashboard/financial/invoices" },
@@ -122,6 +122,7 @@ const buildRewardItem = (
  * ----------------------------------------------- */
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	const router = useRouter();
+	const pathname = usePathname();
 
 	// Fetch active reward program
 	const { data: programsResponse } = useQuery({
@@ -148,9 +149,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 	];
 
 	/* Merge rewards into navMain */
-	const navMain = baseNavMain.map((item) =>
-		item.title === "Rewards" ? { ...item, items: rewardItems } : item,
-	);
+	const navMain = baseNavMain.map((item) => {
+		const items = item.title === "Rewards" ? rewardItems : item.items;
+		const isActive = items?.some(
+			(subItem) => subItem.url !== "#" && pathname.startsWith(subItem.url),
+		);
+
+		return {
+			...item,
+			items,
+			isActive: isActive ?? false,
+		};
+	});
 
 	return (
 		<Sidebar collapsible="icon" {...props}>

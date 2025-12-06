@@ -49,11 +49,14 @@ export type TPaymentStatus =
 	| "cancelled";
 
 export type TOrderStatus =
+	| "draft" // Initial state before processing
 	| "pending" // Just created, awaiting payment
+	| "confirmed" // Order confirmed
 	| "paid" // Payment confirmed
 	| "processing" // Being prepared for shipment
 	| "shipped" // On its way to customer
 	| "delivered" // Successfully delivered
+	| "completed" // Order fulfilled and delivered
 	| "cancelled" // Cancelled before shipping
 	| "refunded" // Money returned to customer
 	| "returned" // Items returned by customer
