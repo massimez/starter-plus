@@ -39,8 +39,12 @@ export function DeleteConfirmationDialog({
 				</AlertDialogHeader>
 				<AlertDialogFooter>
 					<AlertDialogCancel>Cancel</AlertDialogCancel>
-					<AlertDialogAction onClick={onConfirm} disabled={disabled}>
-						Continue
+					<AlertDialogAction
+						onClick={onConfirm}
+						disabled={disabled}
+						className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+					>
+						Delete
 					</AlertDialogAction>
 				</AlertDialogFooter>
 			</AlertDialogContent>

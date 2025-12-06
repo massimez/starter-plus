@@ -10,9 +10,7 @@ import {
 } from "@workspace/ui/components/sidebar";
 import {
 	ContainerIcon,
-	Frame,
-	Map as MapIcon,
-	PieChart,
+	Landmark,
 	Settings2,
 	StoreIcon,
 	Trophy,
@@ -59,6 +57,21 @@ const baseNavMain = [
 		icon: Trophy,
 		isActive: true,
 		items: [], // dynamic
+	},
+	{
+		title: "Financial",
+		url: "#",
+		icon: Landmark,
+		isActive: true,
+		items: [
+			{ title: "Transactions", url: "/dashboard/financial/transactions" },
+			{ title: "Invoices", url: "/dashboard/financial/invoices" },
+			{ title: "Bills", url: "/dashboard/financial/bills" },
+			{ title: "Expenses", url: "/dashboard/financial/expenses" },
+			{ title: "Payroll", url: "/dashboard/financial/payroll" },
+			{ title: "Accounting", url: "/dashboard/financial/accounting" },
+			{ title: "Reports", url: "/dashboard/financial/reports" },
+		],
 	},
 	{
 		title: "Settings",
