@@ -11,6 +11,9 @@ export const createEmployeeSchema = z.object({
 	employmentType: z.enum(["full_time", "part_time", "contract"]),
 	bankAccountNumber: z.string().optional(),
 	taxId: z.string().optional(),
+	baseSalary: z.string().optional(),
+	currency: z.string().length(3).optional(),
+	paymentFrequency: z.enum(["monthly", "bi_weekly", "weekly"]).optional(),
 });
 
 export const createSalaryStructureSchema = z.object({
@@ -48,7 +51,7 @@ export const approveSalaryAdvanceSchema = z.object({
 
 export const createSalaryComponentSchema = z.object({
 	name: z.string().min(1, "Name is required"),
-	componentType: z.enum(["earning", "deduction", "employer_contribution"]),
+	componentType: z.enum(["earning", "deduction"]),
 	calculationType: z.enum(["fixed", "percentage", "formula"]),
 	accountId: z.string().uuid("Account is required"),
 	isTaxable: z.boolean().default(true),

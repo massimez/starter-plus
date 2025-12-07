@@ -3,13 +3,18 @@ import { z } from "zod";
 export const createAccountSchema = z.object({
 	code: z.string().min(1),
 	name: z.string().min(1),
-	accountCategoryId: z.string().uuid(),
+	accountType: z.enum(["asset", "liability", "equity", "revenue", "expense"]),
+	category: z.string().optional(),
+	normalBalance: z.enum(["debit", "credit"]),
 	description: z.string().optional(),
-	parentAccountId: z.string().uuid().optional(),
 	allowManualEntries: z.boolean().default(true),
 });
 
-export const updateAccountSchema = createAccountSchema.partial();
+export const updateAccountSchema = z.object({
+	name: z.string().min(1).optional(),
+	description: z.string().optional(),
+	isActive: z.boolean().optional(),
+});
 
 export const createJournalEntrySchema = z.object({
 	entryDate: z.coerce.date(),

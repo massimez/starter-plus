@@ -40,6 +40,8 @@ export default createRouter()
 				const data = c.req.valid("json");
 				const account = await bankingService.createBankAccount(activeOrgId, {
 					...data,
+					accountType:
+						data.accountType === "credit_card" ? "credit" : data.accountType,
 					createdBy: userId,
 				});
 				return c.json(createSuccessResponse(account), 201);
@@ -131,29 +133,6 @@ export default createRouter()
 				return c.json(createSuccessResponse(transactions));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch bank account transactions");
-			}
-		},
-	)
-
-	.post(
-		"/bank-transactions/:id/reconcile",
-		authMiddleware,
-		paramValidator(z.object({ id: z.string().uuid() })),
-		async (c) => {
-			try {
-				const activeOrgId = validateOrgId(
-					c.get("session")?.activeOrganizationId as string,
-				);
-				const userId = c.get("user")?.id as string;
-				const { id } = c.req.valid("param");
-				const transaction = await bankingService.reconcileBankTransaction(
-					activeOrgId,
-					id,
-					userId,
-				);
-				return c.json(createSuccessResponse(transaction));
-			} catch (error) {
-				return handleRouteError(c, error, "reconcile bank transaction");
 			}
 		},
 	);

@@ -16,15 +16,6 @@ import type { TransactionDb } from "@/types/db";
 export async function getChartOfAccounts(organizationId: string) {
 	const accounts = await db.query.glAccount.findMany({
 		where: eq(glAccount.organizationId, organizationId),
-		with: {
-			category: {
-				with: {
-					accountType: true,
-				},
-			},
-			parentAccount: true,
-			subAccounts: true,
-		},
 		orderBy: [desc(glAccount.code)],
 	});
 
@@ -36,9 +27,10 @@ export async function createAccount(
 	data: {
 		code: string;
 		name: string;
-		accountCategoryId: string;
+		accountType: "asset" | "liability" | "equity" | "revenue" | "expense";
+		category?: string;
+		normalBalance: "debit" | "credit";
 		description?: string;
-		parentAccountId?: string;
 		allowManualEntries?: boolean;
 	},
 ) {
@@ -46,7 +38,13 @@ export async function createAccount(
 		.insert(glAccount)
 		.values({
 			organizationId,
-			...data,
+			code: data.code,
+			name: data.name,
+			accountType: data.accountType,
+			category: data.category,
+			normalBalance: data.normalBalance,
+			description: data.description,
+			allowManualEntries: data.allowManualEntries,
 		})
 		.returning();
 

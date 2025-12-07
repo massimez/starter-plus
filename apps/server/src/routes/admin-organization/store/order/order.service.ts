@@ -2,7 +2,7 @@ import { and, eq } from "drizzle-orm";
 import type { z } from "zod";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
-import { customerPayment } from "@/lib/db/schema/financial/receivables";
+import { payment } from "@/lib/db/schema/financial/invoices";
 import type { TOrderStatus } from "@/lib/db/schema/helpers/types";
 import type { TransactionDb } from "@/types/db";
 import {
@@ -361,7 +361,7 @@ export async function processBonusCompletion(
 
 /**
  * Create customer payment (receivable) for completed order
- * This records the order revenue in the financial receivables system
+ * This records the order revenue in the financial system using unified payment table
  */
 async function createReceivableForOrder(
 	orderId: string,
@@ -398,11 +398,14 @@ async function createReceivableForOrder(
 		return;
 	}
 
-	// Create customer payment record (receivable)
+	// Create payment record using unified payment table
 	const paymentNumber = `PAY-${order.orderNumber}`;
-	await tx.insert(customerPayment).values({
+	await tx.insert(payment).values({
 		organizationId,
-		customerId: client.id, // Use client.id (UUID) instead of order.userId
+		paymentType: "received", // This is a customer payment (receivable)
+		partyType: "customer",
+		customerId: client.id, // Use client.id (UUID)
+		supplierId: null,
 		paymentNumber,
 		paymentDate: new Date(),
 		amount: order.totalAmount || "0",

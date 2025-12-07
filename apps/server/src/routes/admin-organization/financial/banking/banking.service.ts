@@ -1,9 +1,14 @@
 import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
+import { glAccount } from "@/lib/db/schema/financial/accounts";
 import {
 	bankAccount,
 	bankTransaction,
 } from "@/lib/db/schema/financial/banking";
+import {
+	journalEntry,
+	journalEntryLine,
+} from "@/lib/db/schema/financial/journal";
 import type { TransactionDb } from "@/types/db";
 
 /**
@@ -19,9 +24,8 @@ export async function createBankAccount(
 		bankName: string;
 		accountNumber: string;
 		currency: string;
-		accountType: "checking" | "savings" | "credit_card";
+		accountType: "checking" | "savings" | "credit";
 		glAccountId: string;
-		openingBalance?: number;
 		createdBy?: string;
 	},
 ) {
@@ -35,8 +39,7 @@ export async function createBankAccount(
 			currency: data.currency,
 			accountType: data.accountType,
 			glAccountId: data.glAccountId,
-			openingBalance: (data.openingBalance || 0).toString(),
-			currentBalance: (data.openingBalance || 0).toString(),
+			currentBalance: "0",
 			isActive: true,
 			createdBy: data.createdBy,
 		})
@@ -74,7 +77,7 @@ export async function getOrCreateDefaultCashAccount(
 		return cashAccount;
 	}
 
-	// If no cash account exists, we need to create one
+	// If no cash account exists, create one
 	// First, get or create a GL account for cash
 	const { glAccount: glAccountSchema } = await import(
 		"@/lib/db/schema/financial/accounts"
@@ -88,57 +91,15 @@ export async function getOrCreateDefaultCashAccount(
 		),
 	});
 
-	// If no GL account exists, create a minimal one
-	// Note: This is a simplified approach. In production, you'd want proper account categories
+	// If no GL account exists, create one
 	if (!cashGlAccount) {
-		// Get the first account category (or create default ones)
-		const { accountCategory, accountType } = await import(
-			"@/lib/db/schema/financial/accounts"
-		);
-
-		let category = await db.query.accountCategory.findFirst({
-			where: eq(accountCategory.organizationId, organizationId),
-		});
-
-		// If no categories exist, create default account types and categories
-		if (!category) {
-			// First, ensure "asset" account type exists
-			let assetType = await db.query.accountType.findFirst({
-				where: eq(accountType.name, "asset"),
-			});
-
-			if (!assetType) {
-				[assetType] = await db
-					.insert(accountType)
-					.values({
-						name: "asset",
-						normalBalance: "debit",
-						description:
-							"Assets - economic resources owned by the organization",
-					})
-					.returning();
-			}
-
-			// Create a "Current Assets" account category
-			[category] = await db
-				.insert(accountCategory)
-				.values({
-					organizationId,
-					accountTypeId: assetType.id,
-					name: "Current Assets",
-					codePrefix: "1000",
-					description:
-						"Assets that are expected to be converted to cash within one year",
-					createdBy: userId,
-				})
-				.returning();
-		}
-
 		[cashGlAccount] = await db
 			.insert(glAccountSchema)
 			.values({
 				organizationId,
-				accountCategoryId: category.id,
+				accountType: "asset",
+				category: "Current Assets",
+				normalBalance: "debit",
 				code: "1000",
 				name: "Cash",
 				description: "Cash on hand",
@@ -154,10 +115,9 @@ export async function getOrCreateDefaultCashAccount(
 		accountName: "Cash",
 		bankName: "Cash",
 		accountNumber: "CASH-001",
-		currency: "USD", // Default currency, could be made configurable
+		currency: "USD",
 		accountType: "checking",
 		glAccountId: cashGlAccount.id,
-		openingBalance: 0,
 		createdBy: userId,
 	});
 }
@@ -178,13 +138,15 @@ export async function recordBankTransaction(
 		description?: string;
 		referenceNumber?: string;
 		payeePayer?: string;
+		offsetAccountId?: string; // Optional GL account for the offsetting entry
 		createdBy?: string;
 	},
 ) {
 	return await db.transaction(async (tx: TransactionDb) => {
-		// 1. Get current balance
+		// 1. Get current balance and bank account details
 		const account = await tx.query.bankAccount.findFirst({
 			where: eq(bankAccount.id, data.bankAccountId),
+			with: { glAccount: true },
 		});
 
 		if (!account) throw new Error("Bank account not found");
@@ -199,21 +161,19 @@ export async function recordBankTransaction(
 
 		const newBalance = Number(account.currentBalance) + impact;
 
-		// 3. Create Transaction
+		// 3. Create Bank Transaction Record
 		const [transaction] = await tx
 			.insert(bankTransaction)
 			.values({
 				organizationId,
 				bankAccountId: data.bankAccountId,
 				transactionDate: data.transactionDate,
-				valueDate: data.transactionDate,
 				transactionType: data.transactionType,
 				amount: data.amount.toString(),
 				balanceAfter: newBalance.toString(),
 				description: data.description,
 				referenceNumber: data.referenceNumber,
 				payeePayer: data.payeePayer,
-				reconciliationStatus: "unreconciled",
 				createdBy: data.createdBy,
 			})
 			.returning();
@@ -225,6 +185,96 @@ export async function recordBankTransaction(
 				currentBalance: newBalance.toString(),
 			})
 			.where(eq(bankAccount.id, data.bankAccountId));
+
+		// 5. Create Journal Entry for Double-Entry Bookkeeping
+
+		// Get or create default offsetting accounts
+		let offsetAccountId = data.offsetAccountId;
+
+		if (!offsetAccountId) {
+			// Create default "Miscellaneous Income" or "Miscellaneous Expense" account
+			const isIncome = ["deposit", "interest"].includes(data.transactionType);
+			const defaultAccountName = isIncome
+				? "Miscellaneous Income"
+				: "Miscellaneous Expense";
+			const defaultAccountCode = isIncome ? "4900" : "5900";
+
+			// Use independent select instead of tx.query to avoid schema registration issues
+			let [defaultAccount] = await tx
+				.select()
+				.from(glAccount)
+				.where(
+					and(
+						eq(glAccount.organizationId, organizationId),
+						eq(glAccount.code, defaultAccountCode),
+					),
+				)
+				.limit(1);
+
+			if (!defaultAccount) {
+				[defaultAccount] = await tx
+					.insert(glAccount)
+					.values({
+						organizationId,
+						code: defaultAccountCode,
+						name: defaultAccountName,
+						accountType: isIncome ? "revenue" : "expense",
+						category: isIncome ? "Other Income" : "Other Expenses",
+						normalBalance: isIncome ? "credit" : "debit",
+						description: `Auto-created for manual ${isIncome ? "deposits" : "withdrawals"}`,
+						isActive: true,
+						allowManualEntries: true,
+						createdBy: data.createdBy,
+					})
+					.returning();
+			}
+
+			if (!defaultAccount) {
+				throw new Error("Failed to create default offsetting account");
+			}
+
+			offsetAccountId = defaultAccount.id;
+		}
+
+		// Create the journal entry
+		const [entry] = await tx
+			.insert(journalEntry)
+			.values({
+				organizationId,
+				entryNumber: `JE-${Date.now()}`,
+				entryType: "manual",
+				entryDate: data.transactionDate,
+				description:
+					data.description ||
+					`Bank ${data.transactionType} - ${account.accountName}`,
+				// referenceNumber: data.referenceNumber, // Removed as it does not exist in schema
+				status: "posted", // Auto-post manual bank transactions
+				createdBy: data.createdBy,
+			})
+			.returning();
+
+		// Create journal entry lines based on transaction type
+		const isDebit = ["deposit", "interest"].includes(data.transactionType);
+
+		// Line 1: Bank account side
+		await tx.insert(journalEntryLine).values({
+			journalEntryId: entry.id,
+			accountId: account.glAccountId,
+			debitAmount: isDebit ? data.amount.toString() : "0",
+			creditAmount: isDebit ? "0" : data.amount.toString(),
+			description: data.description || `${data.transactionType}`,
+			lineNumber: 1,
+		});
+
+		// Line 2: Offsetting account side
+		await tx.insert(journalEntryLine).values({
+			journalEntryId: entry.id,
+			accountId: offsetAccountId,
+			debitAmount: isDebit ? "0" : data.amount.toString(),
+			creditAmount: isDebit ? data.amount.toString() : "0",
+			description: data.description || `${data.transactionType}`,
+			lineNumber: 2,
+		});
 
 		return transaction;
 	});
@@ -257,31 +307,4 @@ export async function getAllBankTransactions(
 		},
 		limit,
 	});
-}
-
-/**
- * ---------------------------------------------------------------------------
- * RECONCILIATION OPERATIONS
- * ---------------------------------------------------------------------------
- */
-
-export async function reconcileBankTransaction(
-	organizationId: string,
-	transactionId: string,
-	userId: string,
-) {
-	return await db
-		.update(bankTransaction)
-		.set({
-			reconciliationStatus: "reconciled",
-			reconciledAt: new Date(),
-			updatedBy: userId,
-		})
-		.where(
-			and(
-				eq(bankTransaction.id, transactionId),
-				eq(bankTransaction.organizationId, organizationId),
-			),
-		)
-		.returning();
 }

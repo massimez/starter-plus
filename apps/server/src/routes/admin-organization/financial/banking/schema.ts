@@ -24,4 +24,5 @@ export const recordBankTransactionSchema = z.object({
 	description: z.string().optional(),
 	referenceNumber: z.string().optional(),
 	payeePayer: z.string().optional(),
+	offsetAccountId: z.string().uuid().optional(), // Optional GL account for offsetting entry
 });

@@ -50,46 +50,6 @@ export default createRouter()
 	)
 
 	/**
-	 * SALARY STRUCTURE ROUTES
-	 */
-	.post(
-		"/salary-structures",
-		authMiddleware,
-		jsonValidator(createSalaryStructureSchema),
-		async (c) => {
-			try {
-				const activeOrgId = validateOrgId(
-					c.get("session")?.activeOrganizationId as string,
-				);
-				const userId = c.get("user")?.id as string;
-				const data = c.req.valid("json");
-				const structure = await payrollService.createSalaryStructure(
-					activeOrgId,
-					{
-						...data,
-						createdBy: userId,
-					},
-				);
-				return c.json(createSuccessResponse(structure), 201);
-			} catch (error) {
-				return handleRouteError(c, error, "create salary structure");
-			}
-		},
-	)
-
-	.get("/salary-structures", authMiddleware, async (c) => {
-		try {
-			const activeOrgId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
-			const structures = await payrollService.getSalaryStructures(activeOrgId);
-			return c.json(createSuccessResponse(structures));
-		} catch (error) {
-			return handleRouteError(c, error, "fetch salary structures");
-		}
-	})
-
-	/**
 	 * PAYROLL RUN ROUTES
 	 */
 	.post(
@@ -319,6 +279,82 @@ export default createRouter()
 			return c.json(createSuccessResponse(components));
 		} catch (error) {
 			return handleRouteError(c, error, "fetch salary components");
+		}
+	})
+
+	/**
+	 * SALARY STRUCTURES ROUTES
+	 */
+	.post(
+		"/salary-structures",
+		authMiddleware,
+		jsonValidator(createSalaryStructureSchema),
+		async (c) => {
+			try {
+				const activeOrgId = validateOrgId(
+					c.get("session")?.activeOrganizationId as string,
+				);
+				const data = c.req.valid("json");
+
+				// Fetch components to get their type
+				const allComponents =
+					await payrollService.getSalaryComponents(activeOrgId);
+				const componentsMap = new Map(allComponents.map((c) => [c.id, c]));
+
+				const salaryComponents = data.components.map((comp) => {
+					const def = componentsMap.get(comp.componentId);
+					if (!def) {
+						throw new Error(`Component ${comp.componentId} not found`);
+					}
+					return {
+						componentId: comp.componentId,
+						amount: comp.amount || 0,
+						type: def.componentType as "earning" | "deduction",
+					};
+				});
+
+				const employee = await payrollService.updateEmployee(
+					activeOrgId,
+					data.employeeId,
+					{
+						baseSalary: data.baseSalary,
+						currency: data.currency,
+						paymentFrequency: data.paymentFrequency,
+						salaryComponents,
+					},
+				);
+				return c.json(createSuccessResponse(employee), 201);
+			} catch (error) {
+				return handleRouteError(c, error, "create salary structure");
+			}
+		},
+	)
+
+	.get("/salary-structures", authMiddleware, async (c) => {
+		try {
+			const activeOrgId = validateOrgId(
+				c.get("session")?.activeOrganizationId as string,
+			);
+			const employees = await payrollService.getEmployees(activeOrgId);
+			// Map to "Structure" shape expected by frontend table
+			const structures = employees.map((emp) => ({
+				id: emp.id,
+				employee: {
+					id: emp.id,
+					employeeCode: emp.employeeCode,
+					firstName: emp.firstName,
+					lastName: emp.lastName,
+				},
+				baseSalary: emp.baseSalary,
+				currency: emp.currency,
+				paymentFrequency: emp.paymentFrequency,
+				effectiveFrom: new Date().toISOString(),
+				isActive: emp.status === "active",
+				components: emp.salaryComponents,
+			}));
+			return c.json(createSuccessResponse(structures));
+		} catch (error) {
+			return handleRouteError(c, error, "fetch salary structures");
 		}
 	})
 

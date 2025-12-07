@@ -36,8 +36,7 @@ export async function createExpense(
 		currency: string;
 		expenseDate: Date;
 		description: string;
-		employeeId?: string;
-		userId?: string;
+		userId: string;
 		receiptUrl?: string;
 		createdBy?: string;
 	},
@@ -51,7 +50,6 @@ export async function createExpense(
 			currency: data.currency,
 			expenseDate: data.expenseDate,
 			description: data.description,
-			employeeId: data.employeeId,
 			userId: data.userId,
 			receiptUrl: data.receiptUrl,
 			status: "pending",
@@ -67,7 +65,6 @@ export async function getExpenses(organizationId: string, limit = 50) {
 		orderBy: [desc(expense.expenseDate)],
 		with: {
 			category: true,
-			employee: true,
 			user: true,
 		},
 		limit,

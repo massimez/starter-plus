@@ -1,21 +1,17 @@
-import { and, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import {
 	employee,
-	employeeSalaryComponent,
 	payrollEntry,
-	payrollEntryDetail,
 	payrollRun,
 	salaryAdvance,
-	salaryAdvanceRepayment,
 	salaryComponent,
-	salaryStructure,
 } from "@/lib/db/schema/financial/payroll";
 import type { TransactionDb } from "@/types/db";
 
 /**
  * ---------------------------------------------------------------------------
- * EMPLOYEE & SALARY STRUCTURE OPERATIONS
+ * EMPLOYEE & SALARY OPERATIONS
  * ---------------------------------------------------------------------------
  */
 
@@ -34,54 +30,58 @@ export async function createEmployee(
 	return newEmployee;
 }
 
-export async function createSalaryStructure(
+export async function updateEmployee(
 	organizationId: string,
+	employeeId: string,
 	data: {
-		employeeId: string;
-		effectiveFrom: Date;
-		baseSalary: number;
-		currency: string;
-		paymentFrequency: "monthly" | "bi_weekly" | "weekly";
-		components: {
+		firstName?: string;
+		lastName?: string;
+		email?: string;
+		phone?: string;
+		position?: string;
+		employmentType?: "full_time" | "part_time" | "contract";
+		bankAccountNumber?: string;
+		taxId?: string;
+		status?: "active" | "on_leave" | "terminated";
+		baseSalary?: number;
+		currency?: string;
+		paymentFrequency?: "monthly" | "bi_weekly" | "weekly";
+		salaryComponents?: Array<{
 			componentId: string;
-			amount?: number;
-			percentage?: number;
-			calculationBasis?: "base_salary" | "gross_salary";
-		}[];
-		createdBy?: string;
+			amount: number;
+			type: "earning" | "deduction";
+		}>;
 	},
 ) {
-	return await db.transaction(async (tx: TransactionDb) => {
-		// 1. Create Structure Header
-		const [structure] = await tx
-			.insert(salaryStructure)
-			.values({
-				organizationId,
-				employeeId: data.employeeId,
-				effectiveFrom: data.effectiveFrom,
-				baseSalary: data.baseSalary.toString(),
-				currency: data.currency,
-				paymentFrequency: data.paymentFrequency,
-				isActive: true,
-				createdBy: data.createdBy,
-			})
-			.returning();
+	// biome-ignore lint/suspicious/noExplicitAny: <>
+	const updateData: any = { ...data };
 
-		// 2. Create Components
-		if (data.components.length > 0) {
-			await tx.insert(employeeSalaryComponent).values(
-				data.components.map((comp) => ({
-					salaryStructureId: structure.id,
-					salaryComponentId: comp.componentId,
-					amount: comp.amount?.toString(),
-					percentage: comp.percentage?.toString(),
-					calculationBasis: comp.calculationBasis,
-					createdBy: data.createdBy,
-				})),
-			);
-		}
+	// Convert baseSalary number to string for database
+	if (data.baseSalary !== undefined) {
+		updateData.baseSalary = data.baseSalary.toString();
+	}
 
-		return structure;
+	const [updated] = await db
+		.update(employee)
+		.set(updateData)
+		.where(
+			and(
+				eq(employee.id, employeeId),
+				eq(employee.organizationId, organizationId),
+			),
+		)
+		.returning();
+
+	if (!updated) {
+		throw new Error("Employee not found");
+	}
+
+	return updated;
+}
+
+export async function getEmployees(organizationId: string) {
+	return await db.query.employee.findMany({
+		where: eq(employee.organizationId, organizationId),
 	});
 }
 
@@ -122,7 +122,7 @@ export async function deletePayrollRun(organizationId: string, runId: string) {
 			and(
 				eq(payrollRun.id, runId),
 				eq(payrollRun.organizationId, organizationId),
-				inArray(payrollRun.status, ["draft", "calculated"]),
+				eq(payrollRun.status, "draft"),
 			),
 		)
 		.returning();
@@ -137,26 +137,12 @@ export async function deletePayrollRun(organizationId: string, runId: string) {
 }
 
 export async function calculatePayroll(organizationId: string, runId: string) {
-	// 1. Fetch active employees
+	// 1. Fetch active employees with their salary info
 	const employees = await db.query.employee.findMany({
 		where: and(
 			eq(employee.organizationId, organizationId),
 			eq(employee.status, "active"),
 		),
-		with: {
-			salaryStructures: {
-				where: eq(salaryStructure.isActive, true),
-				with: {
-					components: {
-						with: {
-							component: true,
-						},
-					},
-				},
-				limit: 1,
-				orderBy: [desc(salaryStructure.effectiveFrom)],
-			},
-		},
 	});
 
 	return await db.transaction(async (tx: TransactionDb) => {
@@ -165,39 +151,43 @@ export async function calculatePayroll(organizationId: string, runId: string) {
 		let totalNet = 0;
 
 		for (const emp of employees) {
-			const structure = emp.salaryStructures[0];
-			if (!structure) continue;
+			if (!emp.baseSalary) continue; // Skip employees without salary configured
 
-			const baseSalary = Number(structure.baseSalary);
+			const baseSalary = Number(emp.baseSalary);
 			let grossSalary = baseSalary;
 			let deductions = 0;
-			const entryDetails = [];
+			const components: Array<{
+				componentId: string;
+				name: string;
+				type: "earning" | "deduction";
+				amount: number;
+			}> = [];
 
-			// Process salary components
-			for (const compLink of structure.components) {
-				let amount = 0;
-				if (compLink.amount) {
-					amount = Number(compLink.amount);
-				} else if (compLink.percentage) {
-					const basis =
-						compLink.calculationBasis === "gross_salary"
-							? grossSalary
-							: baseSalary;
-					amount = basis * (Number(compLink.percentage) / 100);
+			// Process salary components from JSONB
+			if (emp.salaryComponents && Array.isArray(emp.salaryComponents)) {
+				for (const comp of emp.salaryComponents) {
+					const amount = comp.amount || 0;
+
+					// Fetch component details for name
+					const componentDetails = await tx.query.salaryComponent.findFirst({
+						where: eq(salaryComponent.id, comp.componentId),
+					});
+
+					if (componentDetails) {
+						components.push({
+							componentId: comp.componentId,
+							name: componentDetails.name,
+							type: comp.type,
+							amount,
+						});
+
+						if (comp.type === "earning") {
+							grossSalary += amount;
+						} else if (comp.type === "deduction") {
+							deductions += amount;
+						}
+					}
 				}
-
-				if (compLink.component.componentType === "earning") {
-					grossSalary += amount;
-				} else if (compLink.component.componentType === "deduction") {
-					deductions += amount;
-				}
-
-				entryDetails.push({
-					salaryComponentId: compLink.salaryComponentId,
-					amount: amount.toString(),
-					isTaxable: compLink.component.isTaxable,
-					accountId: compLink.component.accountId,
-				});
 			}
 
 			// Process salary advance deductions
@@ -210,42 +200,37 @@ export async function calculatePayroll(organizationId: string, runId: string) {
 			});
 
 			for (const advance of activeAdvances) {
+				// Calculate monthly deduction (outstanding balance divided by remaining months)
 				const deductionAmount = Math.min(
-					Number(advance.deductionPerPayroll || 0),
+					Number(advance.outstandingBalance) / 3, // Simple: divide by 3 months
 					Number(advance.outstandingBalance),
 				);
 
 				if (deductionAmount > 0) {
 					deductions += deductionAmount;
+					components.push({
+						componentId: advance.id,
+						name: "Salary Advance Repayment",
+						type: "deduction",
+						amount: deductionAmount,
+					});
 				}
 			}
 
 			const netSalary = grossSalary - deductions;
 
-			// Create Payroll Entry
-			const [entry] = await tx
-				.insert(payrollEntry)
-				.values({
-					payrollRunId: runId,
-					employeeId: emp.id,
-					baseSalary: baseSalary.toString(),
-					grossSalary: grossSalary.toString(),
-					totalDeductions: deductions.toString(),
-					netSalary: netSalary.toString(),
-					paymentMethod: "bank_transfer",
-					status: "pending",
-				})
-				.returning();
-
-			// Save details
-			if (entryDetails.length > 0) {
-				await tx.insert(payrollEntryDetail).values(
-					entryDetails.map((detail) => ({
-						payrollEntryId: entry.id,
-						...detail,
-					})),
-				);
-			}
+			// Create Payroll Entry with components stored in JSONB
+			await tx.insert(payrollEntry).values({
+				payrollRunId: runId,
+				employeeId: emp.id,
+				baseSalary: baseSalary.toString(),
+				grossSalary: grossSalary.toString(),
+				totalDeductions: deductions.toString(),
+				netSalary: netSalary.toString(),
+				components, // Store as JSONB
+				paymentMethod: "bank_transfer",
+				status: "pending",
+			});
 
 			totalGross += grossSalary;
 			totalDeductions += deductions;
@@ -259,7 +244,7 @@ export async function calculatePayroll(organizationId: string, runId: string) {
 				totalGross: totalGross.toString(),
 				totalDeductions: totalDeductions.toString(),
 				totalNet: totalNet.toString(),
-				status: "calculated",
+				status: "approved", // Move directly to approved after calculation
 			})
 			.where(eq(payrollRun.id, runId));
 	});
@@ -293,8 +278,9 @@ export async function approvePayrollRun(runId: string, userId: string) {
 			});
 
 			for (const advance of activeAdvances) {
+				// Calculate monthly deduction
 				const deductionAmount = Math.min(
-					Number(advance.deductionPerPayroll || 0),
+					Number(advance.outstandingBalance) / 3,
 					Number(advance.outstandingBalance),
 				);
 
@@ -302,15 +288,7 @@ export async function approvePayrollRun(runId: string, userId: string) {
 					const newBalance =
 						Number(advance.outstandingBalance) - deductionAmount;
 
-					// Create repayment record
-					await tx.insert(salaryAdvanceRepayment).values({
-						salaryAdvanceId: advance.id,
-						payrollRunId: runId,
-						repaymentAmount: deductionAmount.toString(),
-						balanceAfter: newBalance.toString(),
-					});
-
-					// Update advance balance
+					// Update advance balance (no separate repayment table)
 					await tx
 						.update(salaryAdvance)
 						.set({
@@ -337,21 +315,16 @@ export async function requestSalaryAdvance(
 	data: {
 		employeeId: string;
 		amount: number;
-		installments: number;
 		notes?: string;
 		createdBy?: string;
 	},
 ) {
-	const deductionPerPayroll = data.amount / data.installments;
-
 	const [advance] = await db
 		.insert(salaryAdvance)
 		.values({
 			organizationId,
 			employeeId: data.employeeId,
 			requestedAmount: data.amount.toString(),
-			numberOfInstallments: data.installments,
-			deductionPerPayroll: deductionPerPayroll.toString(),
 			status: "pending",
 			notes: data.notes,
 			createdBy: data.createdBy,
@@ -374,14 +347,12 @@ export async function approveSalaryAdvance(
 		if (!advance) throw new Error("Advance request not found");
 
 		const amount = approvedAmount || Number(advance.requestedAmount);
-		const deduction = amount / advance.numberOfInstallments;
 
 		const [updatedAdvance] = await tx
 			.update(salaryAdvance)
 			.set({
 				status: "approved",
 				approvedAmount: amount.toString(),
-				deductionPerPayroll: deduction.toString(),
 				outstandingBalance: amount.toString(),
 				approvedBy: userId,
 				approvedAt: new Date(),
@@ -408,18 +379,74 @@ export async function disburseSalaryAdvance(advanceId: string) {
 	// Cr: Bank (Asset)
 }
 
-export async function getEmployees(organizationId: string) {
-	return await db.query.employee.findMany({
-		where: eq(employee.organizationId, organizationId),
+export async function getSalaryAdvances(
+	organizationId: string,
+	employeeId?: string,
+) {
+	const whereClause = employeeId
+		? and(
+				eq(salaryAdvance.organizationId, organizationId),
+				eq(salaryAdvance.employeeId, employeeId),
+			)
+		: eq(salaryAdvance.organizationId, organizationId);
+
+	return await db.query.salaryAdvance.findMany({
+		where: whereClause,
 		with: {
-			salaryStructures: {
-				where: eq(salaryStructure.isActive, true),
-				limit: 1,
-				orderBy: [desc(salaryStructure.effectiveFrom)],
+			employee: {
+				columns: {
+					firstName: true,
+					lastName: true,
+					employeeCode: true,
+				},
 			},
 		},
+		orderBy: [desc(salaryAdvance.createdAt)],
 	});
 }
+
+/**
+ * ---------------------------------------------------------------------------
+ * SALARY COMPONENT OPERATIONS
+ * ---------------------------------------------------------------------------
+ */
+
+export async function createSalaryComponent(
+	organizationId: string,
+	data: {
+		name: string;
+		componentType: "earning" | "deduction";
+		accountId: string;
+		isTaxable: boolean;
+		createdBy?: string;
+	},
+) {
+	const [component] = await db
+		.insert(salaryComponent)
+		.values({
+			organizationId,
+			...data,
+		})
+		.returning();
+
+	return component;
+}
+
+export async function getSalaryComponents(organizationId: string) {
+	return await db.query.salaryComponent.findMany({
+		where: and(
+			eq(salaryComponent.organizationId, organizationId),
+			eq(salaryComponent.isActive, true),
+		),
+		orderBy: [salaryComponent.componentType, salaryComponent.name],
+	});
+}
+
+/**
+ * ---------------------------------------------------------------------------
+ * PAYROLL QUERY OPERATIONS
+ * ---------------------------------------------------------------------------
+ */
 
 export async function getPayrollRuns(organizationId: string) {
 	return await db.query.payrollRun.findMany({
@@ -456,141 +483,11 @@ export async function getPayrollRunDetails(
 						employeeCode: true,
 					},
 				},
-				details: {
-					with: {
-						component: {
-							columns: {
-								name: true,
-								componentType: true,
-							},
-						},
-					},
-				},
 			},
 		});
 	}
 
 	return { ...run, entries };
-}
-
-export async function updateEmployee(
-	organizationId: string,
-	employeeId: string,
-	data: {
-		firstName?: string;
-		lastName?: string;
-		email?: string;
-		phone?: string;
-		position?: string;
-		employmentType?: "full_time" | "part_time" | "contract";
-		bankAccountNumber?: string;
-		taxId?: string;
-		status?: "active" | "on_leave" | "terminated";
-	},
-) {
-	const [updated] = await db
-		.update(employee)
-		.set(data)
-		.where(
-			and(
-				eq(employee.id, employeeId),
-				eq(employee.organizationId, organizationId),
-			),
-		)
-		.returning();
-
-	if (!updated) {
-		throw new Error("Employee not found");
-	}
-
-	return updated;
-}
-
-export async function createSalaryComponent(
-	organizationId: string,
-	data: {
-		name: string;
-		componentType: "earning" | "deduction" | "employer_contribution";
-		calculationType: "fixed" | "percentage" | "formula";
-		accountId: string;
-		isTaxable: boolean;
-		createdBy?: string;
-	},
-) {
-	const [component] = await db
-		.insert(salaryComponent)
-		.values({
-			organizationId,
-			...data,
-		})
-		.returning();
-
-	return component;
-}
-
-export async function getSalaryComponents(organizationId: string) {
-	return await db.query.salaryComponent.findMany({
-		where: and(
-			eq(salaryComponent.organizationId, organizationId),
-			eq(salaryComponent.isActive, true),
-		),
-		orderBy: [salaryComponent.componentType, salaryComponent.name],
-	});
-}
-
-export async function getSalaryAdvances(
-	organizationId: string,
-	employeeId?: string,
-) {
-	const whereClause = employeeId
-		? and(
-				eq(salaryAdvance.organizationId, organizationId),
-				eq(salaryAdvance.employeeId, employeeId),
-			)
-		: eq(salaryAdvance.organizationId, organizationId);
-
-	return await db.query.salaryAdvance.findMany({
-		where: whereClause,
-		with: {
-			employee: {
-				columns: {
-					firstName: true,
-					lastName: true,
-					employeeCode: true,
-				},
-			},
-		},
-		orderBy: [desc(salaryAdvance.createdAt)],
-	});
-}
-
-export async function getSalaryStructures(organizationId: string) {
-	return await db.query.salaryStructure.findMany({
-		where: and(
-			eq(salaryStructure.organizationId, organizationId),
-			eq(salaryStructure.isActive, true),
-		),
-		with: {
-			employee: {
-				columns: {
-					firstName: true,
-					lastName: true,
-					employeeCode: true,
-				},
-			},
-			components: {
-				with: {
-					component: {
-						columns: {
-							name: true,
-							componentType: true,
-						},
-					},
-				},
-			},
-		},
-		orderBy: [desc(salaryStructure.effectiveFrom)],
-	});
 }
 
 export async function processPayrollPayments(entryIds: string[]) {
@@ -633,7 +530,6 @@ export async function processPayrollPayments(entryIds: string[]) {
 					.update(payrollRun)
 					.set({
 						status: "paid",
-						postedAt: new Date(),
 					})
 					.where(eq(payrollRun.id, entry.payrollRunId));
 			}
