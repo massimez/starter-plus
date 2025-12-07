@@ -13,7 +13,6 @@ import { softAudit } from "../helpers/common";
 import { organization } from "../organization";
 import { user } from "../user";
 import { glAccount } from "./accounts";
-import { employee } from "./payroll";
 
 /**
  * ---------------------------------------------------------------------------
@@ -57,10 +56,9 @@ export const expense = pgTable(
 			.references(() => organization.id, { onDelete: "cascade" }),
 
 		// Who incurred the expense
-		employeeId: uuid("employee_id").references(() => employee.id, {
-			onDelete: "set null",
-		}),
-		userId: text("user_id").references(() => user.id, { onDelete: "set null" }),
+		userId: text("user_id")
+			.notNull()
+			.references(() => user.id, { onDelete: "restrict" }),
 
 		categoryId: uuid("category_id")
 			.notNull()
@@ -77,7 +75,7 @@ export const expense = pgTable(
 		status: varchar("status", { length: 20 })
 			.default("pending")
 			.notNull()
-			.$type<"pending" | "approved" | "rejected" | "paid">(),
+			.$type<"pending" | "approved" | "rejected" | "paid">(), // Application-level validation
 
 		// Approval
 		approvedBy: text("approved_by").references(() => user.id, {
@@ -90,7 +88,7 @@ export const expense = pgTable(
 	},
 	(table) => [
 		index("expense_org_idx").on(table.organizationId),
-		index("expense_employee_idx").on(table.employeeId),
+		index("expense_user_idx").on(table.userId),
 		index("expense_status_idx").on(table.status),
 		index("expense_date_idx").on(table.expenseDate),
 	],
@@ -119,10 +117,6 @@ export const expenseRelations = relations(expense, ({ one }) => ({
 	category: one(expenseCategory, {
 		fields: [expense.categoryId],
 		references: [expenseCategory.id],
-	}),
-	employee: one(employee, {
-		fields: [expense.employeeId],
-		references: [employee.id],
 	}),
 	user: one(user, {
 		fields: [expense.userId],

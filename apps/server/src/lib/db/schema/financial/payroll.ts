@@ -2,7 +2,6 @@ import { sql } from "drizzle-orm";
 import {
 	boolean,
 	index,
-	integer,
 	jsonb,
 	numeric,
 	pgTable,
@@ -23,8 +22,7 @@ import { glAccount } from "./accounts";
  */
 
 /**
- * Employees
- * Employee master data
+ * Employees - Simplified with embedded salary structure
  */
 export const employee = pgTable(
 	"employee",
@@ -45,21 +43,37 @@ export const employee = pgTable(
 		phone: varchar("phone", { length: 50 }),
 
 		// Employment details
-		departmentId: uuid("department_id"), // Future: link to department table
 		position: varchar("position", { length: 100 }),
 		hireDate: timestamp("hire_date", { withTimezone: false }).notNull(),
 		employmentType: varchar("employment_type", { length: 20 })
 			.notNull()
-			.$type<"full_time" | "part_time" | "contract">(),
+			.$type<"full_time" | "part_time" | "contract">(), // Application-level validation
+
+		// Salary information (embedded instead of separate table)
+		baseSalary: numeric("base_salary", { precision: 12, scale: 2 }),
+		currency: varchar("currency", { length: 3 }),
+		paymentFrequency: varchar("payment_frequency", { length: 20 }).$type<
+			"monthly" | "bi_weekly" | "weekly"
+		>(), // Application-level validation
+
+		// Salary components (allowances, deductions) stored as JSON
+		salaryComponents:
+			jsonb("salary_components").$type<
+				Array<{
+					componentId: string;
+					amount: number;
+					type: "earning" | "deduction";
+				}>
+			>(),
 
 		// Status
 		status: varchar("status", { length: 20 })
 			.default("active")
 			.notNull()
-			.$type<"active" | "on_leave" | "terminated">(),
+			.$type<"active" | "on_leave" | "terminated">(), // Application-level validation
 		terminationDate: timestamp("termination_date", { withTimezone: false }),
 
-		// Additional info
+		// Payment info
 		bankAccountNumber: varchar("bank_account_number", { length: 100 }),
 		taxId: varchar("tax_id", { length: 50 }),
 		metadata: jsonb("metadata"),
@@ -74,48 +88,7 @@ export const employee = pgTable(
 );
 
 /**
- * Salary Structures
- * Employee salary configuration with effective dates
- */
-export const salaryStructure = pgTable(
-	"salary_structure",
-	{
-		id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
-		organizationId: text("organization_id")
-			.notNull()
-			.references(() => organization.id, { onDelete: "cascade" }),
-		employeeId: uuid("employee_id")
-			.notNull()
-			.references(() => employee.id, { onDelete: "cascade" }),
-
-		effectiveFrom: timestamp("effective_from", {
-			withTimezone: false,
-		}).notNull(),
-		effectiveTo: timestamp("effective_to", { withTimezone: false }),
-
-		baseSalary: numeric("base_salary", { precision: 12, scale: 2 }).notNull(),
-		currency: varchar("currency", { length: 3 }).notNull(),
-		paymentFrequency: varchar("payment_frequency", { length: 20 })
-			.notNull()
-			.$type<"monthly" | "bi_weekly" | "weekly">(),
-
-		isActive: boolean("is_active").default(true).notNull(),
-
-		...softAudit,
-	},
-	(table) => [
-		index("salary_structure_org_idx").on(table.organizationId),
-		index("salary_structure_employee_idx").on(table.employeeId),
-		index("salary_structure_effective_idx").on(
-			table.effectiveFrom,
-			table.effectiveTo,
-		),
-	],
-);
-
-/**
- * Salary Components
- * Reusable salary component definitions (allowances, deductions, etc.)
+ * Salary Components - Reusable component definitions
  */
 export const salaryComponent = pgTable(
 	"salary_component",
@@ -128,10 +101,7 @@ export const salaryComponent = pgTable(
 		name: varchar("name", { length: 100 }).notNull(),
 		componentType: varchar("component_type", { length: 30 })
 			.notNull()
-			.$type<"earning" | "deduction" | "employer_contribution">(),
-		calculationType: varchar("calculation_type", { length: 20 })
-			.notNull()
-			.$type<"fixed" | "percentage" | "formula">(),
+			.$type<"earning" | "deduction">(), // Application-level validation
 
 		isTaxable: boolean("is_taxable").default(true).notNull(),
 		accountId: uuid("account_id")
@@ -149,41 +119,7 @@ export const salaryComponent = pgTable(
 );
 
 /**
- * Employee Salary Components
- * Links employees to salary components with amounts
- */
-export const employeeSalaryComponent = pgTable(
-	"employee_salary_component",
-	{
-		id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
-		salaryStructureId: uuid("salary_structure_id")
-			.notNull()
-			.references(() => salaryStructure.id, { onDelete: "cascade" }),
-		salaryComponentId: uuid("salary_component_id")
-			.notNull()
-			.references(() => salaryComponent.id, { onDelete: "restrict" }),
-
-		amount: numeric("amount", { precision: 12, scale: 2 }), // For fixed amounts
-		percentage: numeric("percentage", { precision: 5, scale: 2 }), // For percentage-based
-		calculationBasis: varchar("calculation_basis", { length: 20 }).$type<
-			"base_salary" | "gross_salary"
-		>(),
-
-		...softAudit,
-	},
-	(table) => [
-		index("employee_salary_component_structure_idx").on(
-			table.salaryStructureId,
-		),
-		index("employee_salary_component_component_idx").on(
-			table.salaryComponentId,
-		),
-	],
-);
-
-/**
- * Payroll Runs
- * Batch payroll processing records
+ * Payroll Runs - Simplified
  */
 export const payrollRun = pgTable(
 	"payroll_run",
@@ -204,7 +140,7 @@ export const payrollRun = pgTable(
 		status: varchar("status", { length: 20 })
 			.default("draft")
 			.notNull()
-			.$type<"draft" | "calculated" | "approved" | "paid" | "posted">(),
+			.$type<"draft" | "approved" | "paid">(), // Application-level validation
 
 		// Totals
 		totalGross: numeric("total_gross", { precision: 12, scale: 2 }).default(
@@ -215,17 +151,12 @@ export const payrollRun = pgTable(
 			scale: 2,
 		}).default("0"),
 		totalNet: numeric("total_net", { precision: 12, scale: 2 }).default("0"),
-		totalEmployerContributions: numeric("total_employer_contributions", {
-			precision: 12,
-			scale: 2,
-		}).default("0"),
 
 		// Approval tracking
 		approvedBy: text("approved_by").references(() => user.id, {
 			onDelete: "set null",
 		}),
 		approvedAt: timestamp("approved_at", { withTimezone: false }),
-		postedAt: timestamp("posted_at", { withTimezone: false }),
 
 		...softAudit,
 	},
@@ -240,8 +171,7 @@ export const payrollRun = pgTable(
 );
 
 /**
- * Payroll Entries
- * Individual employee payroll records within a payroll run
+ * Payroll Entries - Individual employee payroll records
  */
 export const payrollEntry = pgTable(
 	"payroll_entry",
@@ -261,20 +191,27 @@ export const payrollEntry = pgTable(
 			scale: 2,
 		}).default("0"),
 		netSalary: numeric("net_salary", { precision: 12, scale: 2 }).notNull(),
-		employerContributions: numeric("employer_contributions", {
-			precision: 12,
-			scale: 2,
-		}).default("0"),
+
+		// Component breakdown stored as JSON
+		components:
+			jsonb("components").$type<
+				Array<{
+					componentId: string;
+					name: string;
+					type: "earning" | "deduction";
+					amount: number;
+				}>
+			>(),
 
 		paymentMethod: varchar("payment_method", { length: 20 })
 			.notNull()
-			.$type<"bank_transfer" | "cash" | "check">(),
+			.$type<"bank_transfer" | "cash" | "check">(), // Application-level validation
 		bankAccountNumber: varchar("bank_account_number", { length: 100 }),
 
 		status: varchar("status", { length: 20 })
 			.default("pending")
 			.notNull()
-			.$type<"pending" | "paid">(),
+			.$type<"pending" | "paid">(), // Application-level validation
 
 		...softAudit,
 	},
@@ -285,36 +222,7 @@ export const payrollEntry = pgTable(
 );
 
 /**
- * Payroll Entry Details
- * Line-by-line breakdown of salary components for each payroll entry
- */
-export const payrollEntryDetail = pgTable(
-	"payroll_entry_detail",
-	{
-		id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
-		payrollEntryId: uuid("payroll_entry_id")
-			.notNull()
-			.references(() => payrollEntry.id, { onDelete: "cascade" }),
-		salaryComponentId: uuid("salary_component_id")
-			.notNull()
-			.references(() => salaryComponent.id, { onDelete: "restrict" }),
-
-		amount: numeric("amount", { precision: 12, scale: 2 }).notNull(),
-		isTaxable: boolean("is_taxable").default(true).notNull(),
-		accountId: uuid("account_id")
-			.notNull()
-			.references(() => glAccount.id, { onDelete: "restrict" }),
-
-		...softAudit,
-	},
-	(table) => [
-		index("payroll_entry_detail_entry_idx").on(table.payrollEntryId),
-		index("payroll_entry_detail_component_idx").on(table.salaryComponentId),
-	],
-);
-
-/**
- * Salary Advances
+ * Salary Advances - Simplified
  * Employee salary advance requests and tracking
  */
 export const salaryAdvance = pgTable(
@@ -337,15 +245,6 @@ export const salaryAdvance = pgTable(
 		}).notNull(),
 		approvedAmount: numeric("approved_amount", { precision: 12, scale: 2 }),
 
-		// Repayment terms
-		numberOfInstallments: integer("number_of_installments")
-			.default(1)
-			.notNull(),
-		deductionPerPayroll: numeric("deduction_per_payroll", {
-			precision: 12,
-			scale: 2,
-		}),
-
 		// Tracking
 		outstandingBalance: numeric("outstanding_balance", {
 			precision: 12,
@@ -355,7 +254,7 @@ export const salaryAdvance = pgTable(
 		status: varchar("status", { length: 20 })
 			.default("pending")
 			.notNull()
-			.$type<"pending" | "approved" | "rejected" | "active" | "fully_repaid">(),
+			.$type<"pending" | "approved" | "rejected" | "active" | "fully_repaid">(), // Application-level validation
 
 		// Approval/rejection
 		approvedBy: text("approved_by").references(() => user.id, {
@@ -379,37 +278,5 @@ export const salaryAdvance = pgTable(
 		index("salary_advance_org_idx").on(table.organizationId),
 		index("salary_advance_employee_idx").on(table.employeeId),
 		index("salary_advance_status_idx").on(table.status),
-	],
-);
-
-/**
- * Salary Advance Repayments
- * Tracks repayments of salary advances through payroll deductions
- */
-export const salaryAdvanceRepayment = pgTable(
-	"salary_advance_repayment",
-	{
-		id: uuid("id").default(sql`gen_random_uuid()`).primaryKey(),
-		salaryAdvanceId: uuid("salary_advance_id")
-			.notNull()
-			.references(() => salaryAdvance.id, { onDelete: "cascade" }),
-		payrollRunId: uuid("payroll_run_id")
-			.notNull()
-			.references(() => payrollRun.id, { onDelete: "restrict" }),
-
-		repaymentAmount: numeric("repayment_amount", {
-			precision: 12,
-			scale: 2,
-		}).notNull(),
-		balanceAfter: numeric("balance_after", {
-			precision: 12,
-			scale: 2,
-		}).notNull(),
-
-		...softAudit,
-	},
-	(table) => [
-		index("salary_advance_repayment_advance_idx").on(table.salaryAdvanceId),
-		index("salary_advance_repayment_payroll_idx").on(table.payrollRunId),
 	],
 );

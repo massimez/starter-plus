@@ -1,12 +1,10 @@
 export * from "./financial/accounts";
 export * from "./financial/banking";
 export * from "./financial/expenses";
+export * from "./financial/invoices";
 export * from "./financial/journal";
-export * from "./financial/payables";
 export * from "./financial/payout";
 export * from "./financial/payroll";
-export * from "./financial/receivables";
-export * from "./financial/tax";
 export type * from "./helpers/types";
 export * from "./organization";
 export * from "./relations/auth";

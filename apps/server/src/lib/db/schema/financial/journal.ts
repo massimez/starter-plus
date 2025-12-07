@@ -23,7 +23,6 @@ import { glAccount } from "./accounts";
 
 /**
  * Journal Entry Header
- * Represents a complete double-entry transaction
  */
 export const journalEntry = pgTable(
 	"journal_entry",
@@ -34,18 +33,18 @@ export const journalEntry = pgTable(
 			.references(() => organization.id, { onDelete: "cascade" }),
 
 		// Entry identification
-		entryNumber: varchar("entry_number", { length: 50 }).notNull(), // Auto-generated per tenant
+		entryNumber: varchar("entry_number", { length: 50 }).notNull(),
 		entryDate: timestamp("entry_date", { withTimezone: false }).notNull(),
 		postingDate: timestamp("posting_date", { withTimezone: false }),
 
 		// Entry classification
 		entryType: varchar("entry_type", { length: 50 })
 			.notNull()
-			.$type<"manual" | "automatic" | "adjustment" | "closing">(),
+			.$type<"manual" | "automatic" | "adjustment">(), // Application-level validation
 
 		// Source document reference (polymorphic)
 		referenceType: varchar("reference_type", { length: 50 }), // "invoice", "payment", "payroll", etc.
-		referenceId: uuid("reference_id"), // ID of the source document
+		referenceId: uuid("reference_id"),
 
 		description: text("description").notNull(),
 
@@ -53,26 +52,13 @@ export const journalEntry = pgTable(
 		status: varchar("status", { length: 20 })
 			.default("draft")
 			.notNull()
-			.$type<"draft" | "posted" | "reversed">(),
+			.$type<"draft" | "posted">(), // Application-level validation
 
 		// Approval tracking
 		approvedBy: text("approved_by").references(() => user.id, {
 			onDelete: "set null",
 		}),
 		approvedAt: timestamp("approved_at", { withTimezone: false }),
-
-		// Reversal tracking
-		reversedByEntryId: uuid("reversed_by_entry_id").references(
-			(): any => journalEntry.id,
-			{
-				onDelete: "set null",
-			},
-		),
-		reversedAt: timestamp("reversed_at", { withTimezone: false }),
-
-		// Fiscal period
-		fiscalYear: integer("fiscal_year"),
-		fiscalPeriod: integer("fiscal_period"), // 1-12 for monthly
 
 		...softAudit,
 	},
@@ -93,7 +79,6 @@ export const journalEntry = pgTable(
 
 /**
  * Journal Entry Lines
- * Individual debit/credit lines that make up a journal entry
  */
 export const journalEntryLine = pgTable(
 	"journal_entry_line",
@@ -115,12 +100,6 @@ export const journalEntryLine = pgTable(
 			.notNull(),
 
 		description: text("description"),
-
-		// Optional dimensional tracking (for future extension)
-		costCenterId: uuid("cost_center_id"), // Future: link to cost_center table
-		departmentId: uuid("department_id"), // Future: link to department table
-		projectId: uuid("project_id"), // Future: link to project table
-
 		lineNumber: integer("line_number").notNull(), // Order of lines in entry
 
 		...softAudit,
