@@ -1,23 +1,21 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
+import { use } from "react";
 import { PageDashboardHeader } from "@/app/[locale]/(landing)/_components/sections/page-dashboard-header";
+import { useRouter } from "@/i18n/navigation";
 import { hc } from "@/lib/api-client";
 import { ShippingForm } from "../_components/shipping-form";
 import { ShippingMethodZones } from "../_components/shipping-method-zones";
 import { useShippingMethod } from "../_components/use-shipping";
 
-interface PageProps {
-	params: {
-		locale: string;
-		id: string;
-	};
-}
-
 export default function EditShippingMethodPage({
-	params: { locale, id },
-}: PageProps) {
+	params,
+}: {
+	params: Promise<{ locale: string; id: string }>;
+}) {
+	const { id } = use(params);
+
 	const router = useRouter();
 	const queryClient = useQueryClient();
 	const { data: shippingMethod, isLoading } = useShippingMethod(id);
@@ -38,7 +36,7 @@ export default function EditShippingMethodPage({
 
 			queryClient.invalidateQueries({ queryKey: ["shipping-methods"] });
 			queryClient.invalidateQueries({ queryKey: ["shipping-method", id] });
-			router.push(`/${locale}/dashboard/store/shipping`);
+			router.push("/dashboard/store/shipping");
 		} catch (error) {
 			console.error("Failed to update shipping method:", error);
 		}

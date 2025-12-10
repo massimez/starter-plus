@@ -7,8 +7,24 @@ import {
 } from "@/lib/db/schema";
 
 // Shipping Method schemas
-export const insertShippingMethodSchema = createInsertSchema(shippingMethod);
-export const updateShippingMethodSchema = createSelectSchema(shippingMethod)
+export const insertShippingMethodSchema = createInsertSchema(shippingMethod, {
+	minOrderAmount: (schema) =>
+		schema.transform((val: unknown) => (val === "" ? null : val)),
+	maxOrderAmount: (schema) =>
+		schema.transform((val: unknown) => (val === "" ? null : val)),
+	freeShippingThreshold: (schema) =>
+		schema.transform((val: unknown) => (val === "" ? null : val)),
+}).omit({
+	organizationId: true,
+});
+export const updateShippingMethodSchema = createInsertSchema(shippingMethod, {
+	minOrderAmount: (schema) =>
+		schema.transform((val: unknown) => (val === "" ? null : val)),
+	maxOrderAmount: (schema) =>
+		schema.transform((val: unknown) => (val === "" ? null : val)),
+	freeShippingThreshold: (schema) =>
+		schema.transform((val: unknown) => (val === "" ? null : val)),
+})
 	.omit(idAndAuditFields)
 	.partial();
 

@@ -32,7 +32,7 @@ export const useShippingMethods = () => {
 			if ("error" in json && json.error) {
 				throw new Error(json.error.message);
 			}
-			return json.data.data as ShippingMethod[];
+			return json.data.data;
 		},
 	});
 };
@@ -48,7 +48,7 @@ export const useShippingMethod = (id: string) => {
 			if ("error" in json && json.error) {
 				throw new Error(json.error.message);
 			}
-			return json.data as ShippingMethod;
+			return json.data;
 		},
 		enabled: !!id,
 	});
