@@ -32,6 +32,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import { useFinancialAccounting } from "@/app/[locale]/dashboard/financial/_hooks/use-financial-accounting";
 import { useFinancialPayroll } from "@/app/[locale]/dashboard/financial/_hooks/use-financial-payroll";
 
 const formSchema = z.object({
@@ -45,6 +46,9 @@ const formSchema = z.object({
 export function CreateSalaryComponentSheet() {
 	const [open, setOpen] = useState(false);
 	const { useCreateSalaryComponent } = useFinancialPayroll();
+	const { useAccounts } = useFinancialAccounting();
+	const { data: accounts } = useAccounts();
+
 	// Get hook unconditionally to satisfy rules of hooks
 	let createComponent = useCreateSalaryComponent();
 
@@ -59,10 +63,35 @@ export function CreateSalaryComponentSheet() {
 			name: "",
 			componentType: "earning",
 			calculationType: "fixed",
-			accountId: "", // TODO: This should come from an accounts selector
+			accountId: "",
 			isTaxable: true,
 		},
 	});
+
+	// Group accounts by type for better organization
+	const groupedAccounts = accounts?.reduce(
+		(
+			groups: Record<
+				string,
+				Array<{
+					id: string;
+					code: string;
+					name: string;
+					category?: string | null;
+					accountType: string;
+				}>
+			>,
+			account,
+		) => {
+			const type = account.accountType || "Other";
+			if (!groups[type]) {
+				groups[type] = [];
+			}
+			groups[type].push(account);
+			return groups;
+		},
+		{},
+	);
 
 	function onSubmit(values: z.infer<typeof formSchema>) {
 		createComponent.mutate(values, {
@@ -169,12 +198,34 @@ export function CreateSalaryComponentSheet() {
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel>GL Account</FormLabel>
-									<FormControl>
-										<Input
-											placeholder="Select GL Account (TODO: Make this a selector)"
-											{...field}
-										/>
-									</FormControl>
+									<Select
+										onValueChange={field.onChange}
+										defaultValue={field.value}
+									>
+										<FormControl>
+											<SelectTrigger>
+												<SelectValue placeholder="Select GL Account" />
+											</SelectTrigger>
+										</FormControl>
+										<SelectContent>
+											{groupedAccounts &&
+												Object.entries(groupedAccounts).map(([type, accts]) => (
+													<div key={type}>
+														<div className="px-2 py-1.5 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+															{type.replace("_", " ")}
+														</div>
+														{accts.map((acc) => (
+															<SelectItem key={acc.id} value={acc.id}>
+																<span className="font-mono text-muted-foreground">
+																	{acc.code}
+																</span>{" "}
+																{acc.name}
+															</SelectItem>
+														))}
+													</div>
+												))}
+										</SelectContent>
+									</Select>
 									<FormMessage />
 								</FormItem>
 							)}
