@@ -1,6 +1,6 @@
 "use client";
 
-import { CategorySidebar } from "@/app/[locale]/category/_components/category-sidebar";
+import { CategorySidebar } from "@/app/[locale]/(store)/category/_components/category-sidebar";
 import { usePathname } from "@/i18n/routing";
 import { useCollections } from "@/lib/hooks/use-storefront";
 import { cn } from "@/lib/utils";
