@@ -15,18 +15,19 @@ interface CartContentProps {
 
 export function CartContent({ onCartClose }: CartContentProps) {
 	const t = useTranslations("Cart");
-	const { items, clearCart } = useCartStore();
+	const {
+		items,
+		clearCart,
+		subtotal: getSubtotal,
+		total: getTotal,
+	} = useCartStore();
 	const { data: session } = useSession();
 
 	const isEmpty = items.length === 0;
 
-	// Calculate totals
-	const subtotal = items.reduce(
-		(total, item) => total + item.price * item.quantity,
-		0,
-	);
-	const taxes = subtotal * 0.08; // 8% tax rate (or optional)
-	const total = subtotal + taxes;
+	const subtotal = getSubtotal();
+	const total = getTotal();
+	const taxes = 0; // Taxes handled at checkout
 
 	const _handleClearCart = () => {
 		clearCart();

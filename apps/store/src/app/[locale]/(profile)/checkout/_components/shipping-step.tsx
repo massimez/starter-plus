@@ -184,25 +184,6 @@ export function ShippingStep({
 							</label>
 						</div>
 					)}
-
-				<FormField
-					control={form.control}
-					name="useDifferentBilling"
-					render={({ field }) => (
-						<FormItem className="flex items-center space-x-3 rounded-lg border-2 border-dashed p-4 pt-4">
-							<FormControl>
-								<Checkbox
-									checked={field.value}
-									onCheckedChange={field.onChange}
-									className="h-5 w-5"
-								/>
-							</FormControl>
-							<FormLabel className="cursor-pointer font-medium text-sm">
-								Use different billing address
-							</FormLabel>
-						</FormItem>
-					)}
-				/>
 			</div>
 		</div>
 	);
