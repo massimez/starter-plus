@@ -1,5 +1,6 @@
 import { CardTitle } from "@workspace/ui/components/card";
 import { CreditCard, Truck } from "lucide-react";
+import { useFormatPrice } from "@/lib/hooks/use-format-price";
 import type { CheckoutFormValues } from "./validation";
 
 interface ReviewStepProps {
@@ -8,6 +9,7 @@ interface ReviewStepProps {
 }
 
 export function ReviewStep({ formValues, total }: ReviewStepProps) {
+	const { formatPrice } = useFormatPrice();
 	return (
 		<div className="">
 			<CardTitle className="text-xl">Order Review</CardTitle>
@@ -62,7 +64,7 @@ export function ReviewStep({ formValues, total }: ReviewStepProps) {
 				<div className="rounded-xl border-2 bg-primary/5 p-6">
 					<div className="flex items-center justify-between font-bold text-xl">
 						<span>Total</span>
-						<span className="text-primary">${total.toFixed(2)}</span>
+						<span className="text-primary">{formatPrice(total)}</span>
 					</div>
 				</div>
 			</div>

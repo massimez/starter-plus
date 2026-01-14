@@ -16,7 +16,6 @@ export function NavigationButtons({
 	steps,
 	isSubmitting,
 	itemCount,
-	total,
 	onNext,
 	onBack,
 }: NavigationButtonsProps) {
@@ -58,7 +57,7 @@ export function NavigationButtons({
 							Processing Order...
 						</span>
 					) : (
-						`Place Order • $${total.toFixed(2)}`
+						"Place Order"
 					)}
 				</Button>
 			)}

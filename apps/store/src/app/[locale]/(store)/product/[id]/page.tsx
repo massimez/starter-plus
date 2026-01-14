@@ -40,6 +40,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { use, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { FrequentlyBoughtTogether } from "@/components/features";
+import { useFormatPrice } from "@/lib/hooks/use-format-price";
 import {
 	useDefaultLocation,
 	useOrganization,
@@ -56,6 +57,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 	const t = useTranslations("Product");
 	const locale = useLocale();
 	const { addItem } = useCartStore();
+	const { formatPrice } = useFormatPrice();
 	const { id } = use(params);
 	const [selectedVariantId, setSelectedVariantId] = useState<string>("");
 	const [quantity, setQuantity] = useState(1);
@@ -330,19 +332,19 @@ export default function ProductPage({ params }: ProductPageProps) {
 					{/* Price */}
 					<div className="flex items-baseline gap-3">
 						<span className="font-bold text-3xl text-foreground md:text-4xl">
-							{productData.price.toFixed(2)}
+							{formatPrice(productData.price)}
 						</span>
 						{productData.isOnSale && productData.compareAtPrice && (
 							<>
 								<span className="text-muted-foreground text-xl line-through decoration-red-500/50">
-									${productData.compareAtPrice.toFixed(2)}
+									{formatPrice(productData.compareAtPrice)}
 								</span>
 								<Badge
 									variant="outline"
 									className="border-green-500 bg-green-50 text-green-600"
 								>
-									Save $
-									{(productData.compareAtPrice - productData.price).toFixed(2)}
+									Save{" "}
+									{formatPrice(productData.compareAtPrice - productData.price)}
 								</Badge>
 							</>
 						)}
@@ -548,7 +550,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 					<div className="hidden flex-col sm:flex">
 						<span className="text-muted-foreground text-xs">Total</span>
 						<span className="font-bold text-xl">
-							${(productData.price * quantity).toFixed(2)}
+							{formatPrice(productData.price * quantity)}
 						</span>
 					</div>
 

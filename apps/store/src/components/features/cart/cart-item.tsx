@@ -6,6 +6,7 @@ import { X } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { useFormatPrice } from "@/lib/hooks/use-format-price";
 import { useCartStore } from "@/store/use-cart-store";
 
 interface CartItem {
@@ -26,6 +27,7 @@ interface CartItemProps {
 export function CartItem({ item }: CartItemProps) {
 	const t = useTranslations("Cart");
 	const { updateQuantity, removeItem } = useCartStore();
+	const { formatPrice } = useFormatPrice();
 	const [quantity, setQuantity] = useState(item.quantity);
 
 	const handleQuantityChange = (newQuantity: number) => {
@@ -90,10 +92,10 @@ export function CartItem({ item }: CartItemProps) {
 
 								<div className="mt-3 flex items-center justify-between">
 									<p className="font-semibold text-sm">
-										${totalPrice.toFixed(2)}
+										{formatPrice(totalPrice)}
 									</p>
 									<p className="text-[9px] text-muted-foreground">
-										${item.price.toFixed(2)} each
+										{formatPrice(item.price)} each
 									</p>
 								</div>
 							</div>

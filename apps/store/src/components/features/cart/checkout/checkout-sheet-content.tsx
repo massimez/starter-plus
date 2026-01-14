@@ -6,6 +6,7 @@ import { CheckoutForm } from "@/components/features/cart/checkout/checkout-form"
 import { useRouter } from "@/i18n/routing";
 import { useSession } from "@/lib/auth-client";
 import { useDefaultLocation } from "@/lib/hooks/use-storefront";
+import { useStoreSettings } from "@/store/use-settings-store";
 
 interface CheckoutSheetContentProps {
 	onBack: () => void;
@@ -19,6 +20,7 @@ export function CheckoutSheetContent({
 	const t = useTranslations("Checkout");
 	const { data: session, isPending } = useSession();
 	const router = useRouter();
+	const { currency } = useStoreSettings();
 
 	// Get organization ID from environment
 	const organizationId = process.env.NEXT_PUBLIC_ORGANIZATION_ID || "";
@@ -88,7 +90,7 @@ export function CheckoutSheetContent({
 				<CheckoutForm
 					organizationId={organizationId}
 					locationId={defaultLocation.id}
-					currency="USD"
+					currency={currency}
 					onClose={onClose}
 					onBack={onBack}
 				/>

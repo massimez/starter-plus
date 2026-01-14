@@ -21,6 +21,7 @@ import {
 import Image from "next/image";
 import { toast } from "sonner";
 import { useSession } from "@/lib/auth-client";
+import { useFormatPrice } from "@/lib/hooks/use-format-price";
 import { useOrder, useOrganization } from "@/lib/hooks/use-storefront";
 import { useCartStore } from "@/store/use-cart-store";
 
@@ -92,6 +93,7 @@ export function OrderStatusSheet({
 	const organizationId = org?.id;
 	const userId = session?.user?.id;
 	const { addItem } = useCartStore();
+	const { formatPrice } = useFormatPrice();
 
 	const { data: orderDetails, isLoading } = useOrder(
 		{
@@ -259,10 +261,7 @@ export function OrderStatusSheet({
 												</div>
 												<div className="text-right">
 													<p className="font-semibold text-base">
-														{new Intl.NumberFormat("en-US", {
-															style: "currency",
-															currency: orderDetails.currency || "USD",
-														}).format(Number(item.unitPrice))}
+														{formatPrice(Number(item.unitPrice))}
 													</p>
 												</div>
 											</div>
@@ -275,40 +274,27 @@ export function OrderStatusSheet({
 									<div className="flex justify-between text-sm">
 										<span className="text-muted-foreground">Subtotal</span>
 										<span className="font-medium">
-											{new Intl.NumberFormat("en-US", {
-												style: "currency",
-												currency: orderDetails.currency || "USD",
-											}).format(Number(orderDetails.subtotal || 0))}
+											{formatPrice(Number(orderDetails.subtotal || 0))}
 										</span>
 									</div>
 									{Number(orderDetails.discountAmount || 0) > 0 && (
 										<div className="flex justify-between text-sm">
 											<span className="text-muted-foreground">Discount</span>
 											<span className="font-medium text-green-600">
-												-
-												{new Intl.NumberFormat("en-US", {
-													style: "currency",
-													currency: orderDetails.currency || "USD",
-												}).format(Number(orderDetails.discountAmount || 0))}
+												-{formatPrice(Number(orderDetails.discountAmount || 0))}
 											</span>
 										</div>
 									)}
 									<div className="flex justify-between text-sm">
 										<span className="text-muted-foreground">Shipping</span>
 										<span className="font-medium">
-											{new Intl.NumberFormat("en-US", {
-												style: "currency",
-												currency: orderDetails.currency || "USD",
-											}).format(Number(orderDetails.shippingAmount || 0))}
+											{formatPrice(Number(orderDetails.shippingAmount || 0))}
 										</span>
 									</div>
 									<div className="flex justify-between text-sm">
 										<span className="text-muted-foreground">Tax</span>
 										<span className="font-medium">
-											{new Intl.NumberFormat("en-US", {
-												style: "currency",
-												currency: orderDetails.currency || "USD",
-											}).format(Number(orderDetails.taxAmount || 0))}
+											{formatPrice(Number(orderDetails.taxAmount || 0))}
 										</span>
 									</div>
 
@@ -317,10 +303,7 @@ export function OrderStatusSheet({
 									<div className="flex items-baseline justify-between pt-1">
 										<span className="font-semibold text-base">Total</span>
 										<span className="font-bold text-xl tracking-tight">
-											{new Intl.NumberFormat("en-US", {
-												style: "currency",
-												currency: orderDetails.currency || "USD",
-											}).format(Number(orderDetails.totalAmount))}
+											{formatPrice(Number(orderDetails.totalAmount))}
 										</span>
 									</div>
 								</div>

@@ -8,6 +8,7 @@ import Image from "next/image";
 import { toast } from "sonner";
 import { Link } from "@/i18n/routing";
 import { useDefaultLocationId } from "@/lib/hooks/use-default-location";
+import { useFormatPrice } from "@/lib/hooks/use-format-price";
 import { useCartStore } from "@/store/use-cart-store";
 
 export interface Product {
@@ -33,6 +34,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
 	const { items, addItem, removeItem, updateQuantity } = useCartStore();
+	const { formatPrice } = useFormatPrice();
 	const { locationId } = useDefaultLocationId();
 
 	// Find the current quantity of this item in the cart
@@ -168,7 +170,7 @@ export function ProductCard({ product }: ProductCardProps) {
 							)}
 							<button onClick={handleAddToCart}>
 								<span className="pt-0.5 font-bold text-foreground text-sm leading-none">
-									{product.price.toFixed(0)} ₽
+									{formatPrice(product.price)}
 								</span>
 							</button>
 

@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from "@workspace/ui/components/card";
 import { useTranslations } from "next-intl";
+import { useFormatPrice } from "@/lib/hooks/use-format-price";
 
 interface CartSummaryProps {
 	subtotal?: number;
@@ -11,6 +12,7 @@ interface CartSummaryProps {
 
 export function CartSummary({ total }: CartSummaryProps) {
 	const t = useTranslations("Cart");
+	const { formatPrice } = useFormatPrice();
 
 	return (
 		<Card className="shadow-none">
@@ -36,7 +38,7 @@ export function CartSummary({ total }: CartSummaryProps) {
 				<div className="flex items-center justify-between font-semibold text-base">
 					<span>{t("total")}</span>
 					<span className="font-bold text-lg text-primary">
-						${total.toFixed(2)}
+						{formatPrice(total)}
 					</span>
 				</div>
 			</CardContent>
