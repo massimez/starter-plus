@@ -139,6 +139,7 @@ export function ProductCollectionList({
 		collection?: ProductCollection;
 	}>({ isOpen: false });
 	const [searchQuery, setSearchQuery] = useState("");
+	const [selectedParentId, setSelectedParentId] = useState<string>("all");
 
 	const {
 		data: collectionsData,
@@ -153,25 +154,39 @@ export function ProductCollectionList({
 
 	const closeModal = () => setModalState({ isOpen: false });
 
-	// Filter collections based on search query
+	// Filter collections based on search query and parent
 	const filteredCollections = useMemo(() => {
 		if (!collectionsData?.flat) return [];
-		if (!searchQuery) return collectionsData.flat;
+		let result = collectionsData.flat;
 
-		const query = searchQuery.toLowerCase();
-		return collectionsData.flat.filter((collection) => {
-			const name = getTranslation(collection, selectedLanguage, "name");
-			const description = getTranslation(
-				collection,
-				selectedLanguage,
-				"description",
-			);
-			return (
-				name.toLowerCase().includes(query) ||
-				description.toLowerCase().includes(query)
-			);
-		});
-	}, [collectionsData?.flat, searchQuery, selectedLanguage]);
+		// Filter by parent
+		if (selectedParentId !== "all") {
+			if (selectedParentId === "root") {
+				result = result.filter((c) => !c.parentId);
+			} else {
+				result = result.filter((c) => c.parentId === selectedParentId);
+			}
+		}
+
+		// Filter by search query
+		if (searchQuery) {
+			const query = searchQuery.toLowerCase();
+			result = result.filter((collection) => {
+				const name = getTranslation(collection, selectedLanguage, "name");
+				const description = getTranslation(
+					collection,
+					selectedLanguage,
+					"description",
+				);
+				return (
+					name.toLowerCase().includes(query) ||
+					description.toLowerCase().includes(query)
+				);
+			});
+		}
+
+		return result;
+	}, [collectionsData?.flat, searchQuery, selectedLanguage, selectedParentId]);
 
 	const handleToggleActive = async (
 		collectionId: string,
@@ -230,6 +245,24 @@ export function ProductCollectionList({
 							))}
 						</SelectContent>
 					</Select>
+
+					<Select value={selectedParentId} onValueChange={setSelectedParentId}>
+						<SelectTrigger className="w-[200px]">
+							<SelectValue placeholder="Filter by parent" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="all">All Collections</SelectItem>
+							<SelectItem value="root">Top Level Only</SelectItem>
+							{collectionsData?.flat
+								?.filter((c) => !c.parentId)
+								.map((collection) => (
+									<SelectItem key={collection.id} value={collection.id}>
+										{getTranslation(collection, selectedLanguage, "name")}
+									</SelectItem>
+								))}
+						</SelectContent>
+					</Select>
+
 					{collectionsData?.flat && (
 						<Badge variant="outline" className="ml-2">
 							{filteredCollections.length} collection
