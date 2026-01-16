@@ -99,14 +99,17 @@ function applyPagination<T extends PgTable>(
 
 	let result = query.limit(limit).offset(offset);
 
+	const columns = getTableColumns(table);
+
 	if (orderBy) {
-		const columns = getTableColumns(table);
 		const column = columns[orderBy as keyof typeof columns];
 
 		if (column) {
 			const sortOrder = direction === "desc" ? desc(column) : asc(column);
 			result = result.orderBy(sortOrder);
 		}
+	} else if ("createdAt" in columns) {
+		result = result.orderBy(desc(columns.createdAt as AnyColumn));
 	}
 
 	return result;

@@ -34,7 +34,17 @@ export function useCreateProduct(locale: string) {
 			const payload = {
 				...restValues,
 				translations: translationsPayload,
-				images: images.length > 0 ? images : undefined,
+				images: images
+					? images
+							.filter((img): img is NonNullable<typeof img> => !!img)
+							.map((img) => ({
+								key: img.key,
+								url: img.url,
+								name: img.name,
+								size: img.size,
+								type: img.type,
+							}))
+					: undefined,
 			};
 
 			// 3. Create Product

@@ -92,7 +92,7 @@ export const ProductCard = ({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8"
+							className="h-7 w-6"
 							onClick={() => onEdit(product)}
 						>
 							<Edit className="h-4 w-4" />
@@ -100,7 +100,7 @@ export const ProductCard = ({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-8 w-8 text-destructive hover:text-destructive"
+							className="h-7 w-6 text-destructive hover:text-destructive"
 							onClick={() => onDelete(product.id)}
 						>
 							<Trash2 className="h-4 w-4" />

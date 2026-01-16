@@ -15,7 +15,10 @@ import { Plus, Trash2, X } from "lucide-react";
 import React, { useCallback, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import { generateProductSku } from "@/lib/helpers";
-import type { ProductFormValues } from "./product-schema";
+import type {
+	ProductFormValues,
+	ProductVariantFormValues,
+} from "./product-schema";
 
 export interface VariantOption {
 	id: string;
@@ -74,19 +77,8 @@ export const VariantOptions = ({
 			);
 
 			// Get existing variants to preserve data
-			const existingVariants = (watch("variants") || []) as Array<{
-				id?: string;
-				sku?: string;
-				price?: number;
-				cost?: number;
-				compareAtPrice?: number;
-				maxStock?: number;
-				weightKg?: number;
-				barcode?: string;
-				isActive?: boolean;
-				translations?: unknown[];
-				optionValues?: Record<string, string>;
-			}>;
+			const existingVariants = (watch("variants") ||
+				[]) as ProductVariantFormValues[];
 
 			const productPrice = watch("price");
 			const productCost = watch("cost");

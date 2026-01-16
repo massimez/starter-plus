@@ -1,4 +1,4 @@
-import { and, eq, ilike, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, inArray, sql } from "drizzle-orm";
 import type { z } from "zod";
 import { db } from "@/lib/db";
 import {
@@ -213,7 +213,7 @@ export async function getProductVariantsGroupedByProductWithStock(
 		.where(whereClause)
 		.limit(limit)
 		.offset(offset)
-		.orderBy(product.createdAt);
+		.orderBy(desc(product.createdAt));
 
 	const pageProductIds = productIdsResult.map((p) => p.id);
 
@@ -267,7 +267,7 @@ export async function getProductVariantsGroupedByProductWithStock(
 			productVariant.price,
 			productVariant.translations,
 		)
-		.orderBy(product.createdAt, productVariant.createdAt);
+		.orderBy(desc(product.createdAt), desc(productVariant.createdAt));
 
 	type Row = (typeof rows)[0];
 

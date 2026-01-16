@@ -142,7 +142,7 @@ export const ProductCollectionModal = ({
 				<DialogHeader>
 					<DialogTitle>
 						{isEdit
-							? `Edit Collection: ${collection.name}`
+							? `Edit Collection: ${currentTranslation?.name || collection.name}`
 							: "Create New Collection"}
 					</DialogTitle>
 					{isEdit && (

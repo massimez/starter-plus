@@ -54,12 +54,22 @@ const getTranslation = (
 	collection: ProductCollection,
 	locale: string,
 	field: "name" | "description",
-) =>
-	collection.translations?.find((t) => t.languageCode === locale)?.[field] ||
-	"-";
+) => {
+	return (
+		collection.translations?.find((t) => t.languageCode === locale)?.[field] ||
+		collection[field] ||
+		"-"
+	);
+};
 
 function LoadingSkeleton() {
-	return <>Loading...</>;
+	return (
+		<TableRow>
+			<TableCell colSpan={5} className="h-24 text-center">
+				Loading...
+			</TableCell>
+		</TableRow>
+	);
 }
 
 function EmptyState({ onCreateNew }: { onCreateNew: () => void }) {

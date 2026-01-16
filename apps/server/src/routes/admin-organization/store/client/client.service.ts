@@ -57,7 +57,7 @@ export async function getClients(
 		.select()
 		.from(client)
 		.where(eq(client.organizationId, organizationId))
-		.orderBy(desc(client.updatedAt))
+		.orderBy(desc(client.createdAt))
 		.limit(limit)
 		.offset(offset);
 

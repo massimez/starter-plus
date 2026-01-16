@@ -26,7 +26,10 @@ import {
 import { ChevronDown, ChevronUp, Plus, Trash2 } from "lucide-react";
 import { Fragment, useState } from "react";
 import { type Path, useFieldArray, useFormContext } from "react-hook-form";
-import type { ProductFormValues } from "./product-schema";
+import type {
+	ProductFormValues,
+	ProductVariantFormValues,
+} from "./product-schema";
 
 interface VariantsBlockProps {
 	onVariantRemove?: (variantId: string) => void;
@@ -127,6 +130,7 @@ export const VariantsBlock = ({
 															<FormControl>
 																<Input
 																	{...field}
+																	value={(field.value as number) ?? ""}
 																	type="number"
 																	step="0.01"
 																	placeholder="0.00"
@@ -147,7 +151,11 @@ export const VariantsBlock = ({
 													render={({ field }) => (
 														<FormItem>
 															<FormControl>
-																<Input {...field} placeholder="SKU-001" />
+																<Input
+																	{...field}
+																	value={(field.value as string) ?? ""}
+																	placeholder="SKU-001"
+																/>
 															</FormControl>
 															<FormMessage />
 														</FormItem>
@@ -187,7 +195,9 @@ export const VariantsBlock = ({
 																	`variants.${index}.translations` as Path<ProductFormValues>
 																}
 																render={({ field }) => {
-																	const translations = field.value;
+																	const translations =
+																		(field.value as ProductVariantFormValues["translations"]) ||
+																		[];
 																	const currentTranslation = translations.find(
 																		// biome-ignore lint/suspicious/noExplicitAny: <>
 																		(t: any) =>
@@ -206,9 +216,8 @@ export const VariantsBlock = ({
 																				<Input
 																					value={currentName}
 																					onChange={(e) => {
-																						const newTranslations = [
-																							...translations,
-																						];
+																						const newTranslations: ProductVariantFormValues["translations"] =
+																							[...translations];
 																						const existingIndex =
 																							newTranslations.findIndex(
 																								// biome-ignore lint/suspicious/noExplicitAny: <>
@@ -217,7 +226,10 @@ export const VariantsBlock = ({
 																									selectedLanguage,
 																							);
 
-																						if (existingIndex >= 0) {
+																						if (
+																							existingIndex >= 0 &&
+																							newTranslations[existingIndex]
+																						) {
 																							newTranslations[existingIndex] = {
 																								...newTranslations[
 																									existingIndex
@@ -255,6 +267,7 @@ export const VariantsBlock = ({
 																		<FormControl>
 																			<Input
 																				{...field}
+																				value={(field.value as number) ?? ""}
 																				type="number"
 																				step="0.01"
 																				placeholder="0.00"
@@ -275,6 +288,7 @@ export const VariantsBlock = ({
 																		<FormControl>
 																			<Input
 																				{...field}
+																				value={(field.value as number) ?? ""}
 																				type="number"
 																				step="0.01"
 																				placeholder="0.00"
@@ -297,6 +311,7 @@ export const VariantsBlock = ({
 																		<FormControl>
 																			<Input
 																				{...field}
+																				value={(field.value as string) ?? ""}
 																				placeholder="123456789"
 																			/>
 																		</FormControl>
@@ -315,6 +330,7 @@ export const VariantsBlock = ({
 																		<FormControl>
 																			<Input
 																				{...field}
+																				value={(field.value as number) ?? ""}
 																				type="number"
 																				step="0.01"
 																				placeholder="0.00"
@@ -338,7 +354,7 @@ export const VariantsBlock = ({
 																		</div>
 																		<FormControl>
 																			<Switch
-																				checked={field.value}
+																				checked={field.value as boolean}
 																				onCheckedChange={field.onChange}
 																			/>
 																		</FormControl>

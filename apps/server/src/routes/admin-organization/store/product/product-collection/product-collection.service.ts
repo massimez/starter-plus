@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import type { z } from "zod";
 import { db } from "@/lib/db";
 import { productCollection } from "@/lib/db/schema";
@@ -35,7 +35,8 @@ export async function getProductCollections(orgId: string) {
 	const foundProductCollections = await db
 		.select()
 		.from(productCollection)
-		.where(eq(productCollection.organizationId, validateOrgId(orgId)));
+		.where(eq(productCollection.organizationId, validateOrgId(orgId)))
+		.orderBy(desc(productCollection.createdAt));
 
 	// Build nested structure
 	return buildNestedCollections(foundProductCollections);
