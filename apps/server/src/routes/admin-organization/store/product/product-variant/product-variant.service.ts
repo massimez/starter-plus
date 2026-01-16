@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import type { z } from "zod";
 import { db } from "@/lib/db";
 import { productVariant } from "@/lib/db/schema";
@@ -35,7 +35,12 @@ export async function getProductVariants(orgId: string) {
 	const foundProductVariants = await db
 		.select()
 		.from(productVariant)
-		.where(eq(productVariant.organizationId, validateOrgId(orgId)));
+		.where(
+			and(
+				eq(productVariant.organizationId, validateOrgId(orgId)),
+				isNull(productVariant.deletedAt),
+			),
+		);
 	return foundProductVariants;
 }
 
@@ -53,6 +58,7 @@ export async function getProductVariant(
 			and(
 				eq(productVariant.id, productVariantId),
 				eq(productVariant.organizationId, validateOrgId(orgId)),
+				isNull(productVariant.deletedAt),
 			),
 		)
 		.limit(1);
@@ -88,7 +94,10 @@ export async function deleteProductVariant(
 	orgId: string,
 ) {
 	const [deletedProductVariant] = await db
-		.delete(productVariant)
+		.update(productVariant)
+		.set({
+			deletedAt: new Date(),
+		})
 		.where(
 			and(
 				eq(productVariant.id, productVariantId),

@@ -59,6 +59,7 @@ export function LeafCategoryGrid({ collectionId }: { collectionId: string }) {
 					productVariantId: firstVariant?.id,
 					variantName: variantTranslation?.name,
 					variantSku: firstVariant?.sku,
+					variants: p.variants,
 				};
 
 				return (

@@ -66,8 +66,17 @@ export const VariantOptions = ({
 			// Filter options that have values
 			const validOptions = opts.filter((opt) => opt.values.length > 0);
 
+			// Get existing variants to preserve data
+			const existingVariants = (watch("variants") ||
+				[]) as ProductVariantFormValues[];
+
+			// Preserve manual variants (variants without option values)
+			const manualVariants = existingVariants.filter(
+				(v) => !v.optionValues || Object.keys(v.optionValues).length === 0,
+			);
+
 			if (validOptions.length === 0) {
-				setValue("variants", []);
+				setValue("variants", manualVariants);
 				return;
 			}
 
@@ -75,10 +84,6 @@ export const VariantOptions = ({
 			const combinations = generateCombinations(
 				validOptions.map((opt) => opt.values),
 			);
-
-			// Get existing variants to preserve data
-			const existingVariants = (watch("variants") ||
-				[]) as ProductVariantFormValues[];
 
 			const productPrice = watch("price");
 			const productCost = watch("cost");
@@ -159,7 +164,7 @@ export const VariantOptions = ({
 				};
 			});
 
-			setValue("variants", variants);
+			setValue("variants", [...variants, ...manualVariants]);
 		},
 		[setValue, watch, generateCombinations, selectedLanguage],
 	);

@@ -36,6 +36,54 @@ export const productVariantTranslationEmbeddedSchema = z.object({
 export const baseInsertProductSchema = createInsertSchema(product);
 export const baseUpdateProductSchema = createSelectSchema(product).partial();
 
+export const insertProductVariantSchema = createInsertSchema(productVariant)
+	.omit(idAndAuditFields)
+	.extend({
+		translations: z.array(productVariantTranslationEmbeddedSchema).optional(),
+		price: z.union([z.string(), z.number()]).transform((val) => val.toString()),
+		cost: z
+			.union([z.string(), z.number()])
+			.optional()
+			.transform((val) => val?.toString()),
+		compareAtPrice: z
+			.union([z.string(), z.number()])
+			.optional()
+			.transform((val) => val?.toString()),
+		weightKg: z
+			.union([z.string(), z.number()])
+			.optional()
+			.transform((val) => val?.toString()),
+	});
+
+export const updateProductVariantSchema = createSelectSchema(productVariant)
+	.omit(idAndAuditFields)
+	.partial()
+	.extend({
+		translations: z
+			.array(
+				productVariantTranslationEmbeddedSchema
+					.partial()
+					.required({ languageCode: true }),
+			)
+			.optional(),
+		price: z
+			.union([z.string(), z.number()])
+			.optional()
+			.transform((val) => val?.toString()),
+		cost: z
+			.union([z.string(), z.number()])
+			.optional()
+			.transform((val) => val?.toString()),
+		compareAtPrice: z
+			.union([z.string(), z.number()])
+			.optional()
+			.transform((val) => val?.toString()),
+		weightKg: z
+			.union([z.string(), z.number()])
+			.optional()
+			.transform((val) => val?.toString()),
+	});
+
 // Combined Product Insert Schema
 export const insertProductSchema = baseInsertProductSchema.extend({
 	images: z
@@ -88,6 +136,14 @@ export const updateProductSchema = baseUpdateProductSchema.extend({
 		.optional(),
 	translations: z.array(productTranslationEmbeddedSchema.partial()).optional(),
 	collectionIds: z.array(z.string()).optional(),
+	variants: z
+		.array(
+			updateProductVariantSchema.extend({
+				id: z.string().optional(),
+			}),
+		)
+		.optional(),
+	deletedVariantIds: z.array(z.string()).optional(),
 });
 
 export const insertProductCollectionSchema =
@@ -97,54 +153,6 @@ export const updateProductCollectionSchema = createSelectSchema(
 )
 	.omit(idAndAuditFields)
 	.partial();
-
-export const insertProductVariantSchema = createInsertSchema(productVariant)
-	.omit(idAndAuditFields)
-	.extend({
-		translations: z.array(productVariantTranslationEmbeddedSchema).optional(),
-		price: z.union([z.string(), z.number()]).transform((val) => val.toString()),
-		cost: z
-			.union([z.string(), z.number()])
-			.optional()
-			.transform((val) => val?.toString()),
-		compareAtPrice: z
-			.union([z.string(), z.number()])
-			.optional()
-			.transform((val) => val?.toString()),
-		weightKg: z
-			.union([z.string(), z.number()])
-			.optional()
-			.transform((val) => val?.toString()),
-	});
-
-export const updateProductVariantSchema = createSelectSchema(productVariant)
-	.omit(idAndAuditFields)
-	.partial()
-	.extend({
-		translations: z
-			.array(
-				productVariantTranslationEmbeddedSchema
-					.partial()
-					.required({ languageCode: true }),
-			)
-			.optional(),
-		price: z
-			.union([z.string(), z.number()])
-			.optional()
-			.transform((val) => val?.toString()),
-		cost: z
-			.union([z.string(), z.number()])
-			.optional()
-			.transform((val) => val?.toString()),
-		compareAtPrice: z
-			.union([z.string(), z.number()])
-			.optional()
-			.transform((val) => val?.toString()),
-		weightKg: z
-			.union([z.string(), z.number()])
-			.optional()
-			.transform((val) => val?.toString()),
-	});
 
 export const insertProductVariantStockSchema =
 	createInsertSchema(productVariantStock);

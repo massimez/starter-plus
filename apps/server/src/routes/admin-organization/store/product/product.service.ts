@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: <> */
-import { and, eq, ilike, inArray, or, sql } from "drizzle-orm";
+import { and, eq, ilike, inArray, isNull, or, sql } from "drizzle-orm";
 import type { z } from "zod";
 import { withPaginationAndTotal } from "@/helpers/pagination";
 import { db } from "@/lib/db";
@@ -128,6 +128,7 @@ export async function getProducts(
 		const variantWhereConditions = [
 			inArray(productVariant.productId, resultProductIds),
 			eq(productVariant.organizationId, validatedOrgId),
+			isNull(productVariant.deletedAt),
 		];
 
 		variants = await db
@@ -187,6 +188,7 @@ export async function getProduct(productId: string, orgId: string) {
 			and(
 				eq(productVariant.productId, productId),
 				eq(productVariant.organizationId, orgId),
+				isNull(productVariant.deletedAt),
 			),
 		);
 

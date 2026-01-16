@@ -83,6 +83,7 @@ export function SubcategoryRow({
 			productVariantId: firstVariant?.id,
 			variantName: variantTranslation?.name,
 			variantSku: firstVariant?.sku,
+			variants: p.variants,
 		};
 	});
 

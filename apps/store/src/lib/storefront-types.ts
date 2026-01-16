@@ -58,14 +58,16 @@ export interface ProductVariant {
 	weightKg?: string | number | null;
 	compareAtPrice?: string | number | null;
 	cost?: string | number | null;
-	maxStock?: number;
+	maxStock?: number | null;
 	isActive?: boolean;
 	stock?: ProductVariantStock | null;
-	translations?: {
-		languageCode: string;
-		name: string;
-		attributes?: Record<string, string>;
-	}[];
+	translations?:
+		| {
+				languageCode: string;
+				name?: string;
+				attributes?: Record<string, string>;
+		  }[]
+		| null;
 	createdAt: string;
 	updatedAt: string | null;
 	deletedAt: string | null;

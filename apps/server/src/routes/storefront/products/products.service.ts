@@ -6,6 +6,7 @@ import {
 	gte,
 	ilike,
 	inArray,
+	isNull,
 	lte,
 	type SQL,
 	sql,
@@ -95,7 +96,13 @@ export async function getStorefrontProducts(params: {
 			maxPrice: sql<number>`max(${productVariant.price})`.mapWith(Number),
 		})
 		.from(product)
-		.leftJoin(productVariant, eq(product.id, productVariant.productId))
+		.leftJoin(
+			productVariant,
+			and(
+				eq(product.id, productVariant.productId),
+				isNull(productVariant.deletedAt),
+			),
+		)
 		.where(and(...whereConditions))
 		.groupBy(product.id)
 		.orderBy(orderByClause as SQL)
@@ -108,7 +115,12 @@ export async function getStorefrontProducts(params: {
 			const variants = await db
 				.select()
 				.from(productVariant)
-				.where(eq(productVariant.productId, p.id));
+				.where(
+					and(
+						eq(productVariant.productId, p.id),
+						isNull(productVariant.deletedAt),
+					),
+				);
 
 			// Get stock for each variant if locationId provided
 			const variantsWithStock = locationId
@@ -175,7 +187,12 @@ export async function getStorefrontProduct(params: {
 	const variants = await db
 		.select()
 		.from(productVariant)
-		.where(eq(productVariant.productId, productId));
+		.where(
+			and(
+				eq(productVariant.productId, productId),
+				isNull(productVariant.deletedAt),
+			),
+		);
 
 	// Get stock information for each variant if locationId is provided
 	const variantsWithStock = await Promise.all(
