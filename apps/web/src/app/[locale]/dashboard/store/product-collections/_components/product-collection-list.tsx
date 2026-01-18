@@ -43,6 +43,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { LOCALES } from "@/constants/locales";
 import { hc } from "@/lib/api-client";
+import { CollectionFilter } from "../../_components/collection-filter";
 import { useDeleteProductCollection } from "../hooks/use-delete-product-collection";
 import {
 	type ProductCollection,
@@ -246,22 +247,13 @@ export function ProductCollectionList({
 						</SelectContent>
 					</Select>
 
-					<Select value={selectedParentId} onValueChange={setSelectedParentId}>
-						<SelectTrigger className="w-[200px]">
-							<SelectValue placeholder="Filter by parent" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="all">All Collections</SelectItem>
-							<SelectItem value="root">Top Level Only</SelectItem>
-							{collectionsData?.flat
-								?.filter((c) => !c.parentId)
-								.map((collection) => (
-									<SelectItem key={collection.id} value={collection.id}>
-										{getTranslation(collection, selectedLanguage, "name")}
-									</SelectItem>
-								))}
-						</SelectContent>
-					</Select>
+					<CollectionFilter
+						collections={collectionsData?.data || []}
+						selectedCollectionId={
+							selectedParentId === "all" ? null : selectedParentId
+						}
+						onSelect={(val) => setSelectedParentId(val || "all")}
+					/>
 
 					{collectionsData?.flat && (
 						<Badge variant="outline" className="ml-2">

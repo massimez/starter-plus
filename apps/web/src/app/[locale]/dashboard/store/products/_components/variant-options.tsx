@@ -356,61 +356,6 @@ export const VariantOptions = ({
 							))}
 						</div>
 					)}
-
-					{/* Variants Preview */}
-					{options.some((opt) => opt.values.length > 0) && (
-						<div className="rounded-lg border border-border bg-muted/50 p-4">
-							<h4 className="mb-2 font-semibold text-sm">
-								Variants to be generated
-							</h4>
-							<p className="text-muted-foreground text-xs">
-								{options.reduce(
-									(total, opt) =>
-										opt.values.length > 0
-											? total === 0
-												? opt.values.length
-												: total * opt.values.length
-											: total,
-									0,
-								)}{" "}
-								variant(s) will be created from the combinations below.
-							</p>
-							<div className="mt-3 flex flex-wrap gap-2">
-								{(() => {
-									const validOptions = options.filter(
-										(opt) => opt.values.length > 0,
-									);
-									if (validOptions.length === 0) return null;
-
-									const combinations = generateCombinations(
-										validOptions.map((opt) => opt.values),
-									);
-
-									return combinations.slice(0, 10).map((combo) => (
-										<Badge key={combo.join("-")} variant="outline">
-											{combo.join(" / ")}
-										</Badge>
-									));
-								})()}
-								{(() => {
-									const validOptions = options.filter(
-										(opt) => opt.values.length > 0,
-									);
-									if (validOptions.length === 0) return null;
-
-									const combinations = generateCombinations(
-										validOptions.map((opt) => opt.values),
-									);
-
-									return combinations.length > 10 ? (
-										<Badge variant="outline">
-											+{combinations.length - 10} more...
-										</Badge>
-									) : null;
-								})()}
-							</div>
-						</div>
-					)}
 				</div>
 			</CardContent>
 		</Card>

@@ -19,9 +19,6 @@ import {
 	FormMessage,
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
-import MultipleSelector, {
-	type Option,
-} from "@workspace/ui/components/multi-select";
 import {
 	Select,
 	SelectContent,
@@ -37,6 +34,7 @@ import { type Path, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { LOCALES } from "@/constants/locales";
 import { getSlug } from "@/lib/helpers";
+import { CollectionMultiSelector } from "../../_components/collection-multi-selector";
 import { useProductCollections } from "../../product-collections/hooks/use-product-collection";
 import { ProductImagesSlot } from "./product-images-slot";
 import { type ProductFormValues, productFormSchema } from "./product-schema";
@@ -97,17 +95,7 @@ export function ProductEditForm({
 			});
 		}
 	};
-	const collectionOptions =
-		collectionsResponse?.flat?.map((collection) => {
-			const translation = collection.translations?.find(
-				(t) => t.languageCode === selectedLanguage,
-			);
-			return {
-				label: translation?.name || collection.name || "Untitled Collection",
-				value: collection.id,
-			};
-		}) || [];
-	console.log(collectionOptions, "collectionOptions");
+
 	const form = useForm<ProductFormValues>({
 		// biome-ignore lint/suspicious/noExplicitAny: zodResolver type inference issue with complex schema
 		resolver: zodResolver(productFormSchema) as any,
@@ -583,33 +571,21 @@ export function ProductEditForm({
 										<FormItem>
 											<FormLabel>Collections</FormLabel>
 											<FormControl>
-												<MultipleSelector
-													value={
-														field.value?.map((id) => {
-															const collection = collectionOptions.find(
-																(c: { value: string; label: string }) =>
-																	c.value === id,
-															);
-															return {
-																value: id,
-																label: collection?.label || id,
-															};
-														}) || []
-													}
-													onChange={(selected: Option[]) => {
-														field.onChange(selected.map((s) => s.value));
-													}}
-													options={collectionOptions}
-													placeholder="Select collections..."
-													emptyIndicator={
-														<p className="text-center text-gray-600 text-sm leading-10 dark:text-gray-400">
-															{isLoadingCollections
-																? "Loading collections..."
-																: "No collections found."}
-														</p>
-													}
+												<CollectionMultiSelector
+													collections={collectionsResponse?.data || []}
+													selectedIds={field.value || []}
+													onChange={field.onChange}
 													disabled={isLoadingCollections}
-													className="w-fit overflow-hidden"
+													placeholder={
+														isLoadingCollections
+															? "Loading..."
+															: "Select collections..."
+													}
+													emptyIndicator={
+														isLoadingCollections
+															? "Loading collections..."
+															: "No collections found."
+													}
 												/>
 											</FormControl>
 											<FormDescription>

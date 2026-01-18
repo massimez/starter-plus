@@ -11,6 +11,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@workspace/ui/components/select";
+
 import { Search, X } from "lucide-react";
 import Link from "next/link";
 import { parseAsString, useQueryState } from "nuqs";
@@ -18,6 +19,7 @@ import { PageDashboardHeader } from "@/app/[locale]/(landing)/_components/sectio
 import { DEFAULT_LOCALE, LOCALES } from "@/constants/locales";
 import { useNuqsPagination } from "@/hooks/use-nuqs-pagination";
 import { hc } from "@/lib/api-client";
+import { CollectionFilter } from "../../_components/collection-filter";
 import { useProductCollections } from "../../product-collections/hooks/use-product-collection";
 import { ProductList } from "./product-list";
 import { useProducts } from "./use-products";
@@ -39,7 +41,7 @@ export const ProductsClient = () => {
 	);
 
 	const { data: collectionsData } = useProductCollections(selectedLanguage);
-	const collections = collectionsData?.flat || [];
+	const collections = collectionsData?.data || [];
 
 	const pagination = useNuqsPagination();
 
@@ -91,24 +93,14 @@ export const ProductsClient = () => {
 							</button>
 						)}
 					</div>
-					<Select
-						value={selectedCollection || undefined}
-						onValueChange={(val) => {
+					<CollectionFilter
+						collections={collections}
+						selectedCollectionId={selectedCollection || null}
+						onSelect={(val) => {
 							setSelectedCollection(val || null);
 							pagination.setPage(1);
 						}}
-					>
-						<SelectTrigger className="w-[200px]">
-							<SelectValue placeholder="All Collections" />
-						</SelectTrigger>
-						<SelectContent>
-							{collections.map((collection) => (
-								<SelectItem key={collection.id} value={collection.id}>
-									{collection.name}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
+					/>
 					<Select
 						onValueChange={(val) => {
 							setSelectedLanguage(val);
