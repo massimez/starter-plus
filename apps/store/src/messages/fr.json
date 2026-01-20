@@ -10,7 +10,13 @@
 		"profile": "Profil",
 		"checkout": "Caisse",
 		"login": "Connexion",
-		"logout": "Déconnexion"
+		"logout": "Déconnexion",
+		"drawer": {
+			"orders": "Commandes",
+			"addresses": "Adresses",
+			"settings": "Paramètres",
+			"rewards": "Bonus"
+		}
 	},
 	"Product": {
 		"addToCart": "Ajouter au panier",
@@ -80,5 +86,153 @@
 		"newsletterSuccess": "Abonnement réussi à la newsletter !",
 		"allRightsReserved": "Tous droits réservés.",
 		"weAccept": "Nous acceptons :"
+	},
+	"ProductCard": {
+		"selectVariant": "Choisir une variante",
+		"onePc": "1 pce",
+		"addToCartSuccess": "{name} a été ajouté à votre panier !",
+		"addToCartErrorLocation": "Impossible d'ajouter au panier. Emplacement non disponible.",
+		"addToCartErrorUnavailable": "Ce produit est actuellement indisponible. Veuillez essayer une autre variante ou revenir plus tard.",
+		"descriptionDefault": "Produit {category}"
+	},
+	"AddressSelector": {
+		"title": "Choisir une adresse enregistrée",
+		"default": "Défaut",
+		"newAddressTitle": "Entrer une nouvelle adresse",
+		"newAddressDescription": "Entrer manuellement une nouvelle adresse de livraison"
+	},
+	"Profile": {
+		"sidebar": {
+			"overview": "Aperçu",
+			"settings": "Paramètres",
+			"addresses": "Adresses",
+			"privacy": "Confidentialité",
+			"orders": "Commandes"
+		},
+		"form": {
+			"firstName": "Prénom",
+			"lastName": "Nom",
+			"email": "Email",
+			"phone": "Téléphone",
+			"language": "Langue",
+			"preferredContactMethod": "Méthode de contact préférée",
+			"selectLanguage": "Sélectionner la langue",
+			"verified": "Vérifié",
+			"reset": "Réinitialiser",
+			"save": "Enregistrer",
+			"saving": "Enregistrement...",
+			"success": "Profil mis à jour avec succès !",
+			"error": "Échec de la mise à jour du profil"
+		},
+		"addresses": {
+			"title": "Adresses",
+			"add": "Ajouter une adresse",
+			"edit": "Modifier l'adresse",
+			"editAction": "Modifier",
+			"deleteAction": "Supprimer",
+			"addNew": "Ajouter une nouvelle adresse",
+			"type": "Type",
+			"shipping": "Livraison",
+			"billing": "Facturation",
+			"street": "Adresse",
+			"city": "Ville",
+			"state": "État/Province",
+			"postalCode": "Code postal",
+			"country": "Pays",
+			"default": "Définir comme adresse par défaut",
+			"cancel": "Annuler",
+			"save": "Enregistrer l'adresse",
+			"saving": "Enregistrement...",
+			"deleteConfirm": "Êtes-vous sûr de vouloir supprimer cette adresse ?",
+			"empty": "Aucune adresse enregistrée.",
+			"emptyAction": "Cliquez sur \"Ajouter une adresse\" pour en créer une."
+		},
+		"orders": {
+			"title": "Historique des commandes",
+			"description": "Voir et suivre vos commandes passées",
+			"searchPlaceholder": "Rechercher par numéro de commande...",
+			"status": "Statut",
+			"sortBy": "Trier par",
+			"allStatus": "Tous les statuts",
+			"processing": "En cours",
+			"inTransit": "En transit",
+			"delivered": "Livré",
+			"cancelled": "Annulé",
+			"newest": "Le plus récent",
+			"oldest": "Le plus ancien",
+			"amountHigh": "Montant: Haut à Bas",
+			"amountLow": "Montant: Bas à Haut",
+			"totalAmount": "Montant total",
+			"loading": "Chargement de vos commandes...",
+			"noResults": "Aucune commande trouvée",
+			"noResultsDesc": "Aucune commande ne correspond à vos filtres.",
+			"clearFilters": "Effacer les filtres",
+			"empty": "Pas encore de commande",
+			"emptyDesc": "Commencez vos achats et vos commandes apparaîtront ici.",
+			"startShopping": "Commencer les achats"
+		}
+	},
+	"Checkout": {
+		"steps": {
+			"shipping": "Livraison",
+			"payment": "Paiement",
+			"review": "Vérification"
+		},
+		"validation": {
+			"title": "Erreurs de validation",
+			"emptyCart": "Votre panier est vide",
+			"completeFields": "Veuillez remplir tous les champs obligatoires",
+			"addressSaved": "Adresse enregistrée dans votre profil",
+			"addressSaveFailed": "Échec de l'enregistrement de l'adresse",
+			"fixErrors": "Veuillez corriger {count} erreur(s) dans le formulaire"
+		},
+		"shipping": {
+			"title": "Adresse de livraison",
+			"manual": "Ou entrer manuellement",
+			"saveAddress": "Enregistrer cette adresse dans mon profil",
+			"street": "Adresse",
+			"streetPlaceholder": "123 Rue Principale",
+			"city": "Ville",
+			"cityPlaceholder": "Paris",
+			"state": "État/Province",
+			"statePlaceholder": "Île-de-France",
+			"postalCode": "Code postal",
+			"postalCodePlaceholder": "75001"
+		},
+		"payment": {
+			"title": "Méthode de paiement",
+			"cod": "Paiement à la livraison",
+			"codDescription": "Payez lorsque votre commande arrive à votre porte",
+			"contactInfo": "Coordonnées",
+			"fullName": "Nom complet",
+			"fullNamePlaceholder": "Jean Dupont",
+			"email": "Adresse email",
+			"emailPlaceholder": "jean@example.com",
+			"phone": "Numéro de téléphone",
+			"phonePlaceholder": "01 23 45 67 89"
+		},
+		"review": {
+			"title": "Récapitulatif de la commande",
+			"shippingAddress": "Adresse de livraison",
+			"paymentMethod": "Méthode de paiement",
+			"total": "Total",
+			"items": "Articles",
+			"qty": "Qté",
+			"sku": "UGS",
+			"subtotal": "Sous-total",
+			"discount": "Remise",
+			"shipping": "Livraison",
+			"tax": "Taxe"
+		},
+		"status": {
+			"title": "Détails de la commande",
+			"reorder": "Commander à nouveau",
+			"invoice": "Facture",
+			"invoiceComingSoon": "Téléchargement de la facture bientôt disponible",
+			"reorderSuccess": "Articles ajoutés au panier",
+			"reorderError": "Échec de la nouvelle commande",
+			"noItems": "Impossible de commander à nouveau",
+			"loading": "Chargement des détails..."
+		}
 	}
 }

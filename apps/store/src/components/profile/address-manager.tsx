@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import type { Address } from "@/lib/storefront-types";
 
@@ -14,6 +15,7 @@ export function AddressManager({
 	onUpdate,
 	updating,
 }: AddressManagerProps) {
+	const t = useTranslations("Profile.addresses");
 	const [editingIndex, setEditingIndex] = useState<number | null>(null);
 	const [formData, setFormData] = useState<Address>({
 		type: "shipping",
@@ -48,7 +50,7 @@ export function AddressManager({
 	};
 
 	const handleDelete = async (index: number) => {
-		if (confirm("Are you sure you want to delete this address?")) {
+		if (confirm(t("deleteConfirm"))) {
 			const newAddresses = addresses.filter((_, i) => i !== index);
 			try {
 				await onUpdate(newAddresses);
@@ -112,7 +114,7 @@ export function AddressManager({
 	return (
 		<div className="space-y-6">
 			<div className="flex items-center justify-between">
-				<h2 className="font-semibold text-xl">Addresses</h2>
+				<h2 className="font-semibold text-xl">{t("title")}</h2>
 
 				{editingIndex === null && (
 					<button
@@ -120,7 +122,7 @@ export function AddressManager({
 						className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
 						disabled={updating}
 					>
-						Add Address
+						{t("add")}
 					</button>
 				)}
 			</div>
@@ -135,7 +137,7 @@ export function AddressManager({
 			{editingIndex !== null && (
 				<div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
 					<h3 className="mb-4 font-medium text-lg">
-						{editingIndex === -1 ? "Add New Address" : "Edit Address"}
+						{editingIndex === -1 ? t("addNew") : t("edit")}
 					</h3>
 					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 						<div>
@@ -143,7 +145,7 @@ export function AddressManager({
 								htmlFor="address-type"
 								className="mb-1 block font-medium text-gray-700 text-sm"
 							>
-								Type
+								{t("type")}
 							</label>
 							<select
 								id="address-type"
@@ -156,8 +158,8 @@ export function AddressManager({
 								}
 								className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
 							>
-								<option value="shipping">Shipping</option>
-								<option value="billing">Billing</option>
+								<option value="shipping">{t("shipping")}</option>
+								<option value="billing">{t("billing")}</option>
 							</select>
 						</div>
 
@@ -166,7 +168,7 @@ export function AddressManager({
 								htmlFor="address-street"
 								className="mb-1 block font-medium text-gray-700 text-sm"
 							>
-								Street Address *
+								{t("street")} *
 							</label>
 							<input
 								id="address-street"
@@ -185,7 +187,7 @@ export function AddressManager({
 								htmlFor="address-city"
 								className="mb-1 block font-medium text-gray-700 text-sm"
 							>
-								City *
+								{t("city")} *
 							</label>
 							<input
 								id="address-city"
@@ -204,7 +206,7 @@ export function AddressManager({
 								htmlFor="address-state"
 								className="mb-1 block font-medium text-gray-700 text-sm"
 							>
-								State/Province
+								{t("state")}
 							</label>
 							<input
 								id="address-state"
@@ -222,7 +224,7 @@ export function AddressManager({
 								htmlFor="address-postal"
 								className="mb-1 block font-medium text-gray-700 text-sm"
 							>
-								Postal Code *
+								{t("postalCode")} *
 							</label>
 							<input
 								id="address-postal"
@@ -241,7 +243,7 @@ export function AddressManager({
 								htmlFor="address-country"
 								className="mb-1 block font-medium text-gray-700 text-sm"
 							>
-								Country *
+								{t("country")} *
 							</label>
 							<input
 								id="address-country"
@@ -265,9 +267,7 @@ export function AddressManager({
 									}
 									className="mr-2"
 								/>
-								<span className="text-gray-700 text-sm">
-									Set as default address
-								</span>
+								<span className="text-gray-700 text-sm">{t("default")}</span>
 							</label>
 						</div>
 					</div>
@@ -278,7 +278,7 @@ export function AddressManager({
 							onClick={handleCancel}
 							className="rounded-md border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50"
 						>
-							Cancel
+							{t("cancel")}
 						</button>
 						<button
 							type="button"
@@ -286,7 +286,7 @@ export function AddressManager({
 							className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
 							disabled={updating}
 						>
-							{updating ? "Saving..." : "Save Address"}
+							{updating ? t("saving") : t("save")}
 						</button>
 					</div>
 				</div>
@@ -295,8 +295,8 @@ export function AddressManager({
 			{/* Address List */}
 			{addresses.length === 0 && editingIndex === null ? (
 				<div className="py-8 text-center text-gray-500">
-					<p>No addresses saved yet.</p>
-					<p className="mt-2 text-sm">Click "Add Address" to create one.</p>
+					<p>{t("empty")}</p>
+					<p className="mt-2 text-sm">{t("emptyAction")}</p>
 				</div>
 			) : (
 				<div className="space-y-4">
@@ -313,7 +313,7 @@ export function AddressManager({
 										</span>
 										{address.isDefault && (
 											<span className="inline-block rounded bg-blue-100 px-2 py-1 text-blue-700 text-xs">
-												Default
+												{t("default")}
 											</span>
 										)}
 									</div>
@@ -330,14 +330,14 @@ export function AddressManager({
 										className="text-blue-600 text-sm hover:text-blue-700"
 										disabled={updating || editingIndex !== null}
 									>
-										Edit
+										{t("editAction")}
 									</button>
 									<button
 										onClick={() => handleDelete(index)}
 										className="text-red-600 text-sm hover:text-red-700"
 										disabled={updating || editingIndex !== null}
 									>
-										Delete
+										{t("deleteAction")}
 									</button>
 								</div>
 							</div>

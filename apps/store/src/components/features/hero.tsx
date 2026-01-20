@@ -1,15 +1,9 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import type { Collection } from "@/lib/storefront-types";
-import { HomeCategoryCarousel } from "./home-category-carousel";
 
-interface HeroProps {
-	collections: Collection[];
-}
-
-export const Hero = ({ collections }: HeroProps) => {
-	const t = useTranslations("Hero");
+export const Hero = () => {
+	const t = useTranslations("HomePage"); // Updated to match en.json key
 
 	return (
 		<>
@@ -44,8 +38,6 @@ export const Hero = ({ collections }: HeroProps) => {
 				{/* Bottom Gradient Fade */}
 				<div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-t from-background to-transparent" />
 			</section>
-
-			<HomeCategoryCarousel collections={collections} />
 		</>
 	);
 };

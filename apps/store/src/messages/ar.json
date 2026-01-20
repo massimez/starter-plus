@@ -10,7 +10,13 @@
 		"profile": "الملف الشخصي",
 		"checkout": "الدفع",
 		"login": "تسجيل الدخول",
-		"logout": "تسجيل الخروج"
+		"logout": "تسجيل الخروج",
+		"drawer": {
+			"orders": "الطلبات",
+			"addresses": "العناوين",
+			"settings": "الإعدادات",
+			"rewards": "نقاط المكافأة"
+		}
 	},
 	"Product": {
 		"addToCart": "أضف إلى السلة",
@@ -80,5 +86,153 @@
 		"newsletterSuccess": "تم الاشتراك بنجاح في النشرة الإخبارية!",
 		"allRightsReserved": "جميع الحقوق محفوظة.",
 		"weAccept": "نحن نقبل:"
+	},
+	"ProductCard": {
+		"selectVariant": "حدد البديل",
+		"onePc": "قطعة واحدة",
+		"addToCartSuccess": "تم إضافة {name} إلى سلتك!",
+		"addToCartErrorLocation": "تعذر الإضافة إلى السلة. الموقع غير متوفر.",
+		"addToCartErrorUnavailable": "هذا المنتج غير متوفر حاليًا. يرجى تجربة بديل آخر أو التحقق لاحقًا.",
+		"descriptionDefault": "منتج {category}"
+	},
+	"AddressSelector": {
+		"title": "اختر عنوانًا محفوظًا",
+		"default": "افتراضي",
+		"newAddressTitle": "أدخل عنوانًا جديدًا",
+		"newAddressDescription": "أدخل عنوان الشحن الجديد يدويًا"
+	},
+	"Profile": {
+		"sidebar": {
+			"overview": "نظرة عامة",
+			"settings": "الإعدادات",
+			"addresses": "العناوين",
+			"privacy": "الخصوصية",
+			"orders": "الطلبات"
+		},
+		"form": {
+			"firstName": "الاسم الأول",
+			"lastName": "اسم العائلة",
+			"email": "البريد الإلكتروني",
+			"phone": "الهاتف",
+			"language": "اللغة",
+			"preferredContactMethod": "طريقة الاتصال المفضلة",
+			"selectLanguage": "اختر اللغة",
+			"verified": "تم التحقق",
+			"reset": "إعادة تعيين",
+			"save": "حفظ التغييرات",
+			"saving": "جاري الحفظ...",
+			"success": "تم تحديث الملف الشخصي بنجاح!",
+			"error": "فشل تحديث الملف الشخصي"
+		},
+		"addresses": {
+			"title": "العناوين",
+			"add": "إضافة عنوان",
+			"edit": "تعديل العنوان",
+			"editAction": "تعديل",
+			"deleteAction": "حذف",
+			"addNew": "إضافة عنوان جديد",
+			"type": "النوع",
+			"shipping": "الشحن",
+			"billing": "الفواتير",
+			"street": "العنوان",
+			"city": "المدينة",
+			"state": "المقاطعة/المنطقة",
+			"postalCode": "الرمز البريدي",
+			"country": "البلد",
+			"default": "تعيين كعنوان افتراضي",
+			"cancel": "إلغاء",
+			"save": "حفظ العنوان",
+			"saving": "جاري الحفظ...",
+			"deleteConfirm": "هل أنت متأكد أنك تريد حذف هذا العنوان؟",
+			"empty": "لا توجد عناوين محفوظة بعد.",
+			"emptyAction": "انقر فوق \"إضافة عنوان\" لإنشاء واحد."
+		},
+		"orders": {
+			"title": "سجل الطلبات",
+			"description": "عرض وتتبع طلباتك السابقة",
+			"searchPlaceholder": "البحث برقم الطلب...",
+			"status": "الحالة",
+			"sortBy": "ترتيب حسب",
+			"allStatus": "كل الحالات",
+			"processing": "قيد المعالجة",
+			"inTransit": "في الطريق",
+			"delivered": "تم التوصيل",
+			"cancelled": "ملغي",
+			"newest": "الأحدث",
+			"oldest": "الأقدم",
+			"amountHigh": "السعر: من الأعلى إلى الأقل",
+			"amountLow": "السعر: من الأقل إلى الأعلى",
+			"totalAmount": "المبلغ الإجمالي",
+			"loading": "جاري تحميل طلباتك...",
+			"noResults": "لم يتم العثور على طلبات",
+			"noResultsDesc": "لا توجد طلبات تطابق فلاترك الحالية.",
+			"clearFilters": "مسح الفلاتر",
+			"empty": "لا توجد طلبات بعد",
+			"emptyDesc": "ابدأ رحلة التسوق الخاصة بك وستظهر طلباتك هنا.",
+			"startShopping": "ابدأ التسوق"
+		}
+	},
+	"Checkout": {
+		"steps": {
+			"shipping": "الشحن",
+			"payment": "الدفع",
+			"review": "مراجعة"
+		},
+		"validation": {
+			"title": "أخطاء التحقق",
+			"emptyCart": "سلة التسوق فارغة",
+			"completeFields": "يرجى إكمال جميع الحقول المطلوبة",
+			"addressSaved": "تم حفظ العنوان في ملفك الشخصي",
+			"addressSaveFailed": "فشل حفظ العنوان",
+			"fixErrors": "يرجى إصلاح {count} خطأ في النموذج"
+		},
+		"shipping": {
+			"title": "عنوان الشحن",
+			"manual": "أو أدخل يدويًا",
+			"saveAddress": "حفظ هذا العنوان في ملفي الشخصي",
+			"street": "العنوان",
+			"streetPlaceholder": "123 شارع رئيسي",
+			"city": "المدينة",
+			"cityPlaceholder": "الرياض",
+			"state": "المقاطعة/المنطقة",
+			"statePlaceholder": "الرياض",
+			"postalCode": "الرمز البريدي",
+			"postalCodePlaceholder": "11564"
+		},
+		"payment": {
+			"title": "طريقة الدفع",
+			"cod": "الدفع عند الاستلام",
+			"codDescription": "ادفع عند وصول طلبك إلى باب منزلك",
+			"contactInfo": "معلومات الاتصال",
+			"fullName": "الاسم الكامل",
+			"fullNamePlaceholder": "أحمد محمد",
+			"email": "البريد الإلكتروني",
+			"emailPlaceholder": "ahmed@example.com",
+			"phone": "رقم الهاتف",
+			"phonePlaceholder": "0501234567"
+		},
+		"review": {
+			"title": "مراجعة الطلب",
+			"shippingAddress": "عنوان الشحن",
+			"paymentMethod": "طريقة الدفع",
+			"total": "الإجمالي",
+			"items": "العناصر",
+			"qty": "الكمية",
+			"sku": "SKU",
+			"subtotal": "المجموع الفرعي",
+			"discount": "الخصم",
+			"shipping": "الشحن",
+			"tax": "الضريبة"
+		},
+		"status": {
+			"title": "تفاصيل الطلب",
+			"reorder": "إعادة الطلب",
+			"invoice": "الفاتورة",
+			"invoiceComingSoon": "تنزيل الفاتورة قريباً",
+			"reorderSuccess": "تمت إضافة العناصر إلى عربة التسوق",
+			"reorderError": "فشل إعادة الطلب",
+			"noItems": "غير قادر على إعادة الطلب",
+			"loading": "جاري تحميل التفاصيل..."
+		}
 	}
 }

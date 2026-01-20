@@ -20,7 +20,6 @@ import {
 	ChevronDownIcon,
 	ChevronLeft,
 	ChevronRight,
-	ChevronsUpDown,
 } from "lucide-react";
 import * as React from "react";
 import type { ProductCollection } from "../product-collections/hooks/use-product-collection";

@@ -9,6 +9,7 @@ import {
 import { Button } from "@workspace/ui/components/button";
 import { Form } from "@workspace/ui/components/form";
 import { AlertCircle, Check, CreditCard, Truck, X } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useState } from "react";
 import { type Path, useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -35,6 +36,7 @@ export function CheckoutForm({
 	onClose,
 	onBack,
 }: CheckoutFormProps) {
+	const t = useTranslations("Checkout");
 	const { items, total, appliedCoupon, clearCart } = useCartStore();
 	const { data: session } = useSession();
 	const { profile, updateProfile, loading: profileLoading } = useProfile();
@@ -79,9 +81,9 @@ export function CheckoutForm({
 	});
 
 	const steps: StepConfig[] = [
-		{ id: "shipping", title: "Shipping", icon: Truck },
-		{ id: "payment", title: "Payment", icon: CreditCard },
-		{ id: "review", title: "Review", icon: Check },
+		{ id: "shipping", title: t("steps.shipping"), icon: Truck },
+		{ id: "payment", title: t("steps.payment"), icon: CreditCard },
+		{ id: "review", title: t("steps.review"), icon: Check },
 	];
 
 	const nextStep = async () => {
@@ -199,7 +201,7 @@ export function CheckoutForm({
 		try {
 			// Validate that we have items
 			if (items.length === 0) {
-				toast.error("Your cart is empty");
+				toast.error(t("validation.emptyCart"));
 				return;
 			}
 
@@ -221,7 +223,7 @@ export function CheckoutForm({
 				}
 
 				setCurrentStep("shipping");
-				toast.error("Please complete all required fields");
+				toast.error(t("validation.completeFields"));
 				return;
 			}
 
@@ -238,10 +240,10 @@ export function CheckoutForm({
 							},
 						],
 					});
-					toast.success("Address saved to your profile");
+					toast.success(t("validation.addressSaved"));
 				} catch (error) {
 					console.error("Failed to save address:", error);
-					toast.error("Failed to save address, but proceeding with order");
+					toast.error(t("validation.addressSaveFailed"));
 				}
 			}
 
@@ -310,18 +312,15 @@ export function CheckoutForm({
 
 				// Show detailed error message
 				const errorCount = Object.keys(newErrors).length;
-				toast.error(
-					`Please fix ${errorCount} validation error${errorCount > 1 ? "s" : ""} in the form`,
-					{
-						description:
-							Object.entries(newErrors)
-								.slice(0, 3)
-								.map(([field, msg]) => `${field}: ${msg}`)
-								.join("\n") +
-							(errorCount > 3 ? `\n...and ${errorCount - 3} more` : ""),
-						duration: 5000,
-					},
-				);
+				toast.error(t("validation.fixErrors", { count: errorCount }), {
+					description:
+						Object.entries(newErrors)
+							.slice(0, 3)
+							.map(([field, msg]) => `${field}: ${msg}`)
+							.join("\n") +
+						(errorCount > 3 ? `\n...and ${errorCount - 3} more` : ""),
+					duration: 5000,
+				});
 
 				// Navigate to the step with errors if needed
 				const hasShippingErrors = Object.keys(newErrors).some((k) =>
@@ -361,7 +360,7 @@ export function CheckoutForm({
 								<div className="flex items-start gap-2">
 									<AlertCircle className="mt-0.5 h-4 w-4" />
 									<div className="flex-1">
-										<AlertTitle>Validation Errors</AlertTitle>
+										<AlertTitle>{t("validation.title")}</AlertTitle>
 										<AlertDescription className="mt-2 space-y-1">
 											{Object.entries(apiErrors).map(([field, message]) => (
 												<div key={field} className="text-sm">

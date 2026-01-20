@@ -6,6 +6,7 @@ import {
 	RadioGroupItem,
 } from "@workspace/ui/components/radio-group";
 import { MapPin } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { Address } from "@/lib/storefront-types";
 
 interface AddressSelectorProps {
@@ -19,6 +20,7 @@ export function AddressSelector({
 	onSelect,
 	selectedValue,
 }: AddressSelectorProps) {
+	const t = useTranslations("AddressSelector");
 	const formatAddress = (address: Address) => {
 		const parts = [address.city, address.state, address.postalCode].filter(
 			Boolean,
@@ -32,7 +34,7 @@ export function AddressSelector({
 
 	return (
 		<div className="space-y-3">
-			<Label className="font-semibold text-base">Choose a saved address</Label>
+			<Label className="font-semibold text-base">{t("title")}</Label>
 			<RadioGroup
 				value={selectedValue}
 				onValueChange={onSelect}
@@ -60,7 +62,7 @@ export function AddressSelector({
 								<div className="flex items-center gap-2">
 									{address.isDefault && (
 										<span className="rounded-full bg-primary/10 px-2 py-0.5 font-medium text-primary text-xs">
-											Default
+											{t("default")}
 										</span>
 									)}
 								</div>
@@ -90,9 +92,9 @@ export function AddressSelector({
 							<MapPin className="h-5 w-5 text-primary" />
 						</div>
 						<div className="flex-1 space-y-1">
-							<p className="font-semibold text-sm">Enter new address</p>
+							<p className="font-semibold text-sm">{t("newAddressTitle")}</p>
 							<p className="text-muted-foreground text-xs">
-								Manually enter a new shipping address
+								{t("newAddressDescription")}
 							</p>
 						</div>
 					</Label>

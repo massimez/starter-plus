@@ -13,6 +13,7 @@ import {
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import { Check, CreditCard } from "lucide-react";
+import { useTranslations } from "next-intl";
 import type { UseFormReturn } from "react-hook-form";
 import type { CheckoutFormValues } from "./validation";
 
@@ -21,6 +22,7 @@ interface PaymentStepProps {
 }
 
 export function PaymentStep({ form }: PaymentStepProps) {
+	const t = useTranslations("Checkout.payment");
 	return (
 		<div className="space-y-4">
 			<div className="">
@@ -29,7 +31,7 @@ export function PaymentStep({ form }: PaymentStepProps) {
 						<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
 							<CreditCard className="h-5 w-5 text-primary" />
 						</div>
-						Payment Method
+						{t("title")}
 					</CardTitle>
 				</div>
 				<div className="space-y-6">
@@ -39,9 +41,9 @@ export function PaymentStep({ form }: PaymentStepProps) {
 								<span className="font-bold text-2xl">$</span>
 							</div>
 							<div className="flex-1">
-								<h3 className="font-bold text-lg">Cash on Delivery</h3>
+								<h3 className="font-bold text-lg">{t("cod")}</h3>
 								<p className="text-muted-foreground text-sm">
-									Pay when your order arrives at your doorstep
+									{t("codDescription")}
 								</p>
 							</div>
 							<div className="flex h-8 w-8 items-center justify-center rounded-full bg-green-500 text-white">
@@ -54,7 +56,7 @@ export function PaymentStep({ form }: PaymentStepProps) {
 
 			<Card className="border-2 shadow-sm transition-shadow duration-300 hover:shadow-md">
 				<CardHeader>
-					<CardTitle className="text-xl">Contact Information</CardTitle>
+					<CardTitle className="text-xl">{t("contactInfo")}</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-6">
 					<FormField
@@ -63,11 +65,11 @@ export function PaymentStep({ form }: PaymentStepProps) {
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel className="font-semibold text-sm">
-									Full Name *
+									{t("fullName")} *
 								</FormLabel>
 								<FormControl>
 									<Input
-										placeholder="John Doe"
+										placeholder={t("fullNamePlaceholder")}
 										className="h-12 rounded-lg border-2 px-4 text-base transition-all duration-200 focus:ring-2 focus:ring-primary/20"
 										{...field}
 									/>
@@ -76,19 +78,18 @@ export function PaymentStep({ form }: PaymentStepProps) {
 							</FormItem>
 						)}
 					/>
-
 					<FormField
 						control={form.control}
 						name="customerInfo.email"
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel className="font-semibold text-sm">
-									Email Address *
+									{t("email")} *
 								</FormLabel>
 								<FormControl>
 									<Input
 										type="email"
-										placeholder="john@example.com"
+										placeholder={t("emailPlaceholder")}
 										className="h-12 rounded-lg border-2 px-4 text-base transition-all duration-200 focus:ring-2 focus:ring-primary/20"
 										{...field}
 									/>
@@ -97,19 +98,18 @@ export function PaymentStep({ form }: PaymentStepProps) {
 							</FormItem>
 						)}
 					/>
-
 					<FormField
 						control={form.control}
 						name="customerInfo.phone"
 						render={({ field }) => (
 							<FormItem>
 								<FormLabel className="font-semibold text-sm">
-									Phone Number *
+									{t("phone")} *
 								</FormLabel>
 								<FormControl>
 									<Input
 										type="tel"
-										placeholder="(555) 123-4567"
+										placeholder={t("phonePlaceholder")}
 										className="h-12 rounded-lg border-2 px-4 text-base transition-all duration-200 focus:ring-2 focus:ring-primary/20"
 										{...field}
 									/>

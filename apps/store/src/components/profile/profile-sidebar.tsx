@@ -1,7 +1,8 @@
 "use client";
 
 import { Button } from "@workspace/ui/components/button";
-import { MapPin, Settings, Shield, ShoppingBag, User } from "lucide-react";
+import { MapPin, Settings, Shield, ShoppingBag } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/routing";
 
 import { cn } from "@/lib/utils";
@@ -17,25 +18,21 @@ export function ProfileSidebar({
 	onTabChange,
 	...props
 }: ProfileSidebarProps) {
+	const t = useTranslations("Profile.sidebar");
 	const items = [
 		{
-			id: "overview",
-			title: "Overview",
-			icon: User,
-		},
-		{
 			id: "settings",
-			title: "Settings",
+			title: t("settings"),
 			icon: Settings,
 		},
 		{
 			id: "addresses",
-			title: "Addresses",
+			title: t("addresses"),
 			icon: MapPin,
 		},
 		{
 			id: "privacy",
-			title: "Privacy",
+			title: t("privacy"),
 			icon: Shield,
 		},
 	];
@@ -66,7 +63,7 @@ export function ProfileSidebar({
 				<Button variant="ghost" className="w-full justify-start" asChild>
 					<Link href="/orders">
 						<ShoppingBag className="mr-2 h-4 w-4" />
-						Orders
+						{t("orders")}
 					</Link>
 				</Button>
 			</nav>

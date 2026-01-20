@@ -7,7 +7,7 @@ import {
 	CarouselNext,
 	CarouselPrevious,
 } from "@workspace/ui/components/carousel";
-
+import { useLocale } from "next-intl";
 import { ProductCard } from "@/components/features/product-card";
 import { Link } from "@/i18n/routing";
 import { useDefaultLocation, useProducts } from "@/lib/hooks/use-storefront";
@@ -27,6 +27,7 @@ export function SubcategoryRow({
 	className,
 }: SubcategoryRowProps) {
 	const { data: location } = useDefaultLocation();
+	const locale = useLocale();
 
 	const { data: products = [], isLoading } = useProducts(
 		{
@@ -51,12 +52,12 @@ export function SubcategoryRow({
 		const firstVariant = p.variants?.[0];
 		const variantTranslation =
 			firstVariant?.translations?.find(
-				(t: { languageCode: string }) => t.languageCode === "en",
+				(t: { languageCode: string }) => t.languageCode === locale,
 			) || firstVariant?.translations?.[0];
 
 		return {
 			id: p.id,
-			name: p.translations?.find((t) => t.languageCode === "en")?.name || "",
+			name: p.translations?.find((t) => t.languageCode === locale)?.name || "",
 			price: firstVariant
 				? Number.parseFloat(firstVariant.price)
 				: p.minPrice || 0,

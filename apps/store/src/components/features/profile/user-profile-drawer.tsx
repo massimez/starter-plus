@@ -9,6 +9,7 @@ import {
 	SheetTrigger,
 } from "@workspace/ui/components/sheet";
 import { Gift, LogOut, MapPin, Settings, ShoppingBag } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useRouter } from "@/i18n/routing";
 
@@ -27,27 +28,28 @@ export function UserProfileDrawer({
 	onSignOut,
 	children,
 }: UserProfileDrawerProps) {
+	const t = useTranslations("Navigation");
 	const router = useRouter();
 	const [isOpen, setIsOpen] = useState(false);
 
 	const menuItems = [
 		{
-			label: "Orders",
+			label: t("drawer.orders"),
 			icon: ShoppingBag,
 			href: "/orders",
 		},
 		{
-			label: "Address",
+			label: t("drawer.addresses"),
 			icon: MapPin,
 			href: "/profile?tab=address",
 		},
 		{
-			label: "Settings",
+			label: t("drawer.settings"),
 			icon: Settings,
 			href: "/profile?tab=settings",
 		},
 		{
-			label: "Bonus",
+			label: t("drawer.rewards"),
 			icon: Gift,
 			href: "/rewards",
 			badge: "1", // Assuming 'p' for points or similar from image
@@ -66,7 +68,7 @@ export function UserProfileDrawer({
 			<SheetTrigger asChild>{children}</SheetTrigger>
 			<SheetContent className="flex w-full flex-col sm:max-w-md">
 				<SheetHeader className="text-left">
-					<SheetTitle className="sr-only">User Profile</SheetTitle>
+					<SheetTitle className="sr-only">{t("profile")}</SheetTitle>
 					<div className="flex flex-col">
 						<div className="font-bold">{user.name}</div>
 						<div className="text-muted-foreground text-sm">{user.email}</div>
@@ -111,7 +113,7 @@ export function UserProfileDrawer({
 						}}
 					>
 						<LogOut className="size-6" />
-						Log out
+						{t("logout")}
 					</Button>
 				</div>
 			</SheetContent>

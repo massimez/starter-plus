@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import type { ClientProfile } from "../../lib/hooks/use-profile";
 
@@ -10,6 +11,7 @@ interface ProfileFormProps {
 }
 
 export function ProfileForm({ profile, onUpdate, updating }: ProfileFormProps) {
+	const t = useTranslations("Profile.form");
 	const [formData, setFormData] = useState({
 		firstName: profile.firstName || "",
 		lastName: profile.lastName || "",
@@ -32,7 +34,7 @@ export function ProfileForm({ profile, onUpdate, updating }: ProfileFormProps) {
 			setSuccess(true);
 			setTimeout(() => setSuccess(false), 3000);
 		} catch (err) {
-			setError(err instanceof Error ? err.message : "Failed to update profile");
+			setError(err instanceof Error ? err.message : t("error"));
 		}
 	};
 
@@ -55,9 +57,7 @@ export function ProfileForm({ profile, onUpdate, updating }: ProfileFormProps) {
 
 			{success && (
 				<div className="mb-4 rounded-lg border border-green-200 bg-green-50 p-3">
-					<p className="text-green-600 text-sm">
-						Profile updated successfully!
-					</p>
+					<p className="text-green-600 text-sm">{t("success")}</p>
 				</div>
 			)}
 
@@ -67,7 +67,7 @@ export function ProfileForm({ profile, onUpdate, updating }: ProfileFormProps) {
 						htmlFor="firstName"
 						className="mb-1 block font-medium text-gray-700 text-sm"
 					>
-						First Name
+						{t("firstName")}
 					</label>
 					<input
 						type="text"
@@ -85,7 +85,7 @@ export function ProfileForm({ profile, onUpdate, updating }: ProfileFormProps) {
 						htmlFor="lastName"
 						className="mb-1 block font-medium text-gray-700 text-sm"
 					>
-						Last Name
+						{t("lastName")}
 					</label>
 					<input
 						type="text"
@@ -103,9 +103,11 @@ export function ProfileForm({ profile, onUpdate, updating }: ProfileFormProps) {
 						htmlFor="email"
 						className="mb-1 block font-medium text-gray-700 text-sm"
 					>
-						Email
+						{t("email")}
 						{profile.emailVerified && (
-							<span className="ml-2 text-green-600 text-xs">✓ Verified</span>
+							<span className="ml-2 text-green-600 text-xs">
+								✓ {t("verified")}
+							</span>
 						)}
 					</label>
 					<input
@@ -125,9 +127,11 @@ export function ProfileForm({ profile, onUpdate, updating }: ProfileFormProps) {
 						htmlFor="phone"
 						className="mb-1 block font-medium text-gray-700 text-sm"
 					>
-						Phone
+						{t("phone")}
 						{profile.phoneVerified && (
-							<span className="ml-2 text-green-600 text-xs">✓ Verified</span>
+							<span className="ml-2 text-green-600 text-xs">
+								✓ {t("verified")}
+							</span>
 						)}
 					</label>
 					<input
@@ -147,7 +151,7 @@ export function ProfileForm({ profile, onUpdate, updating }: ProfileFormProps) {
 						htmlFor="language"
 						className="mb-1 block font-medium text-gray-700 text-sm"
 					>
-						Language
+						{t("language")}
 					</label>
 					<select
 						id="language"
@@ -157,7 +161,7 @@ export function ProfileForm({ profile, onUpdate, updating }: ProfileFormProps) {
 						className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
 						disabled={updating}
 					>
-						<option value="">Select language</option>
+						<option value="">{t("selectLanguage")}</option>
 						<option value="en">English</option>
 						<option value="es">Spanish</option>
 						<option value="fr">French</option>
@@ -171,7 +175,7 @@ export function ProfileForm({ profile, onUpdate, updating }: ProfileFormProps) {
 						htmlFor="preferredContactMethod"
 						className="mb-1 block font-medium text-gray-700 text-sm"
 					>
-						Preferred Contact Method
+						{t("preferredContactMethod")}
 					</label>
 					<select
 						id="preferredContactMethod"
@@ -206,14 +210,14 @@ export function ProfileForm({ profile, onUpdate, updating }: ProfileFormProps) {
 					className="rounded-md border border-gray-300 px-4 py-2 text-gray-700 hover:bg-gray-50 disabled:opacity-50"
 					disabled={updating}
 				>
-					Reset
+					{t("reset")}
 				</button>
 				<button
 					type="submit"
 					className="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
 					disabled={updating}
 				>
-					{updating ? "Saving..." : "Save Changes"}
+					{updating ? t("saving") : t("save")}
 				</button>
 			</div>
 		</form>

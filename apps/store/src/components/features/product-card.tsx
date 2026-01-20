@@ -11,6 +11,7 @@ import {
 } from "@workspace/ui/components/select";
 import { Minus, PlusIcon, ShoppingCart } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Link } from "@/i18n/routing";
@@ -45,6 +46,7 @@ export function ProductCard({ product }: ProductCardProps) {
 	const { items, addItem, removeItem, updateQuantity } = useCartStore();
 	const { formatPrice } = useFormatPrice();
 	const { locationId } = useDefaultLocationId();
+	const t = useTranslations("ProductCard");
 
 	const [selectedVariantId, setSelectedVariantId] = useState<
 		string | undefined
@@ -76,16 +78,14 @@ export function ProductCard({ product }: ProductCardProps) {
 		e.stopPropagation();
 
 		if (!locationId) {
-			toast.error("Unable to add to cart. Location not available.");
+			toast.error(t("addToCartErrorLocation"));
 			return;
 		}
 
 		const variantIdToAdd = selectedVariantId || product.productVariantId;
 
 		if (!variantIdToAdd) {
-			toast.error(
-				"This product is currently unavailable. Please try another variant or check back later.",
-			);
+			toast.error(t("addToCartErrorUnavailable"));
 			return;
 		}
 
@@ -94,7 +94,9 @@ export function ProductCard({ product }: ProductCardProps) {
 			name: product.name,
 			price: currentPrice,
 			quantity: 1,
-			description: product.description || `${product.category} product`,
+			description:
+				product.description ||
+				t("descriptionDefault", { category: product.category }),
 			image: product.image,
 			productVariantId: variantIdToAdd,
 			locationId: locationId,
@@ -104,7 +106,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
 		addItem(itemToAdd);
 		if (quantity === 0) {
-			toast.success(`${product.name} has been added to your cart!`);
+			toast.success(t("addToCartSuccess", { name: product.name }));
 		}
 	};
 
@@ -185,7 +187,7 @@ export function ProductCard({ product }: ProductCardProps) {
 								onValueChange={(val) => setSelectedVariantId(val)}
 							>
 								<SelectTrigger className="bold pointer-events-auto h-7 w-full border border-transparent bg-muted/30 px-2 py-0 font-semi text-foreground text-xs shadow-none transition-colors hover:border-primary/20 hover:bg-muted/50 focus:border-primary/20 focus:ring-0">
-									<SelectValue placeholder="Select variant" />
+									<SelectValue placeholder={t("selectVariant")} />
 								</SelectTrigger>
 								<SelectContent>
 									{product.variants.map((v) => {
@@ -203,7 +205,7 @@ export function ProductCard({ product }: ProductCardProps) {
 						</div>
 					) : (
 						<p className="font-medium text-[10px] text-muted-foreground leading-none">
-							{currentVariantName || "1 pc"}
+							{currentVariantName || t("onePc")}
 						</p>
 					)}
 				</div>

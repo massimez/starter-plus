@@ -1,11 +1,6 @@
-export interface Collection {
-	id: string;
-	name: string;
-	slug: string;
-	children?: Collection[];
-	image?: string | null;
-	sortOrder?: number;
-}
+import type { Collection } from "@/lib/storefront-types";
+
+export type { Collection } from "@/lib/storefront-types";
 
 export function getCollectionPath(
 	collections: Collection[],

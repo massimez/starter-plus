@@ -10,7 +10,13 @@
 		"profile": "Profile",
 		"checkout": "Checkout",
 		"login": "Login",
-		"logout": "Logout"
+		"logout": "Logout",
+		"drawer": {
+			"orders": "Orders",
+			"addresses": "Address",
+			"settings": "Settings",
+			"rewards": "Bonus"
+		}
 	},
 	"Product": {
 		"addToCart": "Add to Cart",
@@ -80,5 +86,153 @@
 		"newsletterSuccess": "Successfully subscribed to newsletter!",
 		"allRightsReserved": "All rights reserved.",
 		"weAccept": "We accept:"
+	},
+	"ProductCard": {
+		"selectVariant": "Select variant",
+		"onePc": "1 pc",
+		"addToCartSuccess": "{name} has been added to your cart!",
+		"addToCartErrorLocation": "Unable to add to cart. Location not available.",
+		"addToCartErrorUnavailable": "This product is currently unavailable. Please try another variant or check back later.",
+		"descriptionDefault": "{category} product"
+	},
+	"AddressSelector": {
+		"title": "Choose a saved address",
+		"default": "Default",
+		"newAddressTitle": "Enter new address",
+		"newAddressDescription": "Manually enter a new shipping address"
+	},
+	"Profile": {
+		"sidebar": {
+			"overview": "Overview",
+			"settings": "Settings",
+			"addresses": "Addresses",
+			"privacy": "Privacy",
+			"orders": "Orders"
+		},
+		"form": {
+			"firstName": "First Name",
+			"lastName": "Last Name",
+			"email": "Email",
+			"phone": "Phone",
+			"language": "Language",
+			"preferredContactMethod": "Preferred Contact Method",
+			"selectLanguage": "Select language",
+			"verified": "Verified",
+			"reset": "Reset",
+			"save": "Save Changes",
+			"saving": "Saving...",
+			"success": "Profile updated successfully!",
+			"error": "Failed to update profile"
+		},
+		"addresses": {
+			"title": "Addresses",
+			"add": "Add Address",
+			"edit": "Edit Address",
+			"editAction": "Edit",
+			"deleteAction": "Delete",
+			"addNew": "Add New Address",
+			"type": "Type",
+			"shipping": "Shipping",
+			"billing": "Billing",
+			"street": "Street Address",
+			"city": "City",
+			"state": "State/Province",
+			"postalCode": "Postal Code",
+			"country": "Country",
+			"default": "Set as default address",
+			"cancel": "Cancel",
+			"save": "Save Address",
+			"saving": "Saving...",
+			"deleteConfirm": "Are you sure you want to delete this address?",
+			"empty": "No addresses saved yet.",
+			"emptyAction": "Click \"Add Address\" to create one."
+		},
+		"orders": {
+			"title": "Order History",
+			"description": "View and track your past orders",
+			"searchPlaceholder": "Search by order number or ID...",
+			"status": "Status",
+			"sortBy": "Sort by",
+			"allStatus": "All Status",
+			"processing": "Processing",
+			"inTransit": "In Transit",
+			"delivered": "Delivered",
+			"cancelled": "Cancelled",
+			"newest": "Newest First",
+			"oldest": "Oldest First",
+			"amountHigh": "Amount: High to Low",
+			"amountLow": "Amount: Low to High",
+			"totalAmount": "Total Amount",
+			"loading": "Loading your orders...",
+			"noResults": "No orders found",
+			"noResultsDesc": "No orders match your current filters. Try adjusting your search or filters.",
+			"clearFilters": "Clear Filters",
+			"empty": "No orders yet",
+			"emptyDesc": "Start your shopping journey and your orders will appear here.",
+			"startShopping": "Start Shopping"
+		}
+	},
+	"Checkout": {
+		"steps": {
+			"shipping": "Shipping",
+			"payment": "Payment",
+			"review": "Review"
+		},
+		"validation": {
+			"title": "Validation Errors",
+			"emptyCart": "Your cart is empty",
+			"completeFields": "Please complete all required fields",
+			"addressSaved": "Address saved to your profile",
+			"addressSaveFailed": "Failed to save address, but proceeding with order",
+			"fixErrors": "Please fix {count} validation error(s) in the form"
+		},
+		"shipping": {
+			"title": "Shipping Address",
+			"manual": "Or enter manually",
+			"saveAddress": "Save this address to my profile",
+			"street": "Street Address",
+			"streetPlaceholder": "123 Main Street",
+			"city": "City",
+			"cityPlaceholder": "New York",
+			"state": "State/Province",
+			"statePlaceholder": "NY",
+			"postalCode": "Postal Code",
+			"postalCodePlaceholder": "10001"
+		},
+		"payment": {
+			"title": "Payment Method",
+			"cod": "Cash on Delivery",
+			"codDescription": "Pay when your order arrives at your doorstep",
+			"contactInfo": "Contact Information",
+			"fullName": "Full Name",
+			"fullNamePlaceholder": "John Doe",
+			"email": "Email Address",
+			"emailPlaceholder": "john@example.com",
+			"phone": "Phone Number",
+			"phonePlaceholder": "(555) 123-4567"
+		},
+		"review": {
+			"title": "Order Review",
+			"shippingAddress": "Shipping Address",
+			"paymentMethod": "Payment Method",
+			"total": "Total",
+			"items": "Items",
+			"qty": "Qty",
+			"sku": "SKU",
+			"subtotal": "Subtotal",
+			"discount": "Discount",
+			"shipping": "Shipping",
+			"tax": "Tax"
+		},
+		"status": {
+			"title": "Order Details",
+			"reorder": "Reorder",
+			"invoice": "Invoice",
+			"invoiceComingSoon": "Invoice download coming soon",
+			"reorderSuccess": "Items added to cart",
+			"reorderError": "Failed to reorder",
+			"noItems": "Unable to reorder",
+			"loading": "Loading details..."
+		}
 	}
 }

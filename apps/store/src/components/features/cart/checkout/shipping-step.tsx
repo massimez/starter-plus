@@ -10,6 +10,7 @@ import {
 } from "@workspace/ui/components/form";
 import { Input } from "@workspace/ui/components/input";
 import { ArrowLeft, Truck } from "lucide-react";
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import type { UseFormReturn } from "react-hook-form";
 import { AddressSelector } from "@/components/features/address-selector";
@@ -40,6 +41,7 @@ export function ShippingStep({
 	onBack,
 	onAddressSelect,
 }: ShippingStepProps & { isProfileLoaded: boolean }) {
+	const t = useTranslations("Checkout.shipping");
 	const [isMapSelected, setIsMapSelected] = useState(false);
 	return (
 		<div className="space-y-4">
@@ -58,7 +60,7 @@ export function ShippingStep({
 					<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
 						<Truck className="h-5 w-5 text-primary" />
 					</div>
-					Shipping Address
+					{t("title")}
 				</CardTitle>
 			</div>
 			<div className="space-y-6">
@@ -106,7 +108,7 @@ export function ShippingStep({
 							</div>
 							<div className="relative flex justify-center text-xs uppercase">
 								<span className="bg-background px-2 text-muted-foreground">
-									Or enter manually
+									{t("manual")}
 								</span>
 							</div>
 						</div>
@@ -117,11 +119,11 @@ export function ShippingStep({
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel className="font-semibold text-sm">
-										Street Address *
+										{t("street")} *
 									</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="123 Main Street"
+											placeholder={t("streetPlaceholder")}
 											className="h-12 rounded-lg border-2 px-4 text-base transition-all duration-200 focus:ring-2 focus:ring-primary/20"
 											{...field}
 										/>
@@ -138,11 +140,11 @@ export function ShippingStep({
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel className="font-semibold text-sm">
-											City *
+											{t("city")} *
 										</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="New York"
+												placeholder={t("cityPlaceholder")}
 												className="h-12 rounded-lg border-2 px-4 text-base transition-all duration-200 focus:ring-2 focus:ring-primary/20"
 												{...field}
 											/>
@@ -158,11 +160,11 @@ export function ShippingStep({
 								render={({ field }) => (
 									<FormItem>
 										<FormLabel className="font-semibold text-sm">
-											State/Province *
+											{t("state")} *
 										</FormLabel>
 										<FormControl>
 											<Input
-												placeholder="NY"
+												placeholder={t("statePlaceholder")}
 												className="h-12 rounded-lg border-2 px-4 text-base transition-all duration-200 focus:ring-2 focus:ring-primary/20"
 												{...field}
 											/>
@@ -179,11 +181,11 @@ export function ShippingStep({
 							render={({ field }) => (
 								<FormItem>
 									<FormLabel className="font-semibold text-sm">
-										Postal Code *
+										{t("postalCode")} *
 									</FormLabel>
 									<FormControl>
 										<Input
-											placeholder="10001"
+											placeholder={t("postalCodePlaceholder")}
 											className="h-12 rounded-lg border-2 px-4 text-base transition-all duration-200 focus:ring-2 focus:ring-primary/20"
 											{...field}
 										/>
@@ -212,7 +214,7 @@ export function ShippingStep({
 								htmlFor="save-address"
 								className="cursor-pointer font-medium text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 							>
-								Save this address to my profile
+								{t("saveAddress")}
 							</label>
 						</div>
 					)}

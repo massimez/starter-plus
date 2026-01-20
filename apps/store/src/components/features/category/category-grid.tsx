@@ -1,28 +1,21 @@
 "use client";
 
+import { useMounted } from "@workspace/ui/hooks/use-mounted";
 import Image from "next/image";
 import { useLocale } from "next-intl";
-import { useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
 import { useCollections } from "@/lib/hooks/use-storefront";
-import type { Collection } from "@/lib/storefront-types";
+import {
+	type Collection,
+	getCollectionTranslation,
+} from "@/lib/storefront-types";
 
 export function CategoryGrid() {
 	const locale = useLocale();
-	const [mounted, setMounted] = useState(false);
+	const mounted = useMounted();
 	const { data: collections = [], isLoading } = useCollections(
 		true, // enabled
 	);
-
-	useEffect(() => {
-		setMounted(true);
-	}, []);
-
-	// Helper to get the translation for the current locale
-	const getTranslation = (item: Collection) =>
-		item.translations?.find((t) => t.languageCode === locale) ||
-		item.translations?.find((t) => t.languageCode === "en") ||
-		item.translations?.[0];
 
 	// Show loading only after component has mounted to prevent hydration mismatch
 	if (!mounted || isLoading) {
@@ -43,7 +36,7 @@ export function CategoryGrid() {
 		<div className="grid grid-cols-1 gap-8">
 			<div className="min-w-0 space-y-16">
 				{collections.map((collection: Collection) => {
-					const translation = getTranslation(collection);
+					const translation = getCollectionTranslation(collection, locale);
 					const name = translation?.name || collection.name;
 
 					return (
@@ -60,7 +53,10 @@ export function CategoryGrid() {
 							{collection.children?.length ? (
 								<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 2xl:grid-cols-5">
 									{collection.children.map((child) => {
-										const childTranslation = getTranslation(child);
+										const childTranslation = getCollectionTranslation(
+											child,
+											locale,
+										);
 										const childName = childTranslation?.name || child.name;
 
 										return (

@@ -24,6 +24,21 @@ export interface Collection {
 }
 
 /**
+ * Get the translation for a collection based on the current locale
+ * Falls back to English, then the first available translation
+ */
+export function getCollectionTranslation(
+	collection: Collection,
+	locale: string,
+) {
+	return (
+		collection.translations?.find((t) => t.languageCode === locale) ||
+		collection.translations?.find((t) => t.languageCode === "en") ||
+		collection.translations?.[0]
+	);
+}
+
+/**
  * Flatten nested collections into a single array
  */
 export function flattenCollections(collections: Collection[]): Collection[] {

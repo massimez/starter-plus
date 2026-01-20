@@ -19,6 +19,7 @@ import {
 	XCircle,
 } from "lucide-react";
 import Image from "next/image";
+import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useFormatPrice } from "@/lib/hooks/use-format-price";
 import { useOrder } from "@/lib/hooks/use-storefront";
@@ -87,6 +88,8 @@ export function OrderStatusSheet({
 	orderId,
 	orderNumber,
 }: OrderStatusSheetProps) {
+	const t = useTranslations("Checkout.status");
+	const tReview = useTranslations("Checkout.review");
 	// const { data: org } = useOrganization();
 	// const organizationId = org?.id;
 	const { addItem } = useCartStore();
@@ -107,9 +110,7 @@ export function OrderStatusSheet({
 
 	const handleReorder = () => {
 		if (!orderDetails?.items || orderDetails.items.length === 0) {
-			toast.error("Unable to reorder", {
-				description: "No items found in this order",
-			});
+			toast.error(t("noItems"));
 			return;
 		}
 
@@ -132,13 +133,11 @@ export function OrderStatusSheet({
 				addedCount++;
 			});
 
-			toast.success("Items added to cart", {
+			toast.success(t("reorderSuccess"), {
 				description: `${addedCount} item${addedCount > 1 ? "s" : ""} from order ${orderNumber} added to your cart`,
 			});
 		} catch {
-			toast.error("Failed to reorder", {
-				description: "Something went wrong. Please try again.",
-			});
+			toast.error(t("reorderError"));
 		}
 	};
 
@@ -157,7 +156,7 @@ export function OrderStatusSheet({
 			<SheetContent className="w-full overflow-y-auto sm:max-w-xl">
 				<SheetHeader className="text-center">
 					<SheetTitle className="text-center font-bold text-2xl tracking-tight">
-						Order Details
+						{t("title")}
 					</SheetTitle>
 					<SheetDescription className="text-center text-base text-muted-foreground">
 						Order #{orderNumber}
@@ -188,17 +187,17 @@ export function OrderStatusSheet({
 					<div className="grid grid-cols-2 gap-4">
 						<Button onClick={handleReorder} className="w-full shadow-sm">
 							<RefreshCw className="mr-2 h-4 w-4" />
-							Reorder
+							{t("reorder")}
 						</Button>
 						<Button
 							variant="outline"
 							className="w-full shadow-sm"
 							onClick={() => {
-								toast.info("Invoice download coming soon");
+								toast.info(t("invoiceComingSoon"));
 							}}
 						>
 							<Download className="mr-2 h-4 w-4" />
-							Invoice
+							{t("invoice")}
 						</Button>
 					</div>
 
@@ -207,7 +206,7 @@ export function OrderStatusSheet({
 						<div className="flex flex-col items-center justify-center py-12">
 							<div className="h-8 w-8 animate-spin rounded-full border-primary border-t-2" />
 							<p className="mt-4 text-muted-foreground text-sm">
-								Loading details...
+								{t("loading")}
 							</p>
 						</div>
 					) : (
@@ -215,7 +214,7 @@ export function OrderStatusSheet({
 							<div className="space-y-6">
 								<div className="space-y-4">
 									<h3 className="font-semibold text-lg tracking-tight">
-										Items ({orderDetails.items?.length || 0})
+										{tReview("items")} ({orderDetails.items?.length || 0})
 									</h3>
 									<div className="space-y-4">
 										{orderDetails.items?.map((item: OrderItem) => (
@@ -242,13 +241,13 @@ export function OrderStatusSheet({
 													<div className="flex flex-wrap gap-x-4 gap-y-1 text-muted-foreground text-sm">
 														<span className="inline-flex items-center gap-1">
 															<span className="text-muted-foreground/70">
-																Qty:
+																{tReview("qty")}:
 															</span>{" "}
 															{item.quantity}
 														</span>
 														<span className="inline-flex items-center gap-1 border-l pl-4">
 															<span className="text-muted-foreground/70">
-																SKU:
+																{tReview("sku")}:
 															</span>{" "}
 															{item.sku}
 														</span>
@@ -267,27 +266,35 @@ export function OrderStatusSheet({
 								{/* Price Breakdown */}
 								<div className="space-y-3 rounded-xl border bg-muted/30 p-6">
 									<div className="flex justify-between text-sm">
-										<span className="text-muted-foreground">Subtotal</span>
+										<span className="text-muted-foreground">
+											{tReview("subtotal")}
+										</span>
 										<span className="font-medium">
 											{formatPrice(Number(orderDetails.subtotal || 0))}
 										</span>
 									</div>
 									{Number(orderDetails.discountAmount || 0) > 0 && (
 										<div className="flex justify-between text-sm">
-											<span className="text-muted-foreground">Discount</span>
+											<span className="text-muted-foreground">
+												{tReview("discount")}
+											</span>
 											<span className="font-medium text-green-600">
 												-{formatPrice(Number(orderDetails.discountAmount || 0))}
 											</span>
 										</div>
 									)}
 									<div className="flex justify-between text-sm">
-										<span className="text-muted-foreground">Shipping</span>
+										<span className="text-muted-foreground">
+											{tReview("shipping")}
+										</span>
 										<span className="font-medium">
 											{formatPrice(Number(orderDetails.shippingAmount || 0))}
 										</span>
 									</div>
 									<div className="flex justify-between text-sm">
-										<span className="text-muted-foreground">Tax</span>
+										<span className="text-muted-foreground">
+											{tReview("tax")}
+										</span>
 										<span className="font-medium">
 											{formatPrice(Number(orderDetails.taxAmount || 0))}
 										</span>
@@ -296,7 +303,9 @@ export function OrderStatusSheet({
 									<div className="my-2 border-border/50 border-t" />
 
 									<div className="flex items-baseline justify-between pt-1">
-										<span className="font-semibold text-base">Total</span>
+										<span className="font-semibold text-base">
+											{tReview("total")}
+										</span>
 										<span className="font-bold text-xl tracking-tight">
 											{formatPrice(Number(orderDetails.totalAmount))}
 										</span>
@@ -308,7 +317,7 @@ export function OrderStatusSheet({
 									<div className="rounded-xl border p-5">
 										<h4 className="mb-3 flex items-center gap-2 font-semibold text-sm">
 											<Truck className="h-4 w-4 text-muted-foreground" />
-											Shipping Address
+											{tReview("shippingAddress")}
 										</h4>
 										<div className="ml-2 space-y-1 border-muted border-l-2 pl-6 text-muted-foreground text-sm">
 											<p className="font-medium text-foreground">

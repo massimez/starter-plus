@@ -22,15 +22,15 @@ export default function ProfilePage() {
 	const t = useTranslations("Navigation");
 	const { data: session, isPending } = useSession();
 	const [activeTab, setActiveTab] = useQueryState("tab", {
-		defaultValue: "overview",
+		defaultValue: "settings",
 		parse: (value) => {
 			if (
 				typeof value === "string" &&
-				["overview", "settings", "addresses", "privacy"].includes(value)
+				["settings", "addresses", "privacy"].includes(value)
 			) {
 				return value;
 			}
-			return "overview";
+			return "settings";
 		},
 	});
 	const isClient = useMounted();
@@ -69,30 +69,6 @@ export default function ProfilePage() {
 					<ProfileSidebar activeTab={activeTab} onTabChange={setActiveTab} />
 				</aside>
 				<div className="w-full flex-1">
-					{activeTab === "overview" && (
-						<div className="space-y-6">
-							<Card>
-								<CardHeader>
-									<CardTitle>Profile Information</CardTitle>
-									<CardDescription>Your personal details.</CardDescription>
-								</CardHeader>
-								<CardContent className="space-y-4">
-									<div className="grid gap-1">
-										<span className="font-medium text-muted-foreground text-sm">
-											Name
-										</span>
-										<span className="font-medium">{session.user.name}</span>
-									</div>
-									<div className="grid gap-1">
-										<span className="font-medium text-muted-foreground text-sm">
-											Email
-										</span>
-										<span className="font-medium">{session.user.email}</span>
-									</div>
-								</CardContent>
-							</Card>
-						</div>
-					)}
 					{activeTab === "settings" && profile && (
 						<div className="space-y-6">
 							<Card>

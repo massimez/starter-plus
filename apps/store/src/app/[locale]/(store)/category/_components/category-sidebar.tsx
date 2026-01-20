@@ -9,8 +9,10 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { Sparkles, UtensilsCrossed } from "lucide-react";
 import Image from "next/image";
+import { useLocale } from "next-intl";
 import { useEffect, useState } from "react";
 import { Link } from "@/i18n/routing";
+import { getCollectionTranslation } from "@/lib/storefront-types";
 import type { Collection } from "./utils";
 
 interface CategorySidebarProps {
@@ -22,6 +24,7 @@ export function CategorySidebar({
 	collections,
 	activeSlug,
 }: CategorySidebarProps) {
+	const locale = useLocale();
 	const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
 	// Mock static items based on the image provided
@@ -116,7 +119,10 @@ export function CategorySidebar({
 											{collection.image ? (
 												<Image
 													src={collection.image}
-													alt={collection.name}
+													alt={
+														getCollectionTranslation(collection, locale)
+															?.name || collection.name
+													}
 													fill
 													className="object-cover"
 												/>
@@ -124,7 +130,10 @@ export function CategorySidebar({
 												<span className="text-muted-foreground text-xs" />
 											)}
 										</div>
-										<span className="font-semibold">{collection.name}</span>
+										<span className="font-semibold">
+											{getCollectionTranslation(collection, locale)?.name ||
+												collection.name}
+										</span>
 									</div>
 								</AccordionTrigger>
 								<AccordionContent className="space-y-1 ps-11 pe-2 pb-0">
@@ -137,7 +146,9 @@ export function CategorySidebar({
 												: "text-muted-foreground",
 										)}
 									>
-										All {collection.name}
+										All{" "}
+										{getCollectionTranslation(collection, locale)?.name ||
+											collection.name}
 									</Link>
 									{collection.children?.map((child) => (
 										<Link
@@ -150,7 +161,8 @@ export function CategorySidebar({
 													: "text-muted-foreground",
 											)}
 										>
-											{child.name}
+											{getCollectionTranslation(child, locale)?.name ||
+												child.name}
 										</Link>
 									))}
 								</AccordionContent>
@@ -173,7 +185,10 @@ export function CategorySidebar({
 								{collection.image ? (
 									<Image
 										src={collection.image}
-										alt={collection.name}
+										alt={
+											getCollectionTranslation(collection, locale)?.name ||
+											collection.name
+										}
 										fill
 										className="object-cover"
 									/>
@@ -181,7 +196,10 @@ export function CategorySidebar({
 									<span className="text-muted-foreground text-xs" />
 								)}
 							</div>
-							<span>{collection.name}</span>
+							<span>
+								{getCollectionTranslation(collection, locale)?.name ||
+									collection.name}
+							</span>
 						</Link>
 					);
 				})}
