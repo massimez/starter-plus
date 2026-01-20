@@ -47,9 +47,7 @@ export const storefrontRewardsRoute = createRouter()
 	 */
 	.get("/balance", authMiddleware, async (c) => {
 		try {
-			const organizationId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
+			const organizationId = validateOrgId(c.var.tenantId || undefined);
 			const user = c.get("user") as { id: string };
 
 			// Get active bonus program
@@ -100,9 +98,7 @@ export const storefrontRewardsRoute = createRouter()
 		queryValidator(paginationSchema),
 		async (c) => {
 			try {
-				const organizationId = validateOrgId(
-					c.get("session")?.activeOrganizationId as string,
-				);
+				const organizationId = validateOrgId(c.var.tenantId || undefined);
 				const user = c.get("user") as { id: string };
 				const { limit, offset } = c.req.valid("query");
 
@@ -139,9 +135,7 @@ export const storefrontRewardsRoute = createRouter()
 	 */
 	.get("/available", authMiddleware, async (c) => {
 		try {
-			const organizationId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
+			const organizationId = validateOrgId(c.var.tenantId || undefined);
 			const user = c.get("user") as { id: string };
 
 			// Get active bonus program
@@ -178,9 +172,7 @@ export const storefrontRewardsRoute = createRouter()
 		jsonValidator(redeemRewardSchema),
 		async (c) => {
 			try {
-				const organizationId = validateOrgId(
-					c.get("session")?.activeOrganizationId as string,
-				);
+				const organizationId = validateOrgId(c.var.tenantId || undefined);
 				const user = c.get("user") as { id: string };
 				const { rewardId, payoutDetails } = c.req.valid("json");
 
@@ -231,9 +223,7 @@ export const storefrontRewardsRoute = createRouter()
 	 */
 	.get("/coupons", authMiddleware, async (c) => {
 		try {
-			const organizationId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
+			const organizationId = validateOrgId(c.var.tenantId || undefined);
 			const user = c.get("user") as { id: string };
 
 			// Get user's coupons
@@ -251,9 +241,7 @@ export const storefrontRewardsRoute = createRouter()
 	 */
 	.get("/referral", authMiddleware, async (c) => {
 		try {
-			const organizationId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
+			const organizationId = validateOrgId(c.var.tenantId || undefined);
 			const user = c.get("user") as { id: string };
 
 			// Get active bonus program
@@ -301,9 +289,7 @@ export const storefrontRewardsRoute = createRouter()
 	 */
 	.get("/milestones", authMiddleware, async (c) => {
 		try {
-			const organizationId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
+			const organizationId = validateOrgId(c.var.tenantId || undefined);
 			const user = c.get("user") as { id: string };
 
 			// Get active bonus program
@@ -336,9 +322,7 @@ export const storefrontRewardsRoute = createRouter()
 	 */
 	.get("/tier", authMiddleware, async (c) => {
 		try {
-			const organizationId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
+			const organizationId = validateOrgId(c.var.tenantId || undefined);
 			const user = c.get("user") as { id: string };
 
 			// Get active bonus program
@@ -375,9 +359,7 @@ export const storefrontRewardsRoute = createRouter()
 		jsonValidator(applyCouponSchema),
 		async (c) => {
 			try {
-				const organizationId = validateOrgId(
-					c.get("session")?.activeOrganizationId as string,
-				);
+				const organizationId = validateOrgId(c.var.tenantId || undefined);
 				const { code, orderTotal } = c.req.valid("json");
 
 				try {
@@ -425,9 +407,7 @@ export const storefrontRewardsRoute = createRouter()
 		jsonValidator(applyCouponSchema),
 		async (c) => {
 			try {
-				const organizationId = validateOrgId(
-					c.get("session")?.activeOrganizationId as string,
-				);
+				const organizationId = validateOrgId(c.var.tenantId || undefined);
 				const { code, orderTotal } = c.req.valid("json");
 
 				const result = await applyCoupon(code, organizationId, orderTotal);

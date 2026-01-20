@@ -21,9 +21,9 @@ export const clientRoute = createRouter()
 		async (c) => {
 			try {
 				const userId = c.get("session")?.userId as string;
-				const activeOrgId = c.get("session")?.activeOrganizationId as string;
-
-				const clientProfile = await getMyClient(userId, activeOrgId);
+				// biome-ignore lint/style/noNonNullAssertion: <tenant middleware should set this>
+				const organizationId = c.var.tenantId!;
+				const clientProfile = await getMyClient(userId, organizationId);
 				return c.json(createSuccessResponse(clientProfile));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch client profile");
@@ -38,12 +38,13 @@ export const clientRoute = createRouter()
 		async (c) => {
 			try {
 				const userId = c.get("session")?.userId as string;
-				const activeOrgId = c.get("session")?.activeOrganizationId as string;
 				const updateData = c.req.valid("json");
+				// biome-ignore lint/style/noNonNullAssertion: <tenant middleware should set this>
+				const organizationId = c.var.tenantId!;
 
 				const updatedProfile = await updateMyClient(
 					userId,
-					activeOrgId,
+					organizationId,
 					updateData,
 				);
 				return c.json(createSuccessResponse(updatedProfile));
