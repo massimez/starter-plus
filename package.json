@@ -11,12 +11,12 @@
 		"build": "turbo build",
 		"check-types": "turbo check-types",
 		"dev:native": "turbo -F native dev",
-		"dev:web": "turbo -F @workspace/web dev",
-		"dev:server": "turbo -F @workspace/server dev",
-		"db:push": "turbo -F @workspace/server db:push",
-		"db:studio": "turbo -F @workspace/server db:studio",
-		"db:generate": "turbo -F @workspace/server db:generate",
-		"db:migrate": "turbo -F @workspace/server db:migrate"
+		"dev:admin-store": "turbo -F @workspace/admin-store dev",
+		"dev:api": "turbo -F @workspace/api dev",
+		"db:push": "turbo -F @workspace/api db:push",
+		"db:studio": "turbo -F @workspace/api db:studio",
+		"db:generate": "turbo -F @workspace/api db:generate",
+		"db:migrate": "turbo -F @workspace/api db:migrate"
 	},
 	"simple-git-hooks": {
 		"pre-commit": "bun run check .",

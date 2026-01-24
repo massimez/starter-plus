@@ -40,7 +40,7 @@
 		"**/*.cjs",
 		"**/*.js",
 		".next/types/**/*.ts",
-		"../server/env.ts",
+		"../api/env.ts",
 		".next/dev/types/**/*.ts"
 	],
 	"exclude": ["node_modules"]
