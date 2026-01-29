@@ -14,6 +14,7 @@ import { Skeleton } from "@workspace/ui/components/skeleton";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Suspense } from "react";
+import { UserNav } from "./user-nav";
 
 interface BreadcrumbConfig {
 	label?: string;
@@ -192,7 +193,7 @@ const DynamicBreadcrumb = () => {
 
 export const HeaderDashboard = () => {
 	return (
-		<header className="flex h-16 shrink-0 items-center gap-2 border-b">
+		<header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b pr-4">
 			<div className="flex items-center gap-2 px-3">
 				<SidebarTrigger />
 				<Separator orientation="vertical" className="mr-2 h-4" />
@@ -200,6 +201,7 @@ export const HeaderDashboard = () => {
 					<DynamicBreadcrumb />
 				</Suspense>
 			</div>
+			<UserNav />
 		</header>
 	);
 };

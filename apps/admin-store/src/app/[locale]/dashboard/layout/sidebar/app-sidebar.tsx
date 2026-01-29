@@ -4,7 +4,6 @@ import { useQuery } from "@tanstack/react-query";
 import {
 	Sidebar,
 	SidebarContent,
-	SidebarFooter,
 	SidebarHeader,
 	SidebarRail,
 } from "@workspace/ui/components/sidebar";
@@ -20,7 +19,7 @@ import { usePathname, useRouter } from "next/navigation";
 import type * as React from "react";
 import { hc } from "@/lib/api-client";
 import { NavMain } from "./nav-main";
-import { NavUser } from "./nav-user";
+
 import { TeamSwitcher } from "./team-switcher";
 
 /* -----------------------------------------------
@@ -170,10 +169,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 			<SidebarContent>
 				<NavMain items={navMain} />
 			</SidebarContent>
-
-			<SidebarFooter>
-				<NavUser />
-			</SidebarFooter>
 
 			<SidebarRail />
 		</Sidebar>
