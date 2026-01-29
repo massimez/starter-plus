@@ -3,19 +3,15 @@
 import { Button } from "@workspace/ui/components/button";
 import { FacebookIcon } from "@workspace/ui/components/icons/brands/FacebookIcon";
 import { TikTokIcon } from "@workspace/ui/components/icons/brands/TikTokIcon";
-import { Input } from "@workspace/ui/components/input";
 import {
 	InstagramIcon,
 	LinkedinIcon,
 	Mail,
 	MapPin,
 	Phone,
-	Send,
 	XIcon,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { toast } from "sonner";
 import { Link } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
 
@@ -29,28 +25,19 @@ export function Footer({
 	phone?: string;
 }) {
 	const t = useTranslations("Footer");
-	const [newsletterEmail, setNewsletterEmail] = useState("");
-
-	const handleNewsletterSubmit = (e: React.FormEvent) => {
-		e.preventDefault();
-		if (newsletterEmail) {
-			toast.success(t("newsletterSuccess"));
-			setNewsletterEmail("");
-		}
-	};
 
 	const footerLinks = {
 		shop: [
 			{ href: "/category/", label: t("categories") },
 			{ href: "/products?sort=newest", label: t("newArrivals") },
-			{ href: "/products?sort=popular", label: t("bestSellers") },
+			// { href: "/products?sort=popular", label: t("bestSellers") },
 		],
 		company: [
 			{ href: "/about", label: t("aboutUs") },
-			{ href: "/contact", label: t("contactUs") },
+			// { href: "/contact", label: t("contactUs") },
 		],
 		support: [
-			{ href: "/help", label: t("helpCenter") },
+			// { href: "/help", label: t("helpCenter") },
 			{ href: "/shipping", label: t("shipping") },
 			{ href: "/returns", label: t("returns") },
 			{ href: "/faq", label: t("faq") },
@@ -93,7 +80,7 @@ export function Footer({
 	return (
 		<footer className="xm-auto mt-auto px-4 py-12 md:py-16">
 			{/* Main Footer Content */}
-			<div className="grid gap-12 md:grid-cols-2 lg:grid-cols-12 lg:gap-8 xl:gap-12">
+			<div className="grid md:grid-cols-2 md:gap-12 lg:grid-cols-12 lg:gap-8 xl:gap-12">
 				{/* Brand Section */}
 				<div className="lg:col-span-6">
 					<Link href="/" className="mb-6 inline-block">
@@ -154,7 +141,7 @@ export function Footer({
 				</div>
 
 				{/* Links Sections */}
-				<div className="mt-14 flex flex-row flex-wrap content-start gap-10 lg:col-span-6">
+				<div className="mt-12 flex flex-row flex-wrap content-start gap-10 md:mt-14 lg:col-span-6">
 					{Object.entries(footerLinks).map(([key, links]) => (
 						<div
 							key={key}
@@ -180,34 +167,8 @@ export function Footer({
 				</div>
 			</div>
 
-			{/* Newsletter Section */}
-			<div className="mt-12 border-t pt-8">
-				<div className="mx-auto max-w-md">
-					<h3 className="mb-2 text-center font-semibold text-foreground">
-						{t("newsletterTitle")}
-					</h3>
-					<p className="mb-4 text-center text-muted-foreground text-sm">
-						{t("newsletterDescription")}
-					</p>
-					<form onSubmit={handleNewsletterSubmit} className="flex gap-2">
-						<Input
-							type="email"
-							placeholder={t("emailPlaceholder")}
-							value={newsletterEmail}
-							onChange={(e) => setNewsletterEmail(e.target.value)}
-							required
-							className="flex-1"
-						/>
-						<Button type="submit" size="icon" className="shrink-0">
-							<Send className="h-4 w-4" />
-							<span className="sr-only">{t("subscribe")}</span>
-						</Button>
-					</form>
-				</div>
-			</div>
-
 			{/* Bottom Section */}
-			<div className="mt-12 flex flex-col items-center justify-center gap-4 border-t pt-8 md:flex-row">
+			<div className="mt-6 flex flex-col items-center justify-center gap-4 border-t pt-8 md:mt-12 md:flex-row">
 				{/* Copyright */}
 				<p className="text-center text-muted-foreground text-sm">
 					© {new Date().getFullYear()} {storeName?.toUpperCase() || ""}.{" "}

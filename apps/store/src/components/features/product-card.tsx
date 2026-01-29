@@ -2,13 +2,7 @@
 
 import { Badge } from "@workspace/ui/components/badge";
 import { Card, CardContent } from "@workspace/ui/components/card";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@workspace/ui/components/select";
+
 import { Minus, PlusIcon, ShoppingCart } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
@@ -175,37 +169,51 @@ export function ProductCard({ product }: ProductCardProps) {
 
 			{/* Content */}
 			<CardContent className="flex flex-1 flex-col px-2 pt-0 pb-2 text-left">
-				<h3 className="mt-0.5 line-clamp-2 min-h-[2.4em] font-bold text-foreground text-xs leading-tight">
+				<h3 className="mt-0.5 mb-1 line-clamp-2 font-bold text-foreground text-xs leading-tight">
 					{product.name}
 				</h3>
 
-				<div className="min-h-[1.2em]">
+				<div className="h-8">
 					{product.variants && product.variants.length > 1 ? (
-						<div className="pointer-events-none relative z-10">
-							<Select
-								value={selectedVariantId}
-								onValueChange={(val) => setSelectedVariantId(val)}
-							>
-								<SelectTrigger className="bold pointer-events-auto h-7 w-full border border-transparent bg-muted/30 px-2 py-0 font-semi text-foreground text-xs shadow-none transition-colors hover:border-primary/20 hover:bg-muted/50 focus:border-primary/20 focus:ring-0">
-									<SelectValue placeholder={t("selectVariant")} />
-								</SelectTrigger>
-								<SelectContent>
-									{product.variants.map((v) => {
-										const name =
-											v.translations?.find((t) => t.languageCode === "en")
-												?.name || v.sku;
-										return (
-											<SelectItem key={v.id} value={v.id} className="text-xs">
-												{name}
-											</SelectItem>
-										);
-									})}
-								</SelectContent>
-							</Select>
+						<div className="relative z-10 flex items-center gap-1 pt-2">
+							{product.variants.slice(0, 3).map((v) => {
+								const name =
+									v.translations?.find((t) => t.languageCode === "en")?.name ||
+									v.sku;
+								const isSelected = v.id === selectedVariantId;
+								return (
+									<Badge
+										key={v.id}
+										variant={isSelected ? "primary" : "outline"}
+										className="max-w-20 cursor-pointer hover:bg-primary/90 hover:text-primary-foreground"
+										onClick={(e) => {
+											e.preventDefault();
+											e.stopPropagation();
+											setSelectedVariantId(v.id);
+										}}
+									>
+										<span className="truncate">{name}</span>
+									</Badge>
+								);
+							})}
+							{product.variants.length > 3 && (
+								<Link
+									href={`/product/${product.id}`}
+									className="flex items-center no-underline"
+									onClick={(e) => e.stopPropagation()}
+								>
+									<Badge
+										variant="outline"
+										className="cursor-pointer hover:bg-primary/90 hover:text-primary-foreground"
+									>
+										+{product.variants.length - 3}
+									</Badge>
+								</Link>
+							)}
 						</div>
 					) : (
 						<p className="font-medium text-[10px] text-muted-foreground leading-none">
-							{currentVariantName || t("onePc")}
+							{currentVariantName || ""}
 						</p>
 					)}
 				</div>
