@@ -5,7 +5,7 @@ import { Card, CardContent } from "@workspace/ui/components/card";
 import { X } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useState } from "react";
+
 import { useFormatPrice } from "@/lib/hooks/use-format-price";
 import { useCartStore } from "@/store/use-cart-store";
 
@@ -28,7 +28,7 @@ export function CartItem({ item }: CartItemProps) {
 	const t = useTranslations("Cart");
 	const { updateQuantity, removeItem } = useCartStore();
 	const { formatPrice } = useFormatPrice();
-	const [quantity, setQuantity] = useState(item.quantity);
+	const quantity = item.quantity;
 
 	const handleQuantityChange = (newQuantity: number) => {
 		if (newQuantity === 0) {
@@ -36,7 +36,6 @@ export function CartItem({ item }: CartItemProps) {
 			return;
 		}
 
-		setQuantity(newQuantity);
 		updateQuantity(item.id, newQuantity);
 	};
 
