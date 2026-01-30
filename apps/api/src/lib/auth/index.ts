@@ -6,6 +6,7 @@ import { db } from "../db";
 import * as schema from "../db/schema";
 import { emailService } from "../email/service";
 import { redis } from "../redis";
+import { ac, roles } from "./permissions";
 
 export const auth = betterAuth({
 	trustedOrigins: [
@@ -57,7 +58,15 @@ export const auth = betterAuth({
 
 	plugins: [
 		admin(),
-		organization(),
+		organization({
+			ac,
+			roles: {
+				owner: roles.owner,
+				admin: roles.admin,
+				manager: roles.manager,
+				staff: roles.staff,
+			},
+		}),
 		// phoneNumber({
 		// 	sendOTP: ({ phoneNumber, code }, _request) => {
 		// 		// Implement sending OTP code via SMS
