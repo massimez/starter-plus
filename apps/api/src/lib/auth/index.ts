@@ -2,6 +2,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { betterAuth } from "better-auth/minimal";
 import { admin, emailOTP, organization } from "better-auth/plugins";
 import type { GoogleProfile } from "better-auth/social-providers";
+import { envData } from "@/env";
 import { db } from "../db";
 import * as schema from "../db/schema";
 import { emailService } from "../email/service";
@@ -9,21 +10,14 @@ import { redis } from "../redis";
 import { ac, roles } from "./permissions";
 
 export const auth = betterAuth({
-	trustedOrigins: [
-		"http://test.com:3002",
-		"http://localhost:3000",
-		"http://127.0.0.1:3000",
-		"http://localhost:3002",
-		"http://alpha.localhost:3002",
-		"http://alpha.test.com:3002",
-	],
+	trustedOrigins: envData.FRONTEND_URLS.split(",").map((url) => url.trim()),
 	telemetry: {
 		enabled: false,
 	},
 	advanced: {
 		crossSubDomainCookies: {
-			enabled: true,
-			domain: "test.com",
+			enabled: !!envData.COOKIE_DOMAIN,
+			domain: envData.COOKIE_DOMAIN || "",
 		},
 	},
 	database: drizzleAdapter(db, {

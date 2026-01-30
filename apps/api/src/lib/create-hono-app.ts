@@ -36,18 +36,7 @@ export default function createApp() {
 	app.use(
 		"*",
 		cors({
-			origin:
-				envData.NODE_ENV === "production"
-					? [envData?.FRONTEND_URL]
-					: [
-							"http://localhost:3000",
-							"http://localhost:3002",
-							"http://alpha.localhost:3002",
-							"http://127.0.0.1:3000",
-							"http://alpha.test.com:3002",
-							"http://test.com:3002",
-							"http://test.com:3000",
-						],
+			origin: envData?.FRONTEND_URLS.split(",").map((url) => url.trim()),
 			credentials: true,
 			allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 			allowHeaders: [

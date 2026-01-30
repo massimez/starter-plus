@@ -2,10 +2,11 @@ import { z } from "zod";
 
 const EnvSchema = z.object({
 	NODE_ENV: z.string().default("development"),
-	FRONTEND_URL: z.string().default("http://localhost:3001"),
+	FRONTEND_URLS: z.string(),
 	PORT: z.coerce.number().default(3001),
 	DATABASE_URL: z.string(),
 	BETTER_AUTH_URL: z.string().default("http://localhost:3001"),
+	COOKIE_DOMAIN: z.string().optional(),
 	BETTER_AUTH_SECRET: z.string().min(32),
 	CF_ACCOUNT_ID: z.string().optional(),
 	CF_ACCESS_KEY_ID: z.string().optional(),
