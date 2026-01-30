@@ -1,23 +1,35 @@
 import { headers } from "next/headers";
 
 /**
- * Extracts subdomain slug from host header
- * Supports both localhost (subdomain.localhost) and production (subdomain.example.com)
+ * Extracts slug from host header.
+ * If host is 'somedomain.com', returns 'somedomain.com'.
+ * If host is 'sub.somedomain.com', returns 'sub'.
  */
 export async function getTenantSlugServer(): Promise<string | undefined> {
 	const headersList = await headers();
-	const host = headersList.get("host") || "";
-	const parts = host.split(".");
+	const host = headersList.get("host") ?? ""; // Using nullish coalescing
 
-	// localhost: subdomain.localhost:3000 -> ["subdomain", "localhost:3000"]
-	if (host.includes("localhost")) {
+	// Split always returns at least one element, but TS is being cautious
+	const hostWithoutPort = host.split(":")[0] || "";
+
+	if (!hostWithoutPort) return undefined;
+
+	const parts = hostWithoutPort.split(".");
+
+	// 1. Handle localhost
+	if (hostWithoutPort.includes("localhost")) {
 		return parts.length > 1 ? parts[0] : undefined;
 	}
 
-	// production: subdomain.example.com -> ["subdomain", "example", "com"]
-	// Ignore www subdomain
-	if (parts.length > 2 && parts[0] !== "www") {
-		return parts[0];
+	// 2. Handle 'www'
+	const cleanParts = parts[0] === "www" ? parts.slice(1) : parts;
+
+	// 3. Logic for Slugs
+	if (cleanParts.length === 2) {
+		return cleanParts.join(".");
+	}
+	if (cleanParts.length > 2) {
+		return cleanParts[0];
 	}
 
 	return undefined;
