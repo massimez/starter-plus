@@ -84,7 +84,7 @@ export const ordersRoutes = createRouter()
 		queryValidator(
 			z.object({
 				userId: z.string().min(1),
-				limit: z.coerce.number().default(20),
+				limit: z.coerce.number().max(100).default(20),
 				offset: z.coerce.number().default(0),
 			}),
 		),
@@ -92,9 +92,15 @@ export const ordersRoutes = createRouter()
 			try {
 				const query = c.req.valid("query");
 				const organizationId = c.var.tenantId;
+				const userId = c.get("user")?.id as string;
+
 				if (!organizationId) throw new Error("Organization ID required");
 
-				const orders = await getStorefrontOrders({ ...query, organizationId });
+				const orders = await getStorefrontOrders({
+					...query,
+					userId,
+					organizationId,
+				});
 				return c.json(createSuccessResponse(orders));
 			} catch (error) {
 				return handleRouteError(c, error, "fetch storefront orders");
@@ -116,9 +122,11 @@ export const ordersRoutes = createRouter()
 		async (c) => {
 			try {
 				const { orderId } = c.req.valid("param");
-				const { userId } = c.req.valid("query");
 				const organizationId = c.var.tenantId;
+				const userId = c.get("user")?.id as string;
+
 				if (!organizationId) throw new Error("Organization ID required");
+
 				const order = await getStorefrontOrder({
 					organizationId,
 					orderId,
