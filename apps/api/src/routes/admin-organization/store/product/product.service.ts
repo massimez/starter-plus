@@ -4,6 +4,7 @@ import type { z } from "zod";
 import { withPaginationAndTotal } from "@/helpers/pagination";
 import { db } from "@/lib/db";
 import { product, productVariant, type TProductStatus } from "@/lib/db/schema";
+import { getAuditData } from "@/lib/utils/audit";
 import { validateOrgId } from "@/lib/utils/validator";
 import type { offsetPaginationSchema } from "@/middleware/pagination";
 import {
@@ -19,7 +20,11 @@ type UpdateProduct = z.infer<typeof updateProductSchema>;
 /**
  * Create a new product
  */
-export async function createProduct(productData: InsertProduct, orgId: string) {
+export async function createProduct(
+	productData: InsertProduct,
+	orgId: string,
+	user: { id: string },
+) {
 	const {
 		translations,
 		images,
@@ -37,6 +42,7 @@ export async function createProduct(productData: InsertProduct, orgId: string) {
 			images,
 			thumbnailImage,
 			translations,
+			...getAuditData(user, "create"),
 		})
 		.returning();
 
@@ -87,6 +93,7 @@ export async function getProducts(
 	// Build filters for the query
 	const filters = [];
 	filters.push(eq(product.organizationId, validatedOrgId));
+	filters.push(isNull(product.deletedAt));
 
 	if (productIds && productIds.length > 0) {
 		filters.push(inArray(product.id, productIds));
@@ -175,6 +182,7 @@ export async function getProduct(productId: string, orgId: string) {
 			and(
 				eq(product.id, productId),
 				eq(product.organizationId, validateOrgId(orgId)),
+				isNull(product.deletedAt),
 			),
 		)
 		.limit(1);
@@ -209,6 +217,7 @@ export async function updateProduct(
 	productId: string,
 	productData: UpdateProduct,
 	orgId: string,
+	user: { id: string },
 ) {
 	const { translations, collectionIds, ...restData } = productData;
 
@@ -234,6 +243,7 @@ export async function updateProduct(
 			images: restData.images,
 			thumbnailImage: restData.thumbnailImage,
 			translations: validTranslations,
+			...getAuditData(user, "update"),
 		})
 		.where(
 			and(
@@ -254,9 +264,16 @@ export async function updateProduct(
 /**
  * Delete a product
  */
-export async function deleteProduct(productId: string, orgId: string) {
+export async function deleteProduct(
+	productId: string,
+	orgId: string,
+	user: { id: string },
+) {
 	const [deletedProduct] = await db
-		.delete(product)
+		.update(product)
+		.set({
+			...getAuditData(user, "delete"),
+		})
 		.where(
 			and(
 				eq(product.id, productId),

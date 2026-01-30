@@ -35,8 +35,11 @@ export const productRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user");
+				if (!user) throw new Error("User not found in context");
+
 				const productData = c.req.valid("json");
-				const newProduct = await createProduct(productData, activeOrgId);
+				const newProduct = await createProduct(productData, activeOrgId, user);
 				return c.json(createSuccessResponse(newProduct), 201);
 			} catch (error) {
 				return handleRouteError(c, error, "create product");
@@ -104,6 +107,9 @@ export const productRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user");
+				if (!user) throw new Error("User not found in context");
+
 				const { id } = c.req.valid("param");
 				const productData = c.req.valid("json");
 
@@ -111,6 +117,7 @@ export const productRoute = createRouter()
 					id,
 					productData,
 					activeOrgId,
+					user,
 				);
 				if (!updatedProduct)
 					return c.json(
@@ -137,8 +144,11 @@ export const productRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user");
+				if (!user) throw new Error("User not found in context");
+
 				const { id } = c.req.valid("param");
-				const deletedProduct = await deleteProduct(id, activeOrgId);
+				const deletedProduct = await deleteProduct(id, activeOrgId, user);
 				if (!deletedProduct)
 					return c.json(
 						createErrorResponse("NotFoundError", "Product not found", [
