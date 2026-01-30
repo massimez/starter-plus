@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { User } from "@/lib/auth";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createSuccessResponse,
@@ -139,12 +140,14 @@ export default createRouter()
 				const activeOrgId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const { id } = c.req.valid("param");
 				const data = c.req.valid("json");
 				const expense = await expensesService.updateExpense(
 					activeOrgId,
 					id,
 					data,
+					user,
 				);
 				return c.json(createSuccessResponse(expense));
 			} catch (error) {

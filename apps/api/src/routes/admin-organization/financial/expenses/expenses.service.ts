@@ -1,6 +1,7 @@
 import { and, count, desc, eq, gte, lte } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { expense, expenseCategory } from "@/lib/db/schema/financial/expenses";
+import { getAuditData } from "@/lib/utils/audit";
 
 export async function createExpenseCategory(
 	organizationId: string,
@@ -180,6 +181,7 @@ export async function updateExpense(
 		description?: string;
 		receiptUrl?: string;
 	},
+	user: { id: string },
 ) {
 	const [updatedExpense] = await db
 		.update(expense)
@@ -190,6 +192,7 @@ export async function updateExpense(
 			expenseDate: data.expenseDate,
 			description: data.description,
 			receiptUrl: data.receiptUrl,
+			...getAuditData(user, "update"),
 		})
 		.where(
 			and(

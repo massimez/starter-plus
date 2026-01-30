@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { User } from "@/lib/auth";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createSuccessResponse,
@@ -42,10 +43,12 @@ export default createRouter()
 				const activeOrgId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const data = c.req.valid("json");
 				const account = await accountingService.createAccount(
 					activeOrgId,
 					data,
+					user,
 				);
 				return c.json(createSuccessResponse(account), 201);
 			} catch (error) {
@@ -64,12 +67,14 @@ export default createRouter()
 				const activeOrgId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const { id } = c.req.valid("param");
 				const data = c.req.valid("json");
 				const account = await accountingService.updateAccount(
 					activeOrgId,
 					id,
 					data,
+					user,
 				);
 				return c.json(createSuccessResponse(account));
 			} catch (error) {

@@ -2,6 +2,7 @@ import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import type { TMilestoneType } from "@/lib/db/schema/helpers/types";
+import { getAuditData } from "@/lib/utils/audit";
 import type { TransactionDb } from "@/types/db";
 import { awardPoints } from "./points.service";
 
@@ -28,7 +29,10 @@ type CreateMilestoneInput = {
 /**
  * Create a new milestone
  */
-export async function createMilestone(input: CreateMilestoneInput) {
+export async function createMilestone(
+	input: CreateMilestoneInput,
+	user: { id: string },
+) {
 	const [milestone] = await db
 		.insert(schema.bonusMilestone)
 		.values({
@@ -42,6 +46,7 @@ export async function createMilestone(input: CreateMilestoneInput) {
 			isRepeatable: input.isRepeatable || false,
 			sortOrder: input.sortOrder || 0,
 			metadata: input.metadata,
+			...getAuditData(user, "create"),
 		})
 		.returning();
 
@@ -55,10 +60,14 @@ export async function updateMilestone(
 	milestoneId: string,
 	organizationId: string,
 	input: Partial<CreateMilestoneInput>,
+	user: { id: string },
 ) {
 	const [updated] = await db
 		.update(schema.bonusMilestone)
-		.set(input)
+		.set({
+			...input,
+			...getAuditData(user, "update"),
+		})
 		.where(
 			and(
 				eq(schema.bonusMilestone.id, milestoneId),
@@ -76,10 +85,15 @@ export async function updateMilestone(
 export async function deleteMilestone(
 	milestoneId: string,
 	organizationId: string,
+	user: { id: string },
 ) {
 	const [deleted] = await db
 		.update(schema.bonusMilestone)
-		.set({ deletedAt: new Date(), isActive: false })
+		.set({
+			deletedAt: new Date(),
+			isActive: false,
+			...getAuditData(user, "delete"),
+		})
 		.where(
 			and(
 				eq(schema.bonusMilestone.id, milestoneId),

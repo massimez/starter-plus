@@ -1,4 +1,5 @@
 import z from "zod";
+import type { User } from "@/lib/auth";
 import { createRouter } from "@/lib/create-hono-app";
 import { handleRouteError } from "@/lib/utils/route-helpers";
 import { jsonValidator, paramValidator } from "@/lib/utils/validator";
@@ -27,12 +28,16 @@ export const locationRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user") as User;
 				const data = c.req.valid("json");
 
-				const newLocation = await createLocation({
-					...data,
-					organizationId: activeOrgId,
-				});
+				const newLocation = await createLocation(
+					{
+						...data,
+						organizationId: activeOrgId,
+					},
+					user,
+				);
 
 				return c.json(newLocation, 201);
 			} catch (error) {
@@ -78,10 +83,16 @@ export const locationRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user") as User;
 				const { id } = c.req.valid("param");
 				const data = c.req.valid("json");
 
-				const updatedLocation = await updateLocation(id, data, activeOrgId);
+				const updatedLocation = await updateLocation(
+					id,
+					data,
+					activeOrgId,
+					user,
+				);
 				if (!updatedLocation)
 					return c.json({ error: "Location not found" }, 404);
 
@@ -99,9 +110,10 @@ export const locationRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user") as User;
 				const { id } = c.req.valid("param");
 
-				const deletedLocation = await deleteLocation(id, activeOrgId);
+				const deletedLocation = await deleteLocation(id, activeOrgId, user);
 				if (!deletedLocation)
 					return c.json({ error: "Location not found" }, 404);
 

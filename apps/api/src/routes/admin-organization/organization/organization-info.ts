@@ -1,4 +1,5 @@
 import z from "zod";
+import type { User } from "@/lib/auth";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createErrorResponse,
@@ -28,11 +29,14 @@ export const organizationInfoRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
-
+				const user = c.get("user") as User;
 				const data = c.req.valid("json");
 				const insertData = { ...data, organizationId: activeOrgId };
 
-				const newOrganizationInfo = await createOrganizationInfo(insertData);
+				const newOrganizationInfo = await createOrganizationInfo(
+					insertData,
+					user,
+				);
 
 				return c.json(createSuccessResponse(newOrganizationInfo), 201);
 			} catch (error) {
@@ -117,6 +121,7 @@ export const organizationInfoRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user") as User;
 				const id = c.req.param("id");
 				const data = c.req.valid("json");
 				console.log("Updating organization info with data:", data);
@@ -125,6 +130,7 @@ export const organizationInfoRoute = createRouter()
 					id,
 					data,
 					activeOrgId,
+					user,
 				);
 
 				if (!updatedOrganizationInfo) {

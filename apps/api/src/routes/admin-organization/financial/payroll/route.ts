@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { User } from "@/lib/auth";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createSuccessResponse,
@@ -229,12 +230,14 @@ export default createRouter()
 				const activeOrgId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const { id } = c.req.valid("param");
 				const data = c.req.valid("json");
 				const employee = await payrollService.updateEmployee(
 					activeOrgId,
 					id,
 					data,
+					user,
 				);
 				return c.json(createSuccessResponse(employee));
 			} catch (error) {
@@ -298,12 +301,14 @@ export default createRouter()
 				const activeOrgId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const { id } = c.req.valid("param");
 				const data = c.req.valid("json");
 				const component = await payrollService.updateSalaryComponent(
 					activeOrgId,
 					id,
 					data,
+					user,
 				);
 				return c.json(createSuccessResponse(component));
 			} catch (error) {
@@ -321,8 +326,9 @@ export default createRouter()
 				const activeOrgId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const { id } = c.req.valid("param");
-				await payrollService.deleteSalaryComponent(activeOrgId, id);
+				await payrollService.deleteSalaryComponent(activeOrgId, id, user);
 				return c.json(
 					createSuccessResponse({
 						message: "Salary component deleted successfully",
@@ -346,6 +352,7 @@ export default createRouter()
 				const activeOrgId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const data = c.req.valid("json");
 
 				// Fetch components to get their type
@@ -374,6 +381,7 @@ export default createRouter()
 						paymentFrequency: data.paymentFrequency,
 						salaryComponents,
 					},
+					user,
 				);
 				return c.json(createSuccessResponse(employee), 201);
 			} catch (error) {

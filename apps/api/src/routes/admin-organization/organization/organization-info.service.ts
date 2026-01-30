@@ -2,6 +2,7 @@ import { and, eq } from "drizzle-orm";
 import type z from "zod";
 import { db } from "@/lib/db";
 import { address, location, organizationInfo } from "@/lib/db/schema";
+import { getAuditData } from "@/lib/utils/audit";
 import type {
 	insertOrganizationInfoSchema,
 	updateOrganizationInfoSchema,
@@ -11,10 +12,16 @@ type OrganizationInfoType = typeof organizationInfo.$inferSelect;
 type InsertOrganizationInfoData = z.infer<typeof insertOrganizationInfoSchema>;
 type UpdateOrganizationInfoData = z.infer<typeof updateOrganizationInfoSchema>;
 
-export async function createOrganizationInfo(data: InsertOrganizationInfoData) {
+export async function createOrganizationInfo(
+	data: InsertOrganizationInfoData,
+	user: { id: string },
+) {
 	const [newOrganizationInfo] = await db
 		.insert(organizationInfo)
-		.values(data)
+		.values({
+			...data,
+			...getAuditData(user, "create"),
+		})
 		.returning();
 	return newOrganizationInfo;
 }
@@ -48,10 +55,14 @@ export async function updateOrganizationInfo(
 	id: string,
 	data: UpdateOrganizationInfoData,
 	organizationId: string,
+	user: { id: string },
 ) {
 	const updatedOrganizationInfo = await db
 		.update(organizationInfo)
-		.set(data)
+		.set({
+			...data,
+			...getAuditData(user, "update"),
+		})
 		.where(
 			and(
 				eq(organizationInfo.id, id),

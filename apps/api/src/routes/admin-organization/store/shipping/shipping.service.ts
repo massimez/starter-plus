@@ -3,6 +3,7 @@ import type { z } from "zod";
 import { withPaginationAndTotal } from "@/helpers/pagination";
 import { db } from "@/lib/db";
 import { shippingMethod } from "@/lib/db/schema";
+import { getAuditData } from "@/lib/utils/audit";
 import { validateOrgId } from "@/lib/utils/validator";
 import type { offsetPaginationSchema } from "@/middleware/pagination";
 import type {
@@ -20,12 +21,14 @@ type UpdateShippingMethod = z.infer<typeof updateShippingMethodSchema>;
 export async function createShippingMethod(
 	shippingMethodData: InsertShippingMethod,
 	orgId: string,
+	user: { id: string },
 ) {
 	const [newShippingMethod] = await db
 		.insert(shippingMethod)
 		.values({
 			...shippingMethodData,
 			organizationId: orgId,
+			...getAuditData(user, "create"),
 		})
 		.returning();
 	return newShippingMethod;
@@ -80,10 +83,14 @@ export async function updateShippingMethod(
 	shippingMethodId: string,
 	shippingMethodData: UpdateShippingMethod,
 	orgId: string,
+	user: { id: string },
 ) {
 	const [updatedShippingMethod] = await db
 		.update(shippingMethod)
-		.set(shippingMethodData)
+		.set({
+			...shippingMethodData,
+			...getAuditData(user, "update"),
+		})
 		.where(
 			and(
 				eq(shippingMethod.id, shippingMethodId),
@@ -101,10 +108,13 @@ export async function updateShippingMethod(
 export async function deleteShippingMethod(
 	shippingMethodId: string,
 	orgId: string,
+	user: { id: string },
 ) {
 	const [deletedShippingMethod] = await db
 		.update(shippingMethod)
-		.set({ deletedAt: new Date() })
+		.set({
+			...getAuditData(user, "delete"),
+		})
 		.where(
 			and(
 				eq(shippingMethod.id, shippingMethodId),

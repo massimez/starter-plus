@@ -1,3 +1,4 @@
+import type { User } from "@/lib/auth";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createErrorResponse,
@@ -33,18 +34,22 @@ export const rewardRoute = createRouter()
 				const organizationId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const payload = c.req.valid("json");
 
-				const reward = await createReward({
-					...payload,
-					organizationId,
-					validFrom: payload.validFrom
-						? new Date(payload.validFrom)
-						: undefined,
-					validUntil: payload.validUntil
-						? new Date(payload.validUntil)
-						: undefined,
-				});
+				const reward = await createReward(
+					{
+						...payload,
+						organizationId,
+						validFrom: payload.validFrom
+							? new Date(payload.validFrom)
+							: undefined,
+						validUntil: payload.validUntil
+							? new Date(payload.validUntil)
+							: undefined,
+					},
+					user,
+				);
 
 				return c.json(
 					createSuccessResponse(reward, "Reward created successfully"),
@@ -100,17 +105,23 @@ export const rewardRoute = createRouter()
 				const organizationId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const payload = c.req.valid("json");
 
-				const updated = await updateReward(id, organizationId, {
-					...payload,
-					validFrom: payload.validFrom
-						? new Date(payload.validFrom)
-						: undefined,
-					validUntil: payload.validUntil
-						? new Date(payload.validUntil)
-						: undefined,
-				});
+				const updated = await updateReward(
+					id,
+					organizationId,
+					{
+						...payload,
+						validFrom: payload.validFrom
+							? new Date(payload.validFrom)
+							: undefined,
+						validUntil: payload.validUntil
+							? new Date(payload.validUntil)
+							: undefined,
+					},
+					user,
+				);
 
 				if (!updated) {
 					return c.json(
@@ -148,8 +159,9 @@ export const rewardRoute = createRouter()
 				const organizationId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 
-				const deleted = await deleteReward(id, organizationId);
+				const deleted = await deleteReward(id, organizationId, user);
 
 				if (!deleted) {
 					return c.json(

@@ -1,6 +1,7 @@
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
+import { getAuditData } from "@/lib/utils/audit";
 
 /**
  * ---------------------------------------------------------------------------
@@ -24,7 +25,7 @@ type CreateTierInput = {
 /**
  * Create a new tier
  */
-export async function createTier(input: CreateTierInput) {
+export async function createTier(input: CreateTierInput, user: { id: string }) {
 	const [tier] = await db
 		.insert(schema.bonusTier)
 		.values({
@@ -37,6 +38,7 @@ export async function createTier(input: CreateTierInput) {
 			description: input.description,
 			benefits: input.benefits,
 			sortOrder: input.sortOrder || 0,
+			...getAuditData(user, "create"),
 		})
 		.returning();
 
@@ -50,10 +52,14 @@ export async function updateTier(
 	tierId: string,
 	organizationId: string,
 	input: Partial<CreateTierInput>,
+	user: { id: string },
 ) {
 	const [updated] = await db
 		.update(schema.bonusTier)
-		.set(input)
+		.set({
+			...input,
+			...getAuditData(user, "update"),
+		})
 		.where(
 			and(
 				eq(schema.bonusTier.id, tierId),
@@ -68,10 +74,18 @@ export async function updateTier(
 /**
  * Delete tier
  */
-export async function deleteTier(tierId: string, organizationId: string) {
+export async function deleteTier(
+	tierId: string,
+	organizationId: string,
+	user: { id: string },
+) {
 	const [deleted] = await db
 		.update(schema.bonusTier)
-		.set({ deletedAt: new Date(), isActive: false })
+		.set({
+			deletedAt: new Date(),
+			isActive: false,
+			...getAuditData(user, "delete"),
+		})
 		.where(
 			and(
 				eq(schema.bonusTier.id, tierId),

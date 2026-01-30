@@ -1,3 +1,4 @@
+import type { User } from "@/lib/auth";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createErrorResponse,
@@ -29,8 +30,13 @@ export const shippingZoneRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user") as User;
 				const data = c.req.valid("json");
-				const newShippingZone = await createShippingZone(data, activeOrgId);
+				const newShippingZone = await createShippingZone(
+					data,
+					activeOrgId,
+					user,
+				);
 				return c.json(createSuccessResponse(newShippingZone), 201);
 			} catch (error) {
 				return handleRouteError(c, error, "create shipping zone");
@@ -87,12 +93,15 @@ export const shippingZoneRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user");
+				if (!user) throw new Error("User not found in context");
 				const { id } = c.req.valid("param");
 				const data = c.req.valid("json");
 				const updatedShippingZone = await updateShippingZone(
 					id,
 					data,
 					activeOrgId,
+					user,
 				);
 				if (!updatedShippingZone) {
 					return c.json(
@@ -119,8 +128,14 @@ export const shippingZoneRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user");
+				if (!user) throw new Error("User not found in context");
 				const { id } = c.req.valid("param");
-				const deletedShippingZone = await deleteShippingZone(id, activeOrgId);
+				const deletedShippingZone = await deleteShippingZone(
+					id,
+					activeOrgId,
+					user,
+				);
 				if (!deletedShippingZone) {
 					return c.json(
 						createErrorResponse(

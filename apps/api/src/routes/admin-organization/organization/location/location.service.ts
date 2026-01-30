@@ -1,7 +1,8 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import type z from "zod";
 import { db } from "@/lib/db";
 import { address, location } from "@/lib/db/schema";
+import { getAuditData } from "@/lib/utils/audit";
 import type { insertLocationSchema, updateLocationSchema } from "./schema";
 
 type LocationType = typeof location.$inferSelect;
@@ -38,7 +39,10 @@ const selectLocationWithAddress = {
 	},
 };
 
-export async function createLocation(data: InsertLocationData) {
+export async function createLocation(
+	data: InsertLocationData,
+	user: { id: string },
+) {
 	let addressId = data.addressId;
 	if (data.address) {
 		const [newAddress] = await db
@@ -47,7 +51,11 @@ export async function createLocation(data: InsertLocationData) {
 			.returning({ id: address.id });
 		addressId = newAddress.id;
 	}
-	const insertData = { ...data, addressId };
+	const insertData = {
+		...data,
+		addressId,
+		...getAuditData(user, "create"),
+	};
 	delete insertData.address;
 
 	const [insertedLocation] = await db
@@ -71,7 +79,13 @@ export async function getLocationsByOrg(organizationId: string) {
 		.select(selectLocationWithAddress)
 		.from(location)
 		.leftJoin(address, eq(location.addressId, address.id))
-		.where(eq(location.organizationId, organizationId));
+
+		.where(
+			and(
+				eq(location.organizationId, organizationId),
+				isNull(location.deletedAt),
+			),
+		);
 
 	return foundLocations;
 }
@@ -82,7 +96,11 @@ export async function getLocationById(id: string, organizationId: string) {
 		.from(location)
 		.leftJoin(address, eq(location.addressId, address.id))
 		.where(
-			and(eq(location.id, id), eq(location.organizationId, organizationId)),
+			and(
+				eq(location.id, id),
+				eq(location.organizationId, organizationId),
+				isNull(location.deletedAt),
+			),
 		)
 		.limit(1);
 
@@ -93,6 +111,7 @@ export async function updateLocation(
 	id: string,
 	data: UpdateLocationData,
 	organizationId: string,
+	user: { id: string },
 ) {
 	let addressId = data.addressId;
 	if (data.address) {
@@ -109,7 +128,12 @@ export async function updateLocation(
 			addressId = newAddress.id;
 		}
 	}
-	const updateData = { ...data, addressId, organizationId };
+	const updateData = {
+		...data,
+		addressId,
+		organizationId,
+		...getAuditData(user, "update"),
+	};
 	delete updateData.address;
 
 	await db
@@ -135,9 +159,13 @@ export async function updateLocation(
 export async function deleteLocation(
 	id: string,
 	organizationId: string,
+	user: { id: string },
 ): Promise<LocationType | undefined> {
 	const [deletedLocation] = await db
-		.delete(location)
+		.update(location)
+		.set({
+			...getAuditData(user, "delete"),
+		})
 		.where(
 			and(eq(location.id, id), eq(location.organizationId, organizationId)),
 		)

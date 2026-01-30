@@ -1,3 +1,4 @@
+import type { User } from "@/lib/auth";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createErrorResponse,
@@ -35,12 +36,16 @@ export const bonusProgramRoute = createRouter()
 				const organizationId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const payload = c.req.valid("json");
 
-				const program = await createBonusProgram({
-					...payload,
-					organizationId,
-				});
+				const program = await createBonusProgram(
+					{
+						...payload,
+						organizationId,
+					},
+					user,
+				);
 
 				return c.json(
 					createSuccessResponse(program, "Bonus program created successfully"),
@@ -122,9 +127,15 @@ export const bonusProgramRoute = createRouter()
 				const organizationId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const payload = c.req.valid("json");
 
-				const updated = await updateBonusProgram(id, organizationId, payload);
+				const updated = await updateBonusProgram(
+					id,
+					organizationId,
+					payload,
+					user,
+				);
 
 				if (!updated) {
 					return c.json(
@@ -162,8 +173,9 @@ export const bonusProgramRoute = createRouter()
 				const organizationId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 
-				const deleted = await deleteBonusProgram(id, organizationId);
+				const deleted = await deleteBonusProgram(id, organizationId, user);
 
 				if (!deleted) {
 					return c.json(

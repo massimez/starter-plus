@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { User } from "@/lib/auth";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createErrorResponse,
@@ -35,10 +36,12 @@ export const shippingMethodZoneRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user") as User;
 				const data = c.req.valid("json");
 				const newShippingMethodZone = await createShippingMethodZone(
 					data,
 					activeOrgId,
+					user,
 				);
 				return c.json(createSuccessResponse(newShippingMethodZone), 201);
 			} catch (error) {
@@ -142,12 +145,14 @@ export const shippingMethodZoneRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user") as User;
 				const { id } = c.req.valid("param");
 				const data = c.req.valid("json");
 				const updatedShippingMethodZone = await updateShippingMethodZone(
 					id,
 					data,
 					activeOrgId,
+					user,
 				);
 				if (!updatedShippingMethodZone) {
 					return c.json(
@@ -178,10 +183,12 @@ export const shippingMethodZoneRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user") as User;
 				const { id } = c.req.valid("param");
 				const deletedShippingMethodZone = await deleteShippingMethodZone(
 					id,
 					activeOrgId,
+					user,
 				);
 				if (!deletedShippingMethodZone) {
 					return c.json(

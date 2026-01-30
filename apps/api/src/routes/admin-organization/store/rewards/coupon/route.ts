@@ -1,4 +1,5 @@
 import { z } from "zod";
+import type { User } from "@/lib/auth";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createErrorResponse,
@@ -30,9 +31,10 @@ export const couponRoute = createRouter()
 				const organizationId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const { couponId } = c.req.valid("json");
 
-				const result = await cancelCoupon(couponId, organizationId);
+				const result = await cancelCoupon(couponId, organizationId, user);
 
 				if (!result) {
 					return c.json(

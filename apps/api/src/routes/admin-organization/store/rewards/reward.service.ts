@@ -2,6 +2,7 @@ import { and, asc, desc, eq, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import type { TRewardType } from "@/lib/db/schema/helpers/types";
+import { getAuditData } from "@/lib/utils/audit";
 import type { TransactionDb } from "@/types/db";
 import { generateUniqueCouponCode } from "./coupon.service";
 import { deductPoints } from "./points.service";
@@ -36,7 +37,10 @@ type CreateRewardInput = {
 /**
  * Create a new reward
  */
-export async function createReward(input: CreateRewardInput) {
+export async function createReward(
+	input: CreateRewardInput,
+	user: { id: string },
+) {
 	const [reward] = await db
 		.insert(schema.reward)
 		.values({
@@ -57,6 +61,7 @@ export async function createReward(input: CreateRewardInput) {
 			image: input.image,
 			sortOrder: input.sortOrder || 0,
 			metadata: input.metadata,
+			...getAuditData(user, "create"),
 		})
 		.returning();
 
@@ -70,10 +75,14 @@ export async function updateReward(
 	rewardId: string,
 	organizationId: string,
 	input: Partial<CreateRewardInput>,
+	user: { id: string },
 ) {
 	const [updated] = await db
 		.update(schema.reward)
-		.set(input)
+		.set({
+			...input,
+			...getAuditData(user, "update"),
+		})
 		.where(
 			and(
 				eq(schema.reward.id, rewardId),
@@ -88,10 +97,18 @@ export async function updateReward(
 /**
  * Delete reward
  */
-export async function deleteReward(rewardId: string, organizationId: string) {
+export async function deleteReward(
+	rewardId: string,
+	organizationId: string,
+	user: { id: string },
+) {
 	const [deleted] = await db
 		.update(schema.reward)
-		.set({ deletedAt: new Date(), isActive: false })
+		.set({
+			deletedAt: new Date(),
+			isActive: false,
+			...getAuditData(user, "delete"),
+		})
 		.where(
 			and(
 				eq(schema.reward.id, rewardId),

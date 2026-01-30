@@ -1,3 +1,4 @@
+import type { User } from "@/lib/auth";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createErrorResponse,
@@ -32,8 +33,13 @@ export const shippingMethodRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user") as User;
 				const data = c.req.valid("json");
-				const newShippingMethod = await createShippingMethod(data, activeOrgId);
+				const newShippingMethod = await createShippingMethod(
+					data,
+					activeOrgId,
+					user,
+				);
 				return c.json(createSuccessResponse(newShippingMethod), 201);
 			} catch (error) {
 				return handleRouteError(c, error, "create shipping method");
@@ -90,12 +96,14 @@ export const shippingMethodRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user") as User;
 				const { id } = c.req.valid("param");
 				const data = c.req.valid("json");
 				const updatedShippingMethod = await updateShippingMethod(
 					id,
 					data,
 					activeOrgId,
+					user,
 				);
 				if (!updatedShippingMethod) {
 					return c.json(
@@ -122,10 +130,12 @@ export const shippingMethodRoute = createRouter()
 		async (c) => {
 			try {
 				const activeOrgId = c.get("session")?.activeOrganizationId as string;
+				const user = c.get("user") as User;
 				const { id } = c.req.valid("param");
 				const deletedShippingMethod = await deleteShippingMethod(
 					id,
 					activeOrgId,
+					user,
 				);
 				if (!deletedShippingMethod) {
 					return c.json(

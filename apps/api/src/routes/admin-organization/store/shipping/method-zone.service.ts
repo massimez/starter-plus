@@ -3,6 +3,7 @@ import type { z } from "zod";
 import { withPaginationAndTotal } from "@/helpers/pagination";
 import { db } from "@/lib/db";
 import { shippingMethodZone } from "@/lib/db/schema";
+import { getAuditData } from "@/lib/utils/audit";
 import { validateOrgId } from "@/lib/utils/validator";
 import type { offsetPaginationSchema } from "@/middleware/pagination";
 import type {
@@ -20,12 +21,14 @@ type UpdateShippingMethodZone = z.infer<typeof updateShippingMethodZoneSchema>;
 export async function createShippingMethodZone(
 	shippingMethodZoneData: InsertShippingMethodZone,
 	orgId: string,
+	user: { id: string },
 ) {
 	const [newShippingMethodZone] = await db
 		.insert(shippingMethodZone)
 		.values({
 			...shippingMethodZoneData,
 			organizationId: orgId,
+			...getAuditData(user, "create"),
 		})
 		.returning();
 	return newShippingMethodZone;
@@ -120,10 +123,14 @@ export async function updateShippingMethodZone(
 	shippingMethodZoneId: string,
 	shippingMethodZoneData: UpdateShippingMethodZone,
 	orgId: string,
+	user: { id: string },
 ) {
 	const [updatedShippingMethodZone] = await db
 		.update(shippingMethodZone)
-		.set(shippingMethodZoneData)
+		.set({
+			...shippingMethodZoneData,
+			...getAuditData(user, "update"),
+		})
 		.where(
 			and(
 				eq(shippingMethodZone.id, shippingMethodZoneId),
@@ -141,10 +148,13 @@ export async function updateShippingMethodZone(
 export async function deleteShippingMethodZone(
 	shippingMethodZoneId: string,
 	orgId: string,
+	user: { id: string },
 ) {
 	const [deletedShippingMethodZone] = await db
 		.update(shippingMethodZone)
-		.set({ deletedAt: new Date() })
+		.set({
+			...getAuditData(user, "delete"),
+		})
 		.where(
 			and(
 				eq(shippingMethodZone.id, shippingMethodZoneId),

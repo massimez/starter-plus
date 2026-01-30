@@ -1,6 +1,7 @@
 import { and, desc, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
+import { getAuditData } from "@/lib/utils/audit";
 import type { TransactionDb } from "@/types/db";
 
 /**
@@ -30,7 +31,10 @@ type UpdateBonusProgramInput = Partial<CreateBonusProgramInput>;
 /**
  * Create a new bonus program
  */
-export async function createBonusProgram(input: CreateBonusProgramInput) {
+export async function createBonusProgram(
+	input: CreateBonusProgramInput,
+	user: { id: string },
+) {
 	const [program] = await db
 		.insert(schema.bonusProgram)
 		.values({
@@ -46,6 +50,7 @@ export async function createBonusProgram(input: CreateBonusProgramInput) {
 			referralBonusReferee: input.referralBonusReferee || 0,
 			isActive: input.isActive ?? true,
 			metadata: input.metadata,
+			...getAuditData(user, "create"),
 		})
 		.returning();
 
@@ -127,10 +132,14 @@ export async function updateBonusProgram(
 	programId: string,
 	organizationId: string,
 	input: UpdateBonusProgramInput,
+	user: { id: string },
 ) {
 	const [updated] = await db
 		.update(schema.bonusProgram)
-		.set(input)
+		.set({
+			...input,
+			...getAuditData(user, "update"),
+		})
 		.where(
 			and(
 				eq(schema.bonusProgram.id, programId),
@@ -148,10 +157,14 @@ export async function updateBonusProgram(
 export async function deleteBonusProgram(
 	programId: string,
 	organizationId: string,
+	user: { id: string },
 ) {
 	const [deleted] = await db
 		.update(schema.bonusProgram)
-		.set({ deletedAt: new Date() })
+		.set({
+			deletedAt: new Date(),
+			...getAuditData(user, "delete"),
+		})
 		.where(
 			and(
 				eq(schema.bonusProgram.id, programId),

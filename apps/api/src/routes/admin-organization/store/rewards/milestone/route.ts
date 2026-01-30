@@ -1,3 +1,4 @@
+import type { User } from "@/lib/auth";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createErrorResponse,
@@ -33,12 +34,16 @@ export const milestoneRoute = createRouter()
 				const organizationId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const payload = c.req.valid("json");
 
-				const milestone = await createMilestone({
-					...payload,
-					organizationId,
-				});
+				const milestone = await createMilestone(
+					{
+						...payload,
+						organizationId,
+					},
+					user,
+				);
 
 				return c.json(
 					createSuccessResponse(milestone, "Milestone created successfully"),
@@ -94,9 +99,15 @@ export const milestoneRoute = createRouter()
 				const organizationId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const payload = c.req.valid("json");
 
-				const updated = await updateMilestone(id, organizationId, payload);
+				const updated = await updateMilestone(
+					id,
+					organizationId,
+					payload,
+					user,
+				);
 
 				if (!updated) {
 					return c.json(
@@ -134,8 +145,9 @@ export const milestoneRoute = createRouter()
 				const organizationId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 
-				const deleted = await deleteMilestone(id, organizationId);
+				const deleted = await deleteMilestone(id, organizationId, user);
 
 				if (!deleted) {
 					return c.json(

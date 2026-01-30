@@ -1,6 +1,7 @@
 import { and, desc, eq, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
+import { getAuditData } from "@/lib/utils/audit";
 import type { TransactionDb } from "@/types/db";
 
 /**
@@ -247,10 +248,17 @@ export async function getCoupon(couponId: string, organizationId: string) {
 /**
  * Cancel coupon
  */
-export async function cancelCoupon(couponId: string, organizationId: string) {
+export async function cancelCoupon(
+	couponId: string,
+	organizationId: string,
+	user: { id: string },
+) {
 	const [canceled] = await db
 		.update(schema.bonusCoupon)
-		.set({ status: "cancelled" })
+		.set({
+			status: "cancelled",
+			...getAuditData(user, "update"),
+		})
 		.where(
 			and(
 				eq(schema.bonusCoupon.id, couponId),

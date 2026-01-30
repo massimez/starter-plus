@@ -5,6 +5,7 @@ import {
 	journalEntry,
 	journalEntryLine,
 } from "@/lib/db/schema/financial/journal";
+import { getAuditData } from "@/lib/utils/audit";
 import type { TransactionDb } from "@/types/db";
 
 /**
@@ -33,6 +34,7 @@ export async function createAccount(
 		description?: string;
 		allowManualEntries?: boolean;
 	},
+	user: { id: string },
 ) {
 	const [newAccount] = await db
 		.insert(glAccount)
@@ -45,6 +47,7 @@ export async function createAccount(
 			normalBalance: data.normalBalance,
 			description: data.description,
 			allowManualEntries: data.allowManualEntries,
+			...getAuditData(user, "create"),
 		})
 		.returning();
 
@@ -55,10 +58,14 @@ export async function updateAccount(
 	organizationId: string,
 	accountId: string,
 	data: Partial<typeof glAccount.$inferInsert>,
+	user: { id: string },
 ) {
 	const [updatedAccount] = await db
 		.update(glAccount)
-		.set(data)
+		.set({
+			...data,
+			...getAuditData(user, "update"),
+		})
 		.where(
 			and(
 				eq(glAccount.id, accountId),

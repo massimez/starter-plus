@@ -7,6 +7,7 @@ import {
 	salaryAdvance,
 	salaryComponent,
 } from "@/lib/db/schema/financial/payroll";
+import { getAuditData } from "@/lib/utils/audit";
 import type { TransactionDb } from "@/types/db";
 import { calculateTotals, updatePayrollRunTotals } from "./helpers";
 
@@ -54,6 +55,7 @@ export async function updateEmployee(
 		}>;
 		terminationDate?: string | Date | null;
 	},
+	user: { id: string },
 ) {
 	// biome-ignore lint/suspicious/noExplicitAny: <>
 	const updateData: any = { ...data };
@@ -70,7 +72,10 @@ export async function updateEmployee(
 
 	const [updated] = await db
 		.update(employee)
-		.set(updateData)
+		.set({
+			...updateData,
+			...getAuditData(user, "update"),
+		})
 		.where(
 			and(
 				eq(employee.id, employeeId),
@@ -569,10 +574,14 @@ export async function updateSalaryComponent(
 		accountId?: string;
 		isTaxable?: boolean;
 	},
+	user: { id: string },
 ) {
 	const [updated] = await db
 		.update(salaryComponent)
-		.set({ ...data, updatedAt: new Date() })
+		.set({
+			...data,
+			...getAuditData(user, "update"),
+		})
 		.where(
 			and(
 				eq(salaryComponent.id, componentId),
@@ -591,11 +600,15 @@ export async function updateSalaryComponent(
 export async function deleteSalaryComponent(
 	organizationId: string,
 	componentId: string,
+	user: { id: string },
 ) {
 	// Soft delete
 	const [deleted] = await db
 		.update(salaryComponent)
-		.set({ isActive: false, deletedAt: new Date() })
+		.set({
+			isActive: false,
+			...getAuditData(user, "delete"),
+		})
 		.where(
 			and(
 				eq(salaryComponent.id, componentId),

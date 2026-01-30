@@ -1,3 +1,4 @@
+import type { User } from "@/lib/auth";
 import { createRouter } from "@/lib/create-hono-app";
 import {
 	createErrorResponse,
@@ -35,12 +36,16 @@ export const tierRoute = createRouter()
 				const organizationId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user") as User;
 				const payload = c.req.valid("json");
 
-				const tier = await createTier({
-					...payload,
-					organizationId,
-				});
+				const tier = await createTier(
+					{
+						...payload,
+						organizationId,
+					},
+					user,
+				);
 
 				return c.json(
 					createSuccessResponse(tier, "Tier created successfully"),
@@ -96,9 +101,11 @@ export const tierRoute = createRouter()
 				const organizationId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user");
+				if (!user) throw new Error("User not found in context");
 				const payload = c.req.valid("json");
 
-				const updated = await updateTier(id, organizationId, payload);
+				const updated = await updateTier(id, organizationId, payload, user);
 
 				if (!updated) {
 					return c.json(
@@ -136,8 +143,10 @@ export const tierRoute = createRouter()
 				const organizationId = validateOrgId(
 					c.get("session")?.activeOrganizationId as string,
 				);
+				const user = c.get("user");
+				if (!user) throw new Error("User not found in context");
 
-				const deleted = await deleteTier(id, organizationId);
+				const deleted = await deleteTier(id, organizationId, user);
 
 				if (!deleted) {
 					return c.json(
