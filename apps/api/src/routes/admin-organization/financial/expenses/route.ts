@@ -10,6 +10,7 @@ import {
 	queryValidator,
 	validateOrgId,
 } from "@/lib/utils/validator";
+import { hasOrgPermission } from "@/middleware/org-permission";
 import * as expensesService from "./expenses.service";
 
 const createExpenseSchema = z.object({
@@ -30,6 +31,7 @@ const createCategorySchema = z.object({
 export default createRouter()
 	.get(
 		"/expenses",
+		hasOrgPermission("expense:read"),
 		queryValidator(
 			z.object({
 				limit: z.string().optional(),
@@ -61,25 +63,31 @@ export default createRouter()
 			}
 		},
 	)
-	.post("/expenses", jsonValidator(createExpenseSchema), async (c) => {
-		try {
-			const activeOrgId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
-			const userId = c.get("user")?.id as string;
-			const data = c.req.valid("json");
-			const expense = await expensesService.createExpense(activeOrgId, {
-				...data,
-				userId,
-				createdBy: userId,
-			});
-			return c.json(createSuccessResponse(expense), 201);
-		} catch (error) {
-			return handleRouteError(c, error, "create expense");
-		}
-	})
+	.post(
+		"/expenses",
+		hasOrgPermission("expense:create"),
+		jsonValidator(createExpenseSchema),
+		async (c) => {
+			try {
+				const activeOrgId = validateOrgId(
+					c.get("session")?.activeOrganizationId as string,
+				);
+				const userId = c.get("user")?.id as string;
+				const data = c.req.valid("json");
+				const expense = await expensesService.createExpense(activeOrgId, {
+					...data,
+					userId,
+					createdBy: userId,
+				});
+				return c.json(createSuccessResponse(expense), 201);
+			} catch (error) {
+				return handleRouteError(c, error, "create expense");
+			}
+		},
+	)
 	.post(
 		"/expenses/:id/approve",
+		hasOrgPermission("expense:approve"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {
@@ -101,6 +109,7 @@ export default createRouter()
 	)
 	.post(
 		"/expenses/:id/reject",
+		hasOrgPermission("expense:reject"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {
@@ -122,6 +131,7 @@ export default createRouter()
 	)
 	.put(
 		"/expenses/:id",
+		hasOrgPermission("expense:update"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		jsonValidator(createExpenseSchema.partial()),
 		async (c) => {
@@ -144,6 +154,7 @@ export default createRouter()
 	)
 	.post(
 		"/expenses/:id/pay",
+		hasOrgPermission("expense:pay"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {
@@ -158,20 +169,25 @@ export default createRouter()
 			}
 		},
 	)
-	.get("/expense-categories", async (c) => {
-		try {
-			const activeOrgId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
-			const categories =
-				await expensesService.getExpenseCategories(activeOrgId);
-			return c.json(createSuccessResponse(categories));
-		} catch (error) {
-			return handleRouteError(c, error, "fetch expense categories");
-		}
-	})
+	.get(
+		"/expense-categories",
+		hasOrgPermission("expense_category:read"),
+		async (c) => {
+			try {
+				const activeOrgId = validateOrgId(
+					c.get("session")?.activeOrganizationId as string,
+				);
+				const categories =
+					await expensesService.getExpenseCategories(activeOrgId);
+				return c.json(createSuccessResponse(categories));
+			} catch (error) {
+				return handleRouteError(c, error, "fetch expense categories");
+			}
+		},
+	)
 	.post(
 		"/expense-categories",
+		hasOrgPermission("expense_category:create"),
 		jsonValidator(createCategorySchema),
 		async (c) => {
 			try {

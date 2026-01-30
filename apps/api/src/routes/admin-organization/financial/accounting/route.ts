@@ -9,6 +9,7 @@ import {
 	paramValidator,
 	validateOrgId,
 } from "@/lib/utils/validator";
+import { hasOrgPermission } from "@/middleware/org-permission";
 import * as accountingService from "./accounting.service";
 import {
 	createAccountSchema,
@@ -20,7 +21,7 @@ export default createRouter()
 	/**
 	 * CHART OF ACCOUNTS ROUTES
 	 */
-	.get("/accounts", async (c) => {
+	.get("/accounts", hasOrgPermission("account:read"), async (c) => {
 		try {
 			const activeOrgId = validateOrgId(
 				c.get("session")?.activeOrganizationId as string,
@@ -32,21 +33,30 @@ export default createRouter()
 		}
 	})
 
-	.post("/accounts", jsonValidator(createAccountSchema), async (c) => {
-		try {
-			const activeOrgId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
-			const data = c.req.valid("json");
-			const account = await accountingService.createAccount(activeOrgId, data);
-			return c.json(createSuccessResponse(account), 201);
-		} catch (error) {
-			return handleRouteError(c, error, "create account");
-		}
-	})
+	.post(
+		"/accounts",
+		hasOrgPermission("account:create"),
+		jsonValidator(createAccountSchema),
+		async (c) => {
+			try {
+				const activeOrgId = validateOrgId(
+					c.get("session")?.activeOrganizationId as string,
+				);
+				const data = c.req.valid("json");
+				const account = await accountingService.createAccount(
+					activeOrgId,
+					data,
+				);
+				return c.json(createSuccessResponse(account), 201);
+			} catch (error) {
+				return handleRouteError(c, error, "create account");
+			}
+		},
+	)
 
 	.patch(
 		"/accounts/:id",
+		hasOrgPermission("account:update"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		jsonValidator(updateAccountSchema),
 		async (c) => {
@@ -71,7 +81,7 @@ export default createRouter()
 	/**
 	 * JOURNAL ENTRY ROUTES
 	 */
-	.get("/journal-entries", async (c) => {
+	.get("/journal-entries", hasOrgPermission("journal:read"), async (c) => {
 		try {
 			const activeOrgId = validateOrgId(
 				c.get("session")?.activeOrganizationId as string,
@@ -85,6 +95,7 @@ export default createRouter()
 
 	.post(
 		"/journal-entries",
+		hasOrgPermission("journal:create"),
 		jsonValidator(createJournalEntrySchema),
 		async (c) => {
 			try {
@@ -106,6 +117,7 @@ export default createRouter()
 
 	.post(
 		"/journal-entries/:id/post",
+		hasOrgPermission("journal:post"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {
@@ -126,7 +138,7 @@ export default createRouter()
 		},
 	)
 
-	.get("/trial-balance", async (c) => {
+	.get("/trial-balance", hasOrgPermission("report:read"), async (c) => {
 		try {
 			const activeOrgId = validateOrgId(
 				c.get("session")?.activeOrganizationId as string,
@@ -142,6 +154,7 @@ export default createRouter()
 
 	.delete(
 		"/journal-entries/:id",
+		hasOrgPermission("journal:delete"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {

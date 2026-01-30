@@ -11,6 +11,7 @@ import {
 	queryValidator,
 	validateOrgId,
 } from "@/lib/utils/validator";
+import { hasOrgPermission } from "@/middleware/org-permission";
 import * as invoicesService from "./invoices.service";
 import {
 	createInvoiceSchema,
@@ -22,6 +23,7 @@ export default createRouter()
 	// Get all invoices (with pagination and filters)
 	.get(
 		"/",
+		hasOrgPermission("invoice:read"),
 		queryValidator(
 			z.object({
 				type: z.enum(["receivable", "payable"]).optional(),
@@ -56,6 +58,7 @@ export default createRouter()
 	// Get invoice stats
 	.get(
 		"/stats",
+		hasOrgPermission("invoice:read"),
 		queryValidator(
 			z.object({
 				type: z.enum(["receivable", "payable"]),
@@ -78,6 +81,7 @@ export default createRouter()
 	// Get single invoice
 	.get(
 		"/:id",
+		hasOrgPermission("invoice:read"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {
@@ -108,26 +112,32 @@ export default createRouter()
 	)
 
 	// Create invoice
-	.post("/", jsonValidator(createInvoiceSchema), async (c) => {
-		try {
-			const activeOrgId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
-			const userId = c.get("user")?.id as string;
-			const data = c.req.valid("json");
-			const invoice = await invoicesService.createInvoice(activeOrgId, {
-				...data,
-				createdBy: userId,
-			});
-			return c.json(createSuccessResponse(invoice), 201);
-		} catch (error) {
-			return handleRouteError(c, error, "create invoice");
-		}
-	})
+	.post(
+		"/",
+		hasOrgPermission("invoice:create"),
+		jsonValidator(createInvoiceSchema),
+		async (c) => {
+			try {
+				const activeOrgId = validateOrgId(
+					c.get("session")?.activeOrganizationId as string,
+				);
+				const userId = c.get("user")?.id as string;
+				const data = c.req.valid("json");
+				const invoice = await invoicesService.createInvoice(activeOrgId, {
+					...data,
+					createdBy: userId,
+				});
+				return c.json(createSuccessResponse(invoice), 201);
+			} catch (error) {
+				return handleRouteError(c, error, "create invoice");
+			}
+		},
+	)
 
 	// Update invoice
 	.put(
 		"/:id",
+		hasOrgPermission("invoice:update"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		jsonValidator(updateInvoiceSchema),
 		async (c) => {
@@ -152,6 +162,7 @@ export default createRouter()
 	// Approve invoice
 	.post(
 		"/:id/approve",
+		hasOrgPermission("invoice:approve"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {
@@ -175,6 +186,7 @@ export default createRouter()
 	// Delete invoice
 	.delete(
 		"/:id",
+		hasOrgPermission("invoice:delete"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {
@@ -191,26 +203,32 @@ export default createRouter()
 	)
 
 	// Record payment
-	.post("/payments", jsonValidator(recordPaymentSchema), async (c) => {
-		try {
-			const activeOrgId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
-			const userId = c.get("user")?.id as string;
-			const data = c.req.valid("json");
-			const payment = await invoicesService.recordPayment(activeOrgId, {
-				...data,
-				createdBy: userId,
-			});
-			return c.json(createSuccessResponse(payment), 201);
-		} catch (error) {
-			return handleRouteError(c, error, "record payment");
-		}
-	})
+	.post(
+		"/payments",
+		hasOrgPermission("payment:create"),
+		jsonValidator(recordPaymentSchema),
+		async (c) => {
+			try {
+				const activeOrgId = validateOrgId(
+					c.get("session")?.activeOrganizationId as string,
+				);
+				const userId = c.get("user")?.id as string;
+				const data = c.req.valid("json");
+				const payment = await invoicesService.recordPayment(activeOrgId, {
+					...data,
+					createdBy: userId,
+				});
+				return c.json(createSuccessResponse(payment), 201);
+			} catch (error) {
+				return handleRouteError(c, error, "record payment");
+			}
+		},
+	)
 
 	// Get payments
 	.get(
 		"/payments",
+		hasOrgPermission("payment:read"),
 		queryValidator(
 			z.object({
 				type: z.enum(["received", "sent"]).optional(),
@@ -237,6 +255,7 @@ export default createRouter()
 	// Get party balance (customer or supplier)
 	.get(
 		"/balance/:partyType/:partyId",
+		hasOrgPermission("invoice:read"),
 		paramValidator(
 			z.object({
 				partyType: z.enum(["customer", "supplier"]),

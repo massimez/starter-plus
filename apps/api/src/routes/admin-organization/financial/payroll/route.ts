@@ -9,6 +9,7 @@ import {
 	paramValidator,
 	validateOrgId,
 } from "@/lib/utils/validator";
+import { hasOrgPermission } from "@/middleware/org-permission";
 import * as payrollService from "./payroll.service";
 import {
 	approveSalaryAdvanceSchema,
@@ -26,46 +27,57 @@ export default createRouter()
 	/**
 	 * EMPLOYEE ROUTES
 	 */
-	.post("/employees", jsonValidator(createEmployeeSchema), async (c) => {
-		try {
-			const activeOrgId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
-			const userId = c.get("user")?.id as string;
-			const data = c.req.valid("json");
-			const employee = await payrollService.createEmployee(activeOrgId, {
-				...data,
-				createdBy: userId,
-				organizationId: activeOrgId,
-			});
-			return c.json(createSuccessResponse(employee), 201);
-		} catch (error) {
-			return handleRouteError(c, error, "create employee");
-		}
-	})
+	.post(
+		"/employees",
+		hasOrgPermission("employee:create"),
+		jsonValidator(createEmployeeSchema),
+		async (c) => {
+			try {
+				const activeOrgId = validateOrgId(
+					c.get("session")?.activeOrganizationId as string,
+				);
+				const userId = c.get("user")?.id as string;
+				const data = c.req.valid("json");
+				const employee = await payrollService.createEmployee(activeOrgId, {
+					...data,
+					createdBy: userId,
+					organizationId: activeOrgId,
+				});
+				return c.json(createSuccessResponse(employee), 201);
+			} catch (error) {
+				return handleRouteError(c, error, "create employee");
+			}
+		},
+	)
 
 	/**
 	 * PAYROLL RUN ROUTES
 	 */
-	.post("/payroll-runs", jsonValidator(createPayrollRunSchema), async (c) => {
-		try {
-			const activeOrgId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
-			const userId = c.get("user")?.id as string;
-			const data = c.req.valid("json");
-			const run = await payrollService.createPayrollRun(activeOrgId, {
-				...data,
-				createdBy: userId,
-			});
-			return c.json(createSuccessResponse(run), 201);
-		} catch (error) {
-			return handleRouteError(c, error, "create payroll run");
-		}
-	})
+	.post(
+		"/payroll-runs",
+		hasOrgPermission("payroll:create"),
+		jsonValidator(createPayrollRunSchema),
+		async (c) => {
+			try {
+				const activeOrgId = validateOrgId(
+					c.get("session")?.activeOrganizationId as string,
+				);
+				const userId = c.get("user")?.id as string;
+				const data = c.req.valid("json");
+				const run = await payrollService.createPayrollRun(activeOrgId, {
+					...data,
+					createdBy: userId,
+				});
+				return c.json(createSuccessResponse(run), 201);
+			} catch (error) {
+				return handleRouteError(c, error, "create payroll run");
+			}
+		},
+	)
 
 	.delete(
 		"/payroll-runs/:id",
+		hasOrgPermission("payroll:delete"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {
@@ -87,6 +99,7 @@ export default createRouter()
 
 	.post(
 		"/payroll-runs/:id/calculate",
+		hasOrgPermission("payroll:calculate"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {
@@ -106,6 +119,7 @@ export default createRouter()
 
 	.post(
 		"/payroll-runs/:id/approve",
+		hasOrgPermission("payroll:approve"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {
@@ -124,6 +138,7 @@ export default createRouter()
 	 */
 	.post(
 		"/salary-advances",
+		hasOrgPermission("salary_advance:request"),
 		jsonValidator(requestSalaryAdvanceSchema),
 		async (c) => {
 			try {
@@ -145,6 +160,7 @@ export default createRouter()
 
 	.post(
 		"/salary-advances/:id/approve",
+		hasOrgPermission("salary_advance:approve"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		jsonValidator(approveSalaryAdvanceSchema),
 		async (c) => {
@@ -166,6 +182,7 @@ export default createRouter()
 
 	.post(
 		"/salary-advances/:id/disburse",
+		hasOrgPermission("salary_advance:disburse"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {
@@ -178,7 +195,7 @@ export default createRouter()
 		},
 	)
 
-	.get("/employees", async (c) => {
+	.get("/employees", hasOrgPermission("employee:read"), async (c) => {
 		try {
 			const activeOrgId = validateOrgId(
 				c.get("session")?.activeOrganizationId as string,
@@ -190,7 +207,7 @@ export default createRouter()
 		}
 	})
 
-	.get("/payroll-runs", async (c) => {
+	.get("/payroll-runs", hasOrgPermission("payroll:read"), async (c) => {
 		try {
 			const activeOrgId = validateOrgId(
 				c.get("session")?.activeOrganizationId as string,
@@ -204,6 +221,7 @@ export default createRouter()
 
 	.put(
 		"/employees/:id",
+		hasOrgPermission("employee:update"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		jsonValidator(updateEmployeeSchema),
 		async (c) => {
@@ -230,6 +248,7 @@ export default createRouter()
 	 */
 	.post(
 		"/salary-components",
+		hasOrgPermission("salary_component:create"),
 		jsonValidator(createSalaryComponentSchema),
 		async (c) => {
 			try {
@@ -252,20 +271,26 @@ export default createRouter()
 		},
 	)
 
-	.get("/salary-components", async (c) => {
-		try {
-			const activeOrgId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
-			const components = await payrollService.getSalaryComponents(activeOrgId);
-			return c.json(createSuccessResponse(components));
-		} catch (error) {
-			return handleRouteError(c, error, "fetch salary components");
-		}
-	})
+	.get(
+		"/salary-components",
+		hasOrgPermission("salary_component:read"),
+		async (c) => {
+			try {
+				const activeOrgId = validateOrgId(
+					c.get("session")?.activeOrganizationId as string,
+				);
+				const components =
+					await payrollService.getSalaryComponents(activeOrgId);
+				return c.json(createSuccessResponse(components));
+			} catch (error) {
+				return handleRouteError(c, error, "fetch salary components");
+			}
+		},
+	)
 
 	.put(
 		"/salary-components/:id",
+		hasOrgPermission("salary_component:update"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		jsonValidator(createSalaryComponentSchema.partial()),
 		async (c) => {
@@ -289,6 +314,7 @@ export default createRouter()
 
 	.delete(
 		"/salary-components/:id",
+		hasOrgPermission("salary_component:delete"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {
@@ -313,6 +339,7 @@ export default createRouter()
 	 */
 	.post(
 		"/salary-structures",
+		hasOrgPermission("salary_structure:create"),
 		jsonValidator(createSalaryStructureSchema),
 		async (c) => {
 			try {
@@ -355,58 +382,67 @@ export default createRouter()
 		},
 	)
 
-	.get("/salary-structures", async (c) => {
-		try {
-			const activeOrgId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
-			const employees = await payrollService.getEmployees(activeOrgId);
-			// Map to "Structure" shape expected by frontend table
-			const structures = employees.map((emp) => ({
-				id: emp.id,
-				employee: {
+	.get(
+		"/salary-structures",
+		hasOrgPermission("salary_structure:read"),
+		async (c) => {
+			try {
+				const activeOrgId = validateOrgId(
+					c.get("session")?.activeOrganizationId as string,
+				);
+				const employees = await payrollService.getEmployees(activeOrgId);
+				// Map to "Structure" shape expected by frontend table
+				const structures = employees.map((emp) => ({
 					id: emp.id,
-					employeeCode: emp.employeeCode,
-					firstName: emp.firstName,
-					lastName: emp.lastName,
-				},
-				baseSalary: emp.baseSalary,
-				currency: emp.currency,
-				paymentFrequency: emp.paymentFrequency,
-				effectiveFrom: new Date().toISOString(),
-				isActive: emp.status === "active",
-				components: emp.salaryComponents,
-			}));
-			return c.json(createSuccessResponse(structures));
-		} catch (error) {
-			return handleRouteError(c, error, "fetch salary structures");
-		}
-	})
+					employee: {
+						id: emp.id,
+						employeeCode: emp.employeeCode,
+						firstName: emp.firstName,
+						lastName: emp.lastName,
+					},
+					baseSalary: emp.baseSalary,
+					currency: emp.currency,
+					paymentFrequency: emp.paymentFrequency,
+					effectiveFrom: new Date().toISOString(),
+					isActive: emp.status === "active",
+					components: emp.salaryComponents,
+				}));
+				return c.json(createSuccessResponse(structures));
+			} catch (error) {
+				return handleRouteError(c, error, "fetch salary structures");
+			}
+		},
+	)
 
 	/**
 	 * SALARY ADVANCE QUERIES
 	 */
-	.get("/salary-advances", async (c) => {
-		try {
-			const activeOrgId = validateOrgId(
-				c.get("session")?.activeOrganizationId as string,
-			);
-			const employeeId = c.req.query("employeeId");
-			const advances = await payrollService.getSalaryAdvances(
-				activeOrgId,
-				employeeId,
-			);
-			return c.json(createSuccessResponse(advances));
-		} catch (error) {
-			return handleRouteError(c, error, "fetch salary advances");
-		}
-	})
+	.get(
+		"/salary-advances",
+		hasOrgPermission("salary_advance:read"),
+		async (c) => {
+			try {
+				const activeOrgId = validateOrgId(
+					c.get("session")?.activeOrganizationId as string,
+				);
+				const employeeId = c.req.query("employeeId");
+				const advances = await payrollService.getSalaryAdvances(
+					activeOrgId,
+					employeeId,
+				);
+				return c.json(createSuccessResponse(advances));
+			} catch (error) {
+				return handleRouteError(c, error, "fetch salary advances");
+			}
+		},
+	)
 
 	/**
 	 * PAYROLL RUN DETAILS
 	 */
 	.get(
 		"/payroll-runs/:id/details",
+		hasOrgPermission("payroll:read"),
 		paramValidator(z.object({ id: z.string().uuid() })),
 		async (c) => {
 			try {
@@ -432,6 +468,7 @@ export default createRouter()
 	 */
 	.post(
 		"/entries/process-payment",
+		hasOrgPermission("payroll:process_payment"),
 		jsonValidator(processPayrollPaymentsSchema),
 		async (c) => {
 			try {
@@ -447,6 +484,7 @@ export default createRouter()
 	)
 	.patch(
 		"/payroll-runs/:runId/entries/:entryId",
+		hasOrgPermission("payroll:update"),
 		paramValidator(
 			z.object({ runId: z.string().uuid(), entryId: z.string().uuid() }),
 		),
