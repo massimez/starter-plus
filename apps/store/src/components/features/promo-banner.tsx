@@ -11,7 +11,7 @@ export function PromoBanner({ className }: PromoBannerProps) {
 	return (
 		<section
 			className={cn(
-				"rounded bg-primary/60 py-15 text-primary-foreground",
+				"hidden rounded bg-primary/60 py-15 text-primary-foreground",
 				className,
 			)}
 		>
