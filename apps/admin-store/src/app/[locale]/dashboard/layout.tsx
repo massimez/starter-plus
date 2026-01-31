@@ -14,6 +14,7 @@ import QueryProvider from "@/app/providers/query";
 import { ThemeProvider } from "@/app/providers/theme";
 import { ModalProvider } from "@/components/modals/modal-context";
 import ModalRenderer from "@/components/modals/modal-render";
+import { OrganizationGuard } from "@/components/organization-guard";
 import { AppSidebar } from "./layout/sidebar/app-sidebar";
 import { HeaderDashboard } from "./layout/sidebar/header";
 
@@ -48,21 +49,23 @@ export default async function MainLayout({ children, params }: LayoutProps) {
 							enableSystem
 							disableTransitionOnChange
 						>
-							<ModalProvider>
-								<ModalRenderer />
-								<Toaster position="top-center" richColors />
-								<CurrencyProvider>
-									<SidebarProvider>
-										<NextIntlClientProvider>
-											<AppSidebar />
-											<SidebarInset>
-												<HeaderDashboard />
-												<div className="p-4">{children}</div>
-											</SidebarInset>
-										</NextIntlClientProvider>
-									</SidebarProvider>
-								</CurrencyProvider>
-							</ModalProvider>
+							<NextIntlClientProvider>
+								<ModalProvider>
+									<ModalRenderer />
+									<Toaster position="top-center" richColors />
+									<CurrencyProvider>
+										<OrganizationGuard>
+											<SidebarProvider>
+												<AppSidebar />
+												<SidebarInset>
+													<HeaderDashboard />
+													<div className="p-4">{children}</div>
+												</SidebarInset>
+											</SidebarProvider>
+										</OrganizationGuard>
+									</CurrencyProvider>
+								</ModalProvider>
+							</NextIntlClientProvider>
 						</ThemeProvider>
 					</QueryProvider>
 				</NuqsAdapter>
