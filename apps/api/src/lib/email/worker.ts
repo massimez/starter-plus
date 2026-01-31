@@ -1,3 +1,4 @@
+import { envData } from "@/env";
 import { createWorker } from "../redis/queue";
 import { resend } from "./client";
 import {
@@ -28,7 +29,7 @@ async function sendEmailWithRetry(
 
 	try {
 		await resend.emails.send({
-			from: "Acme <onboarding@resend.dev>", // TODO: Update with domain
+			from: envData.EMAIL_FROM || "",
 			to,
 			subject,
 			html,

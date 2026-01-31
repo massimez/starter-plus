@@ -5,7 +5,7 @@ const EnvSchema = z.object({
 	FRONTEND_URLS: z.string(),
 	PORT: z.coerce.number().default(3001),
 	DATABASE_URL: z.string(),
-	BETTER_AUTH_URL: z.string().default("http://localhost:3001"),
+	BETTER_AUTH_URL: z.string(),
 	COOKIE_DOMAIN: z.string().optional(),
 	BETTER_AUTH_SECRET: z.string().min(32),
 	CF_ACCOUNT_ID: z.string().optional(),
@@ -25,7 +25,8 @@ const EnvSchema = z.object({
 	GOOGLE_CLIENT_ID: z.string().optional(),
 	GOOGLE_CLIENT_SECRET: z.string().optional(),
 	RESEND_KEY: z.string().optional(),
-	REDIS_URL: z.url().default("redis://localhost:6379"),
+	EMAIL_FROM: z.string().optional(),
+	REDIS_URL: z.url(),
 	REDIS_PREFIX: z.string().default("app"),
 });
 
