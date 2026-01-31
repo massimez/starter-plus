@@ -6,6 +6,7 @@ import {
 	getVerificationEmailTemplate,
 	getWelcomeEmailTemplate,
 } from "./templates/auth";
+import { getInvitationEmailTemplate } from "./templates/invitation";
 import { type EmailJobData, type EmailJobResult, EmailJobType } from "./types";
 
 const MAX_RETRIES = 3;
@@ -87,6 +88,18 @@ export const emailWorker = createWorker<EmailJobData, EmailJobResult>(
 						data.email,
 						"Welcome!",
 						getWelcomeEmailTemplate(data.name),
+					);
+					break;
+
+				case EmailJobType.INVITATION:
+					await sendEmailWithRetry(
+						data.email,
+						`You've been invited to join ${data.orgName}`,
+						getInvitationEmailTemplate({
+							inviterName: data.inviterName,
+							orgName: data.orgName,
+							link: data.link,
+						}),
 					);
 					break;
 

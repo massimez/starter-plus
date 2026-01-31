@@ -62,6 +62,15 @@ export const auth = betterAuth({
 				manager: roles.manager,
 				staff: roles.staff,
 			},
+			async sendInvitationEmail(data) {
+				const inviteLink = `${envData.FRONTEND_URLS.split(",")[0]}/accept-invitation/${data.id}`;
+				await emailService.sendInvitationEmail(
+					data.email,
+					data.inviter.user.name,
+					data.organization.name,
+					inviteLink,
+				);
+			},
 		}),
 		// phoneNumber({
 		// 	sendOTP: ({ phoneNumber, code }, _request) => {
@@ -74,8 +83,8 @@ export const auth = betterAuth({
 				if (type === "sign-in") {
 					// Send the OTP for sign in
 				} else if (type === "email-verification") {
-					console.log(email, otp);
-					// await emailService.sendVerificationEmail(email, otp);
+					// console.log(email, otp);
+					await emailService.sendVerificationEmail(email, otp);
 				} else {
 					await emailService.sendPasswordResetEmail(email, otp);
 				}

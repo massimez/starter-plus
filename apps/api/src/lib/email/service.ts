@@ -50,4 +50,26 @@ export const emailService = {
 		);
 		console.log(`[Email Service] Enqueued welcome email for ${email}`);
 	},
+
+	async sendInvitationEmail(
+		email: string,
+		inviterName: string,
+		orgName: string,
+		link: string,
+	) {
+		await emailQueue.add(
+			"invitation-email",
+			{
+				type: EmailJobType.INVITATION,
+				email,
+				inviterName,
+				orgName,
+				link,
+			},
+			{
+				priority: 2, // High priority for invitations
+			},
+		);
+		console.log(`[Email Service] Enqueued invitation email for ${email}`);
+	},
 };

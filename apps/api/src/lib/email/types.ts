@@ -2,6 +2,7 @@ export enum EmailJobType {
 	VERIFICATION = "verification",
 	PASSWORD_RESET = "password_reset",
 	WELCOME = "welcome",
+	INVITATION = "invitation",
 }
 
 export interface VerificationEmailData {
@@ -22,10 +23,19 @@ export interface WelcomeEmailData {
 	name: string;
 }
 
+export interface InvitationEmailData {
+	type: EmailJobType.INVITATION;
+	email: string;
+	inviterName: string;
+	orgName: string;
+	link: string;
+}
+
 export type EmailJobData =
 	| VerificationEmailData
 	| PasswordResetEmailData
-	| WelcomeEmailData;
+	| WelcomeEmailData
+	| InvitationEmailData;
 
 export interface EmailJobResult {
 	success: boolean;
