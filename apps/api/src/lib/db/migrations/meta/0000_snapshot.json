@@ -1,5 +1,5 @@
 {
-	"id": "f39271bc-982f-4c5f-acdd-f0ff1178b481",
+	"id": "d950c75a-86fa-4226-ae85-62b9995368a7",
 	"prevId": "00000000-0000-0000-0000-000000000000",
 	"version": "7",
 	"dialect": "postgresql",
@@ -3435,6 +3435,12 @@
 				},
 				"social_links": {
 					"name": "social_links",
+					"type": "jsonb",
+					"primaryKey": false,
+					"notNull": false
+				},
+				"seo_metadata": {
+					"name": "seo_metadata",
 					"type": "jsonb",
 					"primaryKey": false,
 					"notNull": false

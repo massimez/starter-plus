@@ -5,15 +5,8 @@
 		{
 			"idx": 0,
 			"version": "7",
-			"when": 1766507421289,
-			"tag": "0000_windy_martin_li",
-			"breakpoints": true
-		},
-		{
-			"idx": 1,
-			"version": "7",
-			"when": 1769460614513,
-			"tag": "0001_naive_marvel_apes",
+			"when": 1769859749679,
+			"tag": "0000_daffy_mandarin",
 			"breakpoints": true
 		}
 	]

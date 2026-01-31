@@ -333,6 +333,7 @@ CREATE TABLE "organization_info" (
 	"active_languages" jsonb,
 	"images" jsonb,
 	"social_links" jsonb,
+	"seo_metadata" jsonb,
 	CONSTRAINT "organization_info_organization_id_unique" UNIQUE("organization_id")
 );
 --> statement-breakpoint
