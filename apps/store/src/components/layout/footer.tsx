@@ -17,10 +17,12 @@ import { cn } from "@/lib/utils";
 
 export function Footer({
 	storeName,
+	address,
 	email,
 	phone,
 }: {
 	storeName?: string;
+	address?: string;
 	email?: string;
 	phone?: string;
 }) {
@@ -83,7 +85,7 @@ export function Footer({
 			<div className="grid md:grid-cols-2 md:gap-12 lg:grid-cols-12 lg:gap-8 xl:gap-12">
 				{/* Brand Section */}
 				<div className="lg:col-span-6">
-					<Link href="/" className="mb-6 inline-block">
+					<Link href="/" className="mb-6 inline-block" prefetch={false}>
 						<h2 className="bg-linear-to-r from-primary to-primary/60 bg-clip-text font-bold text-3xl text-transparent tracking-tight">
 							{storeName || t("brandName")}
 						</h2>
@@ -91,12 +93,14 @@ export function Footer({
 
 					{/* Contact Info */}
 					<div className="space-y-4">
-						<div className="flex items-center gap-3 text-muted-foreground transition-colors hover:text-foreground">
-							<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
-								<MapPin className="h-4 w-4 shrink-0" />
+						{address && (
+							<div className="flex items-center gap-3 text-muted-foreground transition-colors hover:text-foreground">
+								<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
+									<MapPin className="h-4 w-4 shrink-0" />
+								</div>
+								<span className="font-medium text-sm">{address}</span>
 							</div>
-							<span className="font-medium text-sm">{t("address")}</span>
-						</div>
+						)}
 						{phone && (
 							<div className="flex items-center gap-3 text-muted-foreground transition-colors hover:text-foreground">
 								<div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10 text-primary">
@@ -153,6 +157,7 @@ export function Footer({
 										<Link
 											href={link.href}
 											className="group flex items-center gap-2 text-muted-foreground text-sm transition-colors hover:text-primary"
+											prefetch={false}
 										>
 											<span className="h-px w-0 bg-primary transition-all duration-300 group-hover:w-3" />
 											<span className="transition-transform duration-300 group-hover:translate-x-1">
