@@ -4,10 +4,8 @@ import {
 	DialogHeader,
 	DialogTitle,
 } from "@workspace/ui/components/dialog";
-import { AppleIcon } from "@workspace/ui/components/icons/brands/AppleIcon";
-import { FacebookIcon } from "@workspace/ui/components/icons/brands/FacebookIcon";
 import { GoogleIcon } from "@workspace/ui/components/icons/brands/GoogleIcon";
-import { TikTokIcon } from "@workspace/ui/components/icons/brands/TikTokIcon";
+
 import { Input } from "@workspace/ui/components/input";
 import { Label } from "@workspace/ui/components/label";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
@@ -41,15 +39,16 @@ export const SignIn = ({
 			<div className="flex gap-3">
 				<Button
 					variant="outline"
-					className="h-12 flex-1"
+					className="h-12 flex-1 gap-2"
 					disabled={loading}
 					onClick={async () => {
 						await onSocialLoginClick("google");
 					}}
 				>
 					<GoogleIcon />
+					Continue with Google
 				</Button>
-				<Button
+				{/* <Button
 					variant="outline"
 					className="h-12 flex-1"
 					disabled={loading}
@@ -76,7 +75,7 @@ export const SignIn = ({
 					}}
 				>
 					<AppleIcon />
-				</Button>
+				</Button> */}
 			</div>
 
 			{/* Divider */}

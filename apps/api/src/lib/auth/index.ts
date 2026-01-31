@@ -117,8 +117,8 @@ export const auth = betterAuth({
 	},
 	socialProviders: {
 		google: {
-			clientId: "GOOGLE_CLIENT_ID",
-			clientSecret: "GOOGLE_CLIENT_SECRET",
+			clientId: envData.GOOGLE_CLIENT_ID || "",
+			clientSecret: envData.GOOGLE_CLIENT_SECRET || "",
 			mapProfileToUser: (profile: GoogleProfile) => {
 				return {
 					firstName: profile.given_name,
