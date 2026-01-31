@@ -36,7 +36,9 @@ export default function createApp() {
 	app.use(
 		"*",
 		cors({
-			origin: envData?.FRONTEND_URLS.split(",").map((url) => url.trim()),
+			origin: envData?.FRONTEND_URLS.split(",").map((url) =>
+				url.trim().replace(/\/$/, ""),
+			),
 			credentials: true,
 			allowMethods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
 			allowHeaders: [

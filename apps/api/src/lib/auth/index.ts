@@ -10,7 +10,9 @@ import { redis } from "../redis";
 import { ac, roles } from "./permissions";
 
 export const auth = betterAuth({
-	trustedOrigins: envData.FRONTEND_URLS.split(",").map((url) => url.trim()),
+	trustedOrigins: envData.FRONTEND_URLS.split(",").map((url) =>
+		url.trim().replace(/\/$/, ""),
+	),
 	telemetry: {
 		enabled: false,
 	},
