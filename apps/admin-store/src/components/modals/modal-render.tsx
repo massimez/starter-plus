@@ -33,6 +33,7 @@ const ModalRenderer = () => {
 				authClient={authClient}
 				router={router}
 				toast={toast}
+				redirectTo="/dashboard"
 				translations={
 					defaultTranslations[locale as keyof typeof defaultTranslations] ||
 					defaultTranslations.en

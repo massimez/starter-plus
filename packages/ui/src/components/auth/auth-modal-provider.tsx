@@ -25,6 +25,7 @@ export interface AuthModalProviderProps {
 	onSignInSuccess?: () => void;
 	onSignUpSuccess?: () => void;
 	onPasswordResetSuccess?: () => void;
+	redirectTo?: string;
 	router: {
 		push?: (path: string) => void;
 		refresh: () => void;
@@ -49,6 +50,7 @@ export function AuthModalProvider({
 	onPasswordResetSuccess,
 	toast,
 	translations = defaultTranslations.en,
+	redirectTo,
 }: AuthModalProviderProps) {
 	const [view, setView] = useState<ViewType>(defaultView);
 	const [otpProps, setOtpProps] = useState<OtpVerificationProps | null>(null);
@@ -152,6 +154,7 @@ export function AuthModalProvider({
 		await authClient.signIn.social(
 			{
 				provider: provider,
+				callbackURL: redirectTo || window.location.href,
 			},
 			{
 				onError: (ctx: { error: { message: string } }) => {

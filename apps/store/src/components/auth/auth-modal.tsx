@@ -19,6 +19,7 @@ interface AuthModalProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	defaultView?: "signIn" | "signUp";
+	redirectTo?: string;
 }
 
 type ViewType =
@@ -32,6 +33,7 @@ export function AuthModal({
 	open,
 	onOpenChange,
 	defaultView = "signIn",
+	redirectTo,
 }: AuthModalProps) {
 	const [view, setView] = useState<ViewType>(defaultView);
 	// biome-ignore lint/suspicious/noExplicitAny: <>
@@ -83,7 +85,7 @@ export function AuthModal({
 		await signIn.social(
 			{
 				provider: provider,
-				callbackURL: "/",
+				callbackURL: redirectTo || window.location.href,
 			},
 			{
 				onError: (ctx) => {
