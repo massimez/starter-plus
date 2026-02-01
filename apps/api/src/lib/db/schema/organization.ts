@@ -74,6 +74,10 @@ export const organizationInfo = pgTable("organization_info", {
 	contactEmail: varchar("contact_email", { length: 100 }),
 	contactPhone: varchar("contact_phone", { length: 20 }),
 
+	// Business Info
+	businessType: varchar("business_type", { length: 50 }),
+	description: text("description"),
+
 	// Travel Fees
 	travelFeeType: varchar("travel_fee_type", {
 		length: 50,

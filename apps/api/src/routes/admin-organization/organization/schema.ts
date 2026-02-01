@@ -7,6 +7,9 @@ export const insertOrganizationInfoSchema = createInsertSchema(
 		contactName: z.string().max(100).optional().or(z.literal("")),
 		contactEmail: z.email().max(100).optional().or(z.literal("")),
 		contactPhone: z.string().max(20).optional().or(z.literal("")),
+
+		businessType: z.string().max(50).optional(),
+		description: z.string().optional(),
 		travelFeeType: z
 			.enum(["fixed", "per_km", "varies", "start_at", "free"])
 			.optional(),
@@ -75,6 +78,9 @@ export const updateOrganizationInfoSchema = createSelectSchema(
 		contactName: z.string().max(100).optional().or(z.literal("")),
 		contactEmail: z.email().max(100).optional().or(z.literal("")),
 		contactPhone: z.string().max(20).optional().or(z.literal("")),
+
+		businessType: z.string().max(50).optional(),
+		description: z.string().optional(),
 		travelFeeType: z
 			.enum(["fixed", "per_km", "varies", "start_at", "free"])
 			.optional(),

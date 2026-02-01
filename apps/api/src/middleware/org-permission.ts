@@ -23,7 +23,7 @@ export const hasOrgPermission = (
 					{
 						code: "MISSING_ORG_ID",
 						path: ["organizationId"],
-						message: "Organization ID is required in query parameters",
+						message: "No active Organization found",
 					},
 				]),
 				400,

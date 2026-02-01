@@ -183,3 +183,23 @@ export const useResendInvitation = () => {
 		},
 	});
 };
+
+export const useDeleteOrganization = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: async ({ organizationId }: { organizationId: string }) => {
+			const res = await authClient.organization.delete({
+				organizationId,
+			});
+
+			if (res.error) {
+				throw new Error(res.error.message || "Failed to delete organization");
+			}
+			return res.data;
+		},
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["organization"] });
+			queryClient.invalidateQueries({ queryKey: ["listOrganizations"] });
+		},
+	});
+};

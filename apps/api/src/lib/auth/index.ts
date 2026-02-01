@@ -80,6 +80,7 @@ export const auth = betterAuth({
 		emailOTP({
 			sendVerificationOnSignUp: true,
 			async sendVerificationOTP({ email, otp, type }) {
+				console.log(email, otp, type);
 				if (type === "sign-in") {
 					// Send the OTP for sign in
 				} else if (type === "email-verification") {
