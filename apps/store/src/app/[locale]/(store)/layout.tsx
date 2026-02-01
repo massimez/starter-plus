@@ -4,8 +4,8 @@ import { MobileCartBar } from "@/components/features/cart/mobile-cart-bar";
 import { CategorySidebarContainer } from "@/components/features/category/category-sidebar-container";
 import { Footer } from "@/components/layout/footer";
 import { Navbar } from "@/components/layout/navbar";
-import { getTenantSlugServer } from "@/lib/get-tenant-server";
 import { storefrontClient } from "@/lib/storefront";
+import { getTenantSlugServer } from "@/lib/tenant/get-tenant-server";
 
 export default async function LayoutStore({
 	children,

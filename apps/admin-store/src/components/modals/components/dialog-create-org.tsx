@@ -12,6 +12,10 @@ import * as React from "react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 
+import { generateSlug } from "@/lib/slug";
+
+// ... existing imports
+
 export function DialogAddOrganization({
 	closeModal,
 }: {
@@ -23,10 +27,11 @@ export function DialogAddOrganization({
 		event.preventDefault();
 		setLoading(true);
 		const formData = new FormData(event.currentTarget as HTMLFormElement);
+		const name = (formData.get("name") as string) ?? "";
 		const { error } = await authClient.organization.create({
 			keepCurrentActiveOrganization: false,
-			name: (formData.get("name") as string) ?? "",
-			slug: (formData.get("name") as string).toLowerCase().replace(/\s+/g, "-"),
+			name,
+			slug: generateSlug(name),
 		});
 
 		setLoading(false);

@@ -8,9 +8,8 @@ import { QueryProvider } from "@/providers/query-provider";
 import { ThemeProvider } from "@/providers/theme-provider";
 import "@workspace/ui/globals.css";
 import type { Metadata } from "next";
-
-import { getTenantSlugServer } from "@/lib/get-tenant-server";
 import { storefrontClient } from "@/lib/storefront";
+import { getTenantSlugServer } from "@/lib/tenant/get-tenant-server";
 
 // Types<
 type SeoMetadata = Record<

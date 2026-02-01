@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import { parseTenantSlug } from "@/lib/tenant/parse-tenant-slug";
 
 /**
  * Extracts slug from host header.
@@ -14,23 +15,5 @@ export async function getTenantSlugServer(): Promise<string | undefined> {
 
 	if (!hostWithoutPort) return undefined;
 
-	const parts = hostWithoutPort.split(".");
-
-	// 1. Handle localhost
-	if (hostWithoutPort.includes("localhost")) {
-		return parts.length > 1 ? parts[0] : undefined;
-	}
-
-	// 2. Handle 'www'
-	const cleanParts = parts[0] === "www" ? parts.slice(1) : parts;
-
-	// 3. Logic for Slugs
-	if (cleanParts.length === 2) {
-		return cleanParts.join(".");
-	}
-	if (cleanParts.length > 2) {
-		return cleanParts[0];
-	}
-
-	return undefined;
+	return parseTenantSlug(hostWithoutPort);
 }

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { getTenantSlug } from "@/lib/get-tenant";
 import { storefrontClient } from "@/lib/storefront";
+import { getTenantSlug } from "@/lib/tenant/get-tenant";
 
 export function useOrganization() {
 	const slug = getTenantSlug();

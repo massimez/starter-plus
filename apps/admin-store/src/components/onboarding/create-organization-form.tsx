@@ -36,6 +36,10 @@ const businessTypes = [
 	{ value: "other", label: "Other" },
 ];
 
+import { generateSlug } from "@/lib/slug";
+
+// ... existing imports
+
 export function CreateOrganizationForm({
 	onSubmit,
 }: {
@@ -47,11 +51,7 @@ export function CreateOrganizationForm({
 
 	// Update slug when name changes
 	React.useEffect(() => {
-		const generatedSlug = name
-			.toLowerCase()
-			.replace(/[^a-z0-9]+/g, "-") // Replace non-alphanumeric chars with hyphens
-			.replace(/^-+|-+$/g, ""); // Remove leading/trailing hyphens
-		setSlug(generatedSlug);
+		setSlug(generateSlug(name));
 	}, [name]);
 
 	const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
