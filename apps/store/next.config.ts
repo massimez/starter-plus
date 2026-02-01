@@ -11,7 +11,13 @@ const withBundleAnalyzer = bundleAnalyzer({
 const nextConfig: NextConfig = {
 	/* config options here */
 	images: {
-		remotePatterns: envData.REMOTE_PATTERNS ?? [],
+		remotePatterns: [
+			...(envData.REMOTE_PATTERNS ?? []),
+			{
+				protocol: "https",
+				hostname: "storage.finitop.app",
+			},
+		],
 	},
 	trailingSlash: false,
 	output: "standalone",
