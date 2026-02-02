@@ -92,18 +92,13 @@ export default function EditProductPage({
 			});
 		}
 
-		// Find images from the current language translation or fallback to the first one with images
-		const translationWithImages =
-			product.translations?.find((t) => t.languageCode === selectedLanguage) ||
-			product.translations?.find((t) => t.images && t.images.length > 0);
-
 		const formattedImages =
-			translationWithImages?.images?.map((img) => ({
-				key: img.url, // Use URL as key since we don't have the original key
-				url: img.url,
-				name: img.alt || "Product Image",
-				size: 0, // Mock size as we don't have it
-				type: "image/jpeg", // Mock type
+			product.images?.map((img) => ({
+				key: img.key || img.url || "",
+				url: img.url || "",
+				name: img.name || "Product Image",
+				size: img.size || 0,
+				type: img.type || "image/jpeg",
 			})) || [];
 
 		return {
@@ -111,7 +106,15 @@ export default function EditProductPage({
 			maxQuantity: product.maxQuantity ?? undefined,
 			translations: translationsRecord,
 			images: formattedImages,
-			thumbnailImage: undefined, // TODO: Handle thumbnail image
+			thumbnailImage: product.thumbnailImage
+				? {
+						key: product.thumbnailImage.key || product.thumbnailImage.url || "",
+						url: product.thumbnailImage.url || "",
+						name: product.thumbnailImage.name || "Thumbnail",
+						size: product.thumbnailImage.size || 0,
+						type: product.thumbnailImage.type || "image/jpeg",
+					}
+				: undefined,
 			collectionIds: product.collectionIds || [],
 			brandId: product.brandId || undefined,
 			variants: product.variants?.map((variant) => ({

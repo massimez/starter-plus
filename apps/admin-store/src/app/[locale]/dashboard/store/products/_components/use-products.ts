@@ -41,7 +41,23 @@ export type Product = {
 	maxQuantity: number | null;
 	type?: string;
 	collectionIds?: string[];
+	images?:
+		| {
+				key?: string;
+				url?: string;
+				name?: string;
+				size?: number;
+				type?: string;
+		  }[]
+		| null;
 	brandId?: string | null;
+	thumbnailImage?: {
+		key?: string;
+		url?: string;
+		name?: string;
+		size?: number;
+		type?: string;
+	} | null;
 	translations:
 		| {
 				languageCode: string;
