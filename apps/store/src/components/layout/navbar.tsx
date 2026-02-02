@@ -130,7 +130,14 @@ export function Navbar({ logo, storeName = "" }: NavbarProps) {
 					</Button> */}
 
 					<div className="flex items-center">
-						<CartButton className="hidden lg:flex" classNameIcon="size-6" />
+						<CartButton
+							className="hidden lg:flex"
+							classNameIcon="size-6"
+							onLoginClick={() => {
+								setAuthModalView("signIn");
+								setIsAuthModalOpen(true);
+							}}
+						/>
 					</div>
 					<LanguageSelector
 						locales={locales}

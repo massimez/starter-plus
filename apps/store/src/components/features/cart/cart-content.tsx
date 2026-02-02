@@ -3,7 +3,6 @@
 import { Button } from "@workspace/ui/components/button";
 import { ShoppingBag } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
 import { useSession } from "@/lib/auth-client";
 import { useCartStore } from "@/store/use-cart-store";
 import { CartItem } from "./cart-item";
@@ -12,11 +11,15 @@ import { CartSummary } from "./cart-summary";
 interface CartContentProps {
 	onCartClose?: () => void;
 	onCheckout?: () => void;
+	onLoginClick?: () => void;
 }
 
-export function CartContent({ onCartClose, onCheckout }: CartContentProps) {
+export function CartContent({
+	onCartClose,
+	onCheckout,
+	onLoginClick,
+}: CartContentProps) {
 	const t = useTranslations("Cart");
-	const router = useRouter();
 	const {
 		items,
 		clearCart,
@@ -78,7 +81,12 @@ export function CartContent({ onCartClose, onCheckout }: CartContentProps) {
 					) : (
 						<Button
 							className="h-14 w-full rounded-xl font-bold text-base shadow-lg transition-all hover:scale-[1.02] hover:shadow-xl"
-							onClick={() => router.push("/login")}
+							onClick={() => {
+								if (onLoginClick) {
+									onCartClose?.();
+									onLoginClick();
+								}
+							}}
 						>
 							{t("checkout")}
 						</Button>

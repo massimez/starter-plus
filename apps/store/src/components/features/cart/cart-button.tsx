@@ -11,9 +11,11 @@ import { CartModal } from "./cart-modal";
 export function CartButton({
 	className,
 	classNameIcon,
+	onLoginClick,
 }: {
 	className?: string;
 	classNameIcon?: string;
+	onLoginClick?: () => void;
 }) {
 	const [isOpen, setIsOpen] = useState(false);
 	const isMounted = useMounted();
@@ -38,7 +40,11 @@ export function CartButton({
 				)}
 			</Button>
 
-			<CartModal open={isOpen} onOpenChange={setIsOpen} />
+			<CartModal
+				open={isOpen}
+				onOpenChange={setIsOpen}
+				onLoginClick={onLoginClick}
+			/>
 		</>
 	);
 }

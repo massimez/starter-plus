@@ -17,12 +17,14 @@ interface CartModalProps {
 	open: boolean;
 	onOpenChange: (open: boolean) => void;
 	defaultView?: "cart" | "checkout";
+	onLoginClick?: () => void;
 }
 
 export function CartModal({
 	open,
 	onOpenChange,
 	defaultView = "cart",
+	onLoginClick,
 }: CartModalProps) {
 	const t = useTranslations("Cart");
 	const { itemCount } = useCartStore();
@@ -62,6 +64,7 @@ export function CartModal({
 							<CartContent
 								onCartClose={() => onOpenChange(false)}
 								onCheckout={() => setView("checkout")}
+								onLoginClick={onLoginClick}
 							/>
 						</div>
 					</>
