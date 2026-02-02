@@ -13,11 +13,11 @@ import {
 } from "@workspace/ui/components/select";
 
 import { Search, X } from "lucide-react";
-import Link from "next/link";
 import { parseAsString, useQueryState } from "nuqs";
 import { PageDashboardHeader } from "@/app/[locale]/(landing)/_components/sections/page-dashboard-header";
 import { DEFAULT_LOCALE, LOCALES } from "@/constants/locales";
 import { useNuqsPagination } from "@/hooks/use-nuqs-pagination";
+import { Link } from "@/i18n/navigation";
 import { hc } from "@/lib/api-client";
 import { CollectionFilter } from "../../_components/collection-filter";
 import { useProductCollections } from "../../product-collections/hooks/use-product-collection";
@@ -28,7 +28,7 @@ export const ProductsClient = () => {
 	const queryClient = useQueryClient();
 
 	const [selectedLanguage, setSelectedLanguage] = useQueryState(
-		"locale",
+		"filterLocale",
 		parseAsString.withDefault(DEFAULT_LOCALE),
 	);
 	const [searchQuery, setSearchQuery] = useQueryState(
@@ -124,7 +124,7 @@ export const ProductsClient = () => {
 							Clear Filters
 						</Button>
 					)}
-					<Link href={`/${selectedLanguage}/dashboard/store/products/new`}>
+					<Link href={"/dashboard/store/products/new"}>
 						<Button>Add Product</Button>
 					</Link>
 				</div>
