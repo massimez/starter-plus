@@ -27,7 +27,7 @@ export function LeafCategoryGrid({ collectionId }: { collectionId: string }) {
 		);
 
 	return (
-		<div className="flex">
+		<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
 			{products.map((p) => {
 				// Inline mapping logic or extract utility
 				const firstVariant = p.variants?.[0];
@@ -58,10 +58,7 @@ export function LeafCategoryGrid({ collectionId }: { collectionId: string }) {
 				};
 
 				return (
-					<div
-						key={p.id}
-						className="flex basis-[240px] justify-center ps-4 md:basis-[260px]"
-					>
+					<div key={p.id} className="flex justify-center">
 						<div className="w-full">
 							<ProductCard product={mappedProduct} />
 						</div>
