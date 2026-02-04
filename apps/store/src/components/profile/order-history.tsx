@@ -298,7 +298,7 @@ export function OrderHistory({ orders, isLoadingOrders }: OrderHistoryProps) {
 						</p>
 						<Button
 							size="lg"
-							onClick={() => router.push("/products")}
+							onClick={() => router.push("/")}
 							className="gap-2"
 						>
 							<ShoppingBag className="h-4 w-4" />
