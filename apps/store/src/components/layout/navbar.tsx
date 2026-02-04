@@ -104,7 +104,8 @@ export function Navbar({ logo, storeName = "" }: NavbarProps) {
 				</Link>
 
 				{/* Search Bar */}
-				<div className="hidden w-full flex-1 items-center justify-center px-8 lg:flex">
+				<div className="hidden w-full md:flex" />
+				<div className="hidden w-full flex-1 items-center justify-center px-8">
 					<div className="flex w-full max-w-2xl items-center rounded-md border border-input bg-muted/30 focus-within:ring-1 focus-within:ring-ring">
 						<div className="relative flex-1">
 							<Input
