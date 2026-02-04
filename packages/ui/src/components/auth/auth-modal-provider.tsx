@@ -154,7 +154,9 @@ export function AuthModalProvider({
 		await authClient.signIn.social(
 			{
 				provider: provider,
-				callbackURL: redirectTo || window.location.href,
+				callbackURL: redirectTo?.startsWith("/")
+					? `${window.location.origin}${redirectTo}`
+					: redirectTo || window.location.href,
 			},
 			{
 				onError: (ctx: { error: { message: string } }) => {
