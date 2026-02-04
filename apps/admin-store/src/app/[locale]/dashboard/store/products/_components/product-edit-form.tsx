@@ -106,7 +106,7 @@ export function ProductEditForm({
 			minQuantity: 1,
 			isFeatured: false,
 			trackStock: true,
-			allowBackorders: false,
+			allowBackorders: true,
 
 			price: 0,
 			cost: 0,
@@ -128,21 +128,21 @@ export function ProductEditForm({
 				)}
 				className="space-y-8 pb-10"
 			>
-				<div className="flex items-center justify-between">
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 					<div className="space-y-1">
 						<h1 className="font-bold text-2xl">
 							{initialValues?.id ? "Edit Product" : "Add Product"}
 						</h1>
 					</div>
-					<div className="flex items-center gap-3">
+					<div className="flex flex-col gap-3 sm:flex-row sm:items-center">
 						{/* Language Selector */}
-						<div className="flex items-center gap-2">
+						<div className="order-2 flex items-center gap-2 sm:order-0">
 							<Languages className="h-4 w-4 text-muted-foreground" />
 							<Select
 								value={editingLanguage}
 								onValueChange={setEditingLanguage}
 							>
-								<SelectTrigger className="w-[140px]">
+								<SelectTrigger className="w-full sm:w-[140px]">
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
@@ -154,16 +154,24 @@ export function ProductEditForm({
 								</SelectContent>
 							</Select>
 						</div>
-						<Button
-							type="button"
-							variant="outline"
-							onClick={() => window.history.back()}
-						>
-							Discard
-						</Button>
-						<Button type="submit" disabled={isSubmitting}>
-							{isSubmitting ? "Saving..." : "Save Product"}
-						</Button>
+
+						<div className="order-1 grid w-full grid-cols-2 gap-3 sm:order-0 sm:flex sm:w-auto">
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => window.history.back()}
+								className="w-full sm:w-auto"
+							>
+								Discard
+							</Button>
+							<Button
+								type="submit"
+								disabled={isSubmitting}
+								className="w-full sm:w-auto"
+							>
+								{isSubmitting ? "Saving..." : "Save Product"}
+							</Button>
+						</div>
 					</div>
 				</div>
 
