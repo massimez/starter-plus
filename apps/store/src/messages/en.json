@@ -178,6 +178,8 @@
 			"payment": "Payment",
 			"review": "Review"
 		},
+
+		"loading": "Loading...",
 		"validation": {
 			"title": "Validation Errors",
 			"emptyCart": "Your cart is empty",
@@ -188,16 +190,16 @@
 		},
 		"shipping": {
 			"title": "Shipping Address",
+			"back": "Go back",
 			"manual": "Or enter manually",
+			"useSavedAddress": "Use a saved address",
 			"saveAddress": "Save this address to my profile",
+			"guestMessage": "Sign in to save addresses for faster checkout next time.",
 			"street": "Street Address",
-			"streetPlaceholder": "123 Main Street",
 			"city": "City",
-			"cityPlaceholder": "New York",
 			"state": "State/Province",
-			"statePlaceholder": "NY",
 			"postalCode": "Postal Code",
-			"postalCodePlaceholder": "10001"
+			"country": "Country"
 		},
 		"payment": {
 			"title": "Payment Method",

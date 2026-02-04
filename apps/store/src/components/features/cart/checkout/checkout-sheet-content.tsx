@@ -3,7 +3,6 @@
 import { Button } from "@workspace/ui/components/button";
 import { useTranslations } from "next-intl";
 import { CheckoutForm } from "@/components/features/cart/checkout/checkout-form";
-import { useRouter } from "@/i18n/routing";
 import { useSession } from "@/lib/auth-client";
 import { useDefaultLocation } from "@/lib/hooks/use-storefront";
 import { useStoreSettings } from "@/store/use-settings-store";
@@ -18,8 +17,7 @@ export function CheckoutSheetContent({
 	onClose,
 }: CheckoutSheetContentProps) {
 	const t = useTranslations("Checkout");
-	const { data: session, isPending } = useSession();
-	const router = useRouter();
+	const { isPending } = useSession();
 	const { currency } = useStoreSettings();
 
 	// Fetch default location for the organization
@@ -36,19 +34,6 @@ export function CheckoutSheetContent({
 					<div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-current border-r-transparent border-solid" />
 					<p className="text-muted-foreground">{t("loading")}</p>
 				</div>
-			</div>
-		);
-	}
-
-	if (!session) {
-		return (
-			<div className="flex h-full flex-col items-center justify-center p-8 text-center">
-				<h3 className="mb-2 font-semibold text-lg">{t("authRequired")}</h3>
-				<p className="mb-6 text-muted-foreground">{t("authMessage")}</p>
-				<Button onClick={() => router.push("/login")}>{t("signIn")}</Button>
-				<Button variant="ghost" onClick={onBack} className="mt-4">
-					{t("backToCart")}
-				</Button>
 			</div>
 		);
 	}

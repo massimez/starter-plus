@@ -5,14 +5,30 @@ import { useMounted } from "@workspace/ui/hooks/use-mounted";
 import { ShoppingBag } from "lucide-react";
 import { useState } from "react";
 import { useCartStore } from "@/store/use-cart-store";
+import { AuthModal } from "../../auth/auth-modal";
 import { CartModal } from "./cart-modal";
 
 export function MobileCartBar() {
 	const [isOpen, setIsOpen] = useState(false);
 	const isMounted = useMounted();
 	const { itemCount } = useCartStore();
+	const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+	const [authModalView, setAuthModalView] = useState<"signIn" | "signUp">(
+		"signIn",
+	);
+	const [cartView, setCartView] = useState<"cart" | "checkout">("cart");
 
 	const cartCount = isMounted ? itemCount() : 0;
+
+	const handleLoginClick = () => {
+		setAuthModalView("signIn");
+		setIsAuthModalOpen(true);
+	};
+
+	const handleLoginSuccess = () => {
+		setCartView("checkout");
+		setIsOpen(true);
+	};
 
 	return (
 		<>
@@ -20,7 +36,10 @@ export function MobileCartBar() {
 				<Button
 					className="flex h-15 w-15 items-center justify-center rounded-full shadow-xl"
 					size="icon"
-					onClick={() => setIsOpen(true)}
+					onClick={() => {
+						setCartView("cart");
+						setIsOpen(true);
+					}}
 				>
 					<div className="relative">
 						<ShoppingBag className="size-6" />
@@ -33,7 +52,20 @@ export function MobileCartBar() {
 				</Button>
 			</div>
 
-			<CartModal open={isOpen} onOpenChange={setIsOpen} />
+			<CartModal
+				key={cartView}
+				open={isOpen}
+				onOpenChange={setIsOpen}
+				onLoginClick={handleLoginClick}
+				defaultView={cartView}
+			/>
+
+			<AuthModal
+				open={isAuthModalOpen}
+				onOpenChange={setIsAuthModalOpen}
+				defaultView={authModalView}
+				onLoginSuccess={handleLoginSuccess}
+			/>
 		</>
 	);
 }

@@ -6,7 +6,11 @@ import { ResetPasswordOtp } from "@workspace/ui/components/auth/reset-password-o
 import { SignIn } from "@workspace/ui/components/auth/sign-in";
 import { SignUp } from "@workspace/ui/components/auth/sign-up";
 import defaultTranslations from "@workspace/ui/components/auth/translations.json";
-import { Dialog, DialogContent } from "@workspace/ui/components/dialog";
+import {
+	Dialog,
+	DialogContent,
+	DialogTitle,
+} from "@workspace/ui/components/dialog";
 import { useOtpVerification } from "@workspace/ui/hooks/use-otp-verification";
 import { ArrowLeft } from "lucide-react";
 import { useLocale } from "next-intl";
@@ -20,6 +24,7 @@ interface AuthModalProps {
 	onOpenChange: (open: boolean) => void;
 	defaultView?: "signIn" | "signUp";
 	redirectTo?: string;
+	onLoginSuccess?: () => void;
 }
 
 type ViewType =
@@ -34,6 +39,7 @@ export function AuthModal({
 	onOpenChange,
 	defaultView = "signIn",
 	redirectTo,
+	onLoginSuccess,
 }: AuthModalProps) {
 	const [view, setView] = useState<ViewType>(defaultView);
 	// biome-ignore lint/suspicious/noExplicitAny: <>
@@ -72,6 +78,7 @@ export function AuthModal({
 				onSuccess: async () => {
 					toast.success("Signed in successfully");
 					onOpenChange(false);
+					onLoginSuccess?.();
 					router.refresh();
 				},
 				onError: (ctx) => {
@@ -115,6 +122,7 @@ export function AuthModal({
 						onVerificationSuccess: () => {
 							toast.success("Account created successfully");
 							onOpenChange(false);
+							onLoginSuccess?.();
 							router.refresh();
 						},
 					});
@@ -187,6 +195,7 @@ export function AuthModal({
 	return (
 		<Dialog open={open} onOpenChange={onOpenChange}>
 			<DialogContent className="flex h-screen w-screen max-w-none flex-col gap-0 rounded-none p-0 sm:h-auto sm:w-full sm:max-w-[500px] sm:rounded-lg sm:p-8">
+				<DialogTitle className="sr-only">Authentication</DialogTitle>
 				{/* Back Button - Only on mobile */}
 				{showBackButton && (
 					<button

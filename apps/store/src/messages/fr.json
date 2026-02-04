@@ -188,16 +188,16 @@
 		},
 		"shipping": {
 			"title": "Adresse de livraison",
+			"back": "Retour",
 			"manual": "Ou entrer manuellement",
+			"useSavedAddress": "Utiliser une adresse enregistrée",
 			"saveAddress": "Enregistrer cette adresse dans mon profil",
+			"guestMessage": "Connectez-vous pour enregistrer vos adresses pour une commande plus rapide la prochaine fois.",
 			"street": "Adresse",
-			"streetPlaceholder": "123 Rue Principale",
 			"city": "Ville",
-			"cityPlaceholder": "Paris",
 			"state": "État/Province",
-			"statePlaceholder": "Île-de-France",
 			"postalCode": "Code postal",
-			"postalCodePlaceholder": "75001"
+			"country": "Pays"
 		},
 		"payment": {
 			"title": "Méthode de paiement",

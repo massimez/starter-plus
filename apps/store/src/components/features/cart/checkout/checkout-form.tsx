@@ -32,7 +32,7 @@ import {
 
 export function CheckoutForm({
 	locationId,
-	currency = "USD",
+	currency = "DZD",
 	onClose,
 	onBack,
 }: CheckoutFormProps) {

@@ -188,16 +188,16 @@
 		},
 		"shipping": {
 			"title": "عنوان الشحن",
+			"back": "رجوع",
 			"manual": "أو أدخل يدويًا",
+			"useSavedAddress": "استخدم عنوانًا محفوظًا",
 			"saveAddress": "حفظ هذا العنوان في ملفي الشخصي",
+			"guestMessage": "سجل الدخول لحفظ العناوين لإتمام عملية الدفع بشكل أسرع في المرة القادمة.",
 			"street": "العنوان",
-			"streetPlaceholder": "123 شارع رئيسي",
 			"city": "المدينة",
-			"cityPlaceholder": "الرياض",
 			"state": "المقاطعة/المنطقة",
-			"statePlaceholder": "الرياض",
 			"postalCode": "الرمز البريدي",
-			"postalCodePlaceholder": "11564"
+			"country": "البلد"
 		},
 		"payment": {
 			"title": "طريقة الدفع",
