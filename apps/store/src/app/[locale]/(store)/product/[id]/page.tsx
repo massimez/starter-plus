@@ -36,7 +36,6 @@ import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import { use, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { FrequentlyBoughtTogether } from "@/components/features";
 import { useFormatPrice } from "@/lib/hooks/use-format-price";
 import { useDefaultLocation, useProduct } from "@/lib/hooks/use-storefront";
 import type { ProductVariant } from "@/lib/storefront-types";
@@ -549,11 +548,6 @@ export default function ProductPage({ params }: ProductPageProps) {
 						</AccordionContent>
 					</AccordionItem> */}
 				</Accordion>
-			</div>
-
-			{/* Frequently Bought Together */}
-			<div className="mt-8 px-4 lg:px-0">
-				<FrequentlyBoughtTogether currentProductId={id} />
 			</div>
 
 			{/* Mobile Sticky Add to Cart */}
