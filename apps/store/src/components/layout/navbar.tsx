@@ -16,7 +16,7 @@ import { ModeToggle } from "@workspace/ui/components/theme-toggle";
 import { ChevronDown, Search, Tornado, User } from "lucide-react";
 import Image from "next/image";
 import { useLocale } from "next-intl";
-import { useState } from "react";
+import { type ComponentProps, useState } from "react";
 import { toast } from "sonner";
 import { CartButton } from "@/components/features/cart/cart-button";
 import { UserProfileDrawer } from "@/components/features/profile/user-profile-drawer";
@@ -41,20 +41,19 @@ export function Navbar({ logo, storeName = "" }: NavbarProps) {
 	const locales: LocaleOption[] = [
 		{ code: "en", label: "English", flag: "🇺🇸", nativeName: "English" },
 		{ code: "fr", label: "Français", flag: "🇫🇷", nativeName: "Français" },
-		{ code: "ar", label: "العربية", flag: "🇸🇦", nativeName: "العربية" },
+		{ code: "ar", label: "العربية", flag: "🇩🇿", nativeName: "العربية" },
 	];
 
 	const handleLocaleChange = (locale: string) => {
 		router.replace(pathname, { locale });
 	};
 
-	// Get actual auth state from session
 	const { data: session } = useSession();
 	const isAuthenticated = !!session?.user;
 	const user = {
 		name: session?.user?.name || "User",
 		email: session?.user?.email || "",
-		avatar: session?.user?.image || "", // Optional avatar URL
+		avatar: session?.user?.image || "",
 	};
 
 	const handleSignOut = async () => {
@@ -71,32 +70,54 @@ export function Navbar({ logo, storeName = "" }: NavbarProps) {
 			},
 		});
 	};
+	const renderUserTriggerButton = (
+		props: ComponentProps<typeof Button> = {},
+	) => (
+		<Button
+			variant="ghost"
+			className="gap-1 px-0 transition-all duration-200 hover:scale-105"
+			{...props}
+		>
+			<Avatar className="size-8 transition-all duration-300 hover:ring-2 hover:ring-primary hover:ring-offset-2">
+				{isAuthenticated ? (
+					<AvatarImage src={user.avatar} alt={user.name} />
+				) : null}
+				<AvatarFallback className="bg-transparent">
+					<User className="size-7 transition-transform duration-200 group-hover:scale-110" />
+				</AvatarFallback>
+			</Avatar>
+			<ChevronDown className="size-4 transition-transform duration-200 group-hover:translate-y-0.5" />
+		</Button>
+	);
 
 	return (
-		<header className="sticky top-0 z-50 w-full bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-			<Card className="mx-auto flex h-20 flex-row items-center gap-4 px-4">
+		<header className="fade-in slide-in-from-top-4 sticky top-0 z-50 w-full animate-in bg-background/95 backdrop-blur duration-500 supports-backdrop-filter:bg-background/60">
+			<Card className="mx-auto flex h-20 flex-row items-center gap-4 px-4 transition-shadow duration-300 hover:shadow-md">
 				{/* Logo Section */}
-				<Link href="/" className="me-6 flex w-[236px] items-center gap-2">
+				<Link
+					href="/"
+					className="group me-6 flex w-[236px] items-center gap-2 transition-all duration-300 hover:scale-105"
+				>
 					{logo ? (
 						<div className="relative flex h-12 w-auto max-w-[200px] items-center justify-center">
 							<Image
 								src={logo}
 								alt={storeName}
-								width={0}
-								height={0}
+								width={200}
+								height={48}
 								sizes="200px"
-								className="h-full w-auto object-contain"
+								className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-105"
 							/>
-							<span className="font-bold text-2xl text-[#774ba9] tracking-tight">
+							<span className="font-bold text-2xl text-[#774ba9] tracking-tight transition-all duration-300 group-hover:text-[#8b5ac0]">
 								{storeName}
 							</span>
 						</div>
 					) : (
 						<>
 							<div className="flex items-center justify-center text-primary">
-								<Tornado className="h-8 w-8 rotate-180" />
+								<Tornado className="h-8 w-8 rotate-180 transition-all duration-500 group-hover:rotate-270 group-hover:scale-110" />
 							</div>
-							<span className="font-bold text-2xl text-primary tracking-tight">
+							<span className="font-bold text-2xl text-primary tracking-tight transition-all duration-300 group-hover:tracking-wide">
 								{storeName}
 							</span>
 						</>
@@ -106,20 +127,20 @@ export function Navbar({ logo, storeName = "" }: NavbarProps) {
 				{/* Search Bar */}
 				<div className="hidden w-full md:flex" />
 				<div className="hidden w-full flex-1 items-center justify-center px-8">
-					<div className="flex w-full max-w-2xl items-center rounded-md border border-input bg-muted/30 focus-within:ring-1 focus-within:ring-ring">
+					<div className="flex w-full max-w-2xl items-center rounded-md border border-input bg-muted/30 transition-all duration-300 focus-within:scale-[1.02] focus-within:shadow-sm focus-within:ring-1 focus-within:ring-ring">
 						<div className="relative flex-1">
 							<Input
 								placeholder="Search"
-								className="h-10 rounded-none border-0 bg-transparent px-4 shadow-none focus-visible:ring-0"
+								className="h-10 rounded-none border-0 bg-transparent px-4 shadow-none transition-all duration-200 focus-visible:ring-0"
 							/>
 						</div>
 
 						<Button
 							variant="ghost"
 							size="icon"
-							className="h-10 w-12 rounded-l-none hover:bg-transparent"
+							className="group h-10 w-12 rounded-l-none transition-all duration-200 hover:scale-110 hover:bg-transparent"
 						>
-							<Search className="h-5 w-5 text-muted-foreground" />
+							<Search className="h-5 w-5 text-muted-foreground transition-all duration-200 group-hover:scale-110 group-hover:text-foreground" />
 						</Button>
 					</div>
 				</div>
@@ -132,7 +153,7 @@ export function Navbar({ logo, storeName = "" }: NavbarProps) {
 
 					<div className="flex items-center">
 						<CartButton
-							className="hidden lg:flex"
+							className="hidden transition-all duration-200 hover:scale-110 lg:flex"
 							classNameIcon="size-6"
 							onLoginClick={() => {
 								setAuthModalView("signIn");
@@ -140,43 +161,34 @@ export function Navbar({ logo, storeName = "" }: NavbarProps) {
 							}}
 						/>
 					</div>
-					<LanguageSelector
-						locales={locales}
-						currentLocale={currentLocale}
-						onLocaleChange={handleLocaleChange}
-						triggerVariant="ghost"
-						size="icon"
-						iconClassName="size-6"
-					/>
-					<ModeToggle
-						className="max-sm:hidden"
-						variant="ghost"
-						iconClassName="size-6"
-					/>
+					<div className="transition-all duration-200 hover:scale-110">
+						<LanguageSelector
+							locales={locales}
+							currentLocale={currentLocale}
+							onLocaleChange={handleLocaleChange}
+							triggerVariant="ghost"
+							size="icon"
+							iconClassName="size-6"
+						/>
+					</div>
+					<div className="transition-all duration-200 hover:scale-110">
+						<ModeToggle
+							className="max-sm:hidden"
+							variant="ghost"
+							iconClassName="size-6"
+						/>
+					</div>
 					{isAuthenticated ? (
 						<UserProfileDrawer user={user} onSignOut={handleSignOut}>
-							<Button variant="ghost" className="gap-0 px-0">
-								<Avatar className="size-8">
-									<AvatarImage src={user.avatar} alt={user.name} />
-									<AvatarFallback className="bg-background-transparent">
-										<User className="size-7" />
-									</AvatarFallback>
-								</Avatar>
-								<ChevronDown className="size-4" />
-							</Button>
+							{renderUserTriggerButton()}
 						</UserProfileDrawer>
 					) : (
-						<Button
-							variant="ghost"
-							className="gap-2 pr-0 text-foreground"
-							onClick={() => {
+						renderUserTriggerButton({
+							onClick: () => {
 								setAuthModalView("signIn");
 								setIsAuthModalOpen(true);
-							}}
-						>
-							<User className="size-7" />
-							<ChevronDown className="size-4" />
-						</Button>
+							},
+						})
 					)}
 				</div>
 			</Card>

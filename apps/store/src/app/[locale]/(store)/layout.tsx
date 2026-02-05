@@ -36,7 +36,7 @@ export default async function LayoutStore({
 				<Card className="hidden w-[236px] px-4 lg:flex">
 					<CategorySidebarContainer className="scrollbar-hide -mt-1.5 sticky top-20 max-h-[calc(100vh-8rem)] w-full shrink-0 flex-col overflow-y-auto" />
 				</Card>
-				<Card className="w-full flex-1 p-4">{children}</Card>
+				<Card className="w-full flex-1 overflow-hidden p-4">{children}</Card>
 				<Card className="hidden px-4 xl:flex">
 					<CartSidebar className="scrollbar-hide sticky top-20 flex max-h-[calc(100vh-8rem)] w-[330px] shrink-0 flex-col overflow-hidden" />
 				</Card>

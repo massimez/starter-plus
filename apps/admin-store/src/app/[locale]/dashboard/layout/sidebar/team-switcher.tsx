@@ -55,12 +55,6 @@ export function TeamSwitcher() {
 	};
 	const { openModal } = useModal();
 	const loading = orgsLoading || activeOrgLoading || isSwitching;
-	console.log("SideBarLoaded:", {
-		orgsLoading,
-		activeOrgLoading,
-		isSwitching,
-		loading,
-	});
 
 	// biome-ignore lint/correctness/useExhaustiveDependencies: <ex>
 	React.useEffect(() => {

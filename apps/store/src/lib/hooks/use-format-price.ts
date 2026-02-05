@@ -5,7 +5,6 @@ import { useStoreSettings } from "@/store/use-settings-store";
 export function useFormatPrice() {
 	const { currency } = useStoreSettings();
 	const locale = useLocale();
-	console.log(locale);
 	const formatPrice = useCallback(
 		(price: number | undefined | null) => {
 			const code = locale === "fr" ? "fr-DZ" : locale;
