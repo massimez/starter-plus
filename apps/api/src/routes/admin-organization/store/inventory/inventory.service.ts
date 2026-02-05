@@ -23,8 +23,30 @@ interface GetInventoryParams {
 	offset?: number;
 }
 
+interface DbTransaction {
+	select: typeof db.select;
+	update: typeof db.update;
+	insert: typeof db.insert;
+}
+
+// Constants
+const DEFAULT_INVENTORY_LIMIT = 20;
+
+// Custom errors
+class InsufficientStockError extends Error {
+	constructor(current: number, change: number) {
+		super(
+			`Insufficient stock. Current: ${current}, Attempted change: ${change}`,
+		);
+		this.name = "InsufficientStockError";
+	}
+}
+
 /**
- * Get product variant stock
+ * Get product variant stock for a specific variant
+ * @param productVariantId - The ID of the product variant
+ * @param orgId - The organization ID
+ * @returns Stock information with quantity and reserved quantity
  */
 export async function getProductVariantStock(
 	productVariantId: string,
@@ -47,6 +69,11 @@ export async function getProductVariantStock(
 
 /**
  * Create stock transaction and update stock accordingly
+ * Uses a database transaction to ensure atomicity
+ * @param data - Transaction data including quantity change and location
+ * @param orgId - The organization ID
+ * @param user - User performing the transaction
+ * @returns The created transaction record
  */
 export async function createStockTransaction(
 	data: InsertProductVariantStockTransaction,
@@ -71,16 +98,23 @@ export async function createStockTransaction(
 }
 
 /**
- * Update product variant stock after a transaction
+ * Update product variant stock after a transaction using atomic operations
+ * FIXED: Now uses atomic SQL to prevent race conditions
+ * FIXED: Validates against negative stock
+ * FIXED: Checks deletedAt on existing stock lookup
+ * @param transaction - The stock transaction
+ * @param user - User performing the update
+ * @param _db - Database instance (or transaction instance)
  */
 export async function updateStockAfterTransaction(
 	transaction: typeof productVariantStockTransaction.$inferSelect,
 	user: { id: string },
-	_db: Pick<typeof db, "select" | "update" | "insert"> = db,
+	_db: DbTransaction = db,
 ) {
 	const { productVariantId, organizationId, locationId, quantityChange } =
 		transaction;
 
+	// FIXED: Added isNull check for deletedAt
 	const [currentStock] = await _db
 		.select()
 		.from(productVariantStock)
@@ -89,14 +123,22 @@ export async function updateStockAfterTransaction(
 				eq(productVariantStock.productVariantId, productVariantId),
 				eq(productVariantStock.organizationId, organizationId),
 				eq(productVariantStock.locationId, locationId),
+				isNull(productVariantStock.deletedAt),
 			),
 		);
 
 	if (currentStock) {
+		// FIXED: Validate against negative stock
+		const newQuantity = currentStock.quantity + quantityChange;
+		if (newQuantity < 0) {
+			throw new InsufficientStockError(currentStock.quantity, quantityChange);
+		}
+
+		// FIXED: Use atomic SQL operation instead of read-then-update
 		await _db
 			.update(productVariantStock)
 			.set({
-				quantity: currentStock.quantity + quantityChange,
+				quantity: sql`${productVariantStock.quantity} + ${quantityChange}`,
 				...getAuditData(user, "update"),
 			})
 			.where(
@@ -108,12 +150,17 @@ export async function updateStockAfterTransaction(
 				),
 			);
 	} else {
+		// FIXED: Validate initial stock isn't negative
+		if (quantityChange < 0) {
+			throw new InsufficientStockError(0, quantityChange);
+		}
+
 		await _db.insert(productVariantStock).values({
 			productVariantId,
 			organizationId,
 			locationId,
 			quantity: quantityChange,
-			reservedQuantity: 0, // Assuming new stock starts with 0 reserved
+			reservedQuantity: 0,
 			...getAuditData(user, "create"),
 		});
 	}
@@ -121,6 +168,10 @@ export async function updateStockAfterTransaction(
 
 /**
  * Get stock transactions with pagination
+ * @param productVariantId - Optional filter by variant ID
+ * @param orgId - Organization ID
+ * @param paginationParams - Limit and offset for pagination
+ * @returns Paginated list of transactions with total count
  */
 export async function getStockTransactions(
 	productVariantId: string | undefined,
@@ -132,6 +183,7 @@ export async function getStockTransactions(
 
 	const filters = [
 		eq(productVariantStockTransaction.organizationId, validatedOrgId),
+		isNull(productVariantStockTransaction.deletedAt),
 	];
 
 	if (productVariantId) {
@@ -140,17 +192,11 @@ export async function getStockTransactions(
 		);
 	}
 
-	const whereClause =
-		filters.length > 1
-			? and(...filters)
-			: filters.length === 1
-				? filters[0]
-				: undefined;
+	// FIXED: Simplified logic
+	const whereClause = filters.length > 0 ? and(...filters) : undefined;
 
 	const data = await db.query.productVariantStockTransaction.findMany({
-		where: whereClause
-			? and(whereClause, isNull(productVariantStockTransaction.deletedAt))
-			: isNull(productVariantStockTransaction.deletedAt),
+		where: whereClause,
 		with: {
 			location: true,
 			variant: true,
@@ -160,22 +206,21 @@ export async function getStockTransactions(
 		orderBy: (tx, { desc }) => [desc(tx.createdAt)],
 	});
 
-	// optional: total count if you need pagination info
 	const total = await db
 		.select({ count: sql<number>`count(*)` })
 		.from(productVariantStockTransaction)
-		.where(
-			whereClause
-				? and(whereClause, isNull(productVariantStockTransaction.deletedAt))
-				: isNull(productVariantStockTransaction.deletedAt),
-		)
-		.then((res) => res[0]?.count ?? 0);
+		.where(whereClause)
+		.then((res) => Number(res[0]?.count ?? 0));
 
 	return { total, data };
 }
 
 /**
  * Get product variants grouped by product with inventory stock
+ * @param orgId - Organization ID
+ * @param params - Filter and pagination parameters
+ * @param locationId - Optional location filter
+ * @returns Paginated products with their variants and stock information
  */
 export async function getProductVariantsGroupedByProductWithStock(
 	orgId: string,
@@ -183,7 +228,12 @@ export async function getProductVariantsGroupedByProductWithStock(
 	locationId?: string,
 ) {
 	const orgIdValidated = validateOrgId(orgId);
-	const { collectionId, search, limit = 20, offset = 0 } = params;
+	const {
+		collectionId,
+		search,
+		limit = DEFAULT_INVENTORY_LIMIT,
+		offset = 0,
+	} = params;
 
 	// 1. Get paginated product IDs first
 	const filters = [
@@ -223,7 +273,7 @@ export async function getProductVariantsGroupedByProductWithStock(
 		.select({ count: sql<number>`count(*)` })
 		.from(product)
 		.where(whereClause);
-	const total = Number(totalResult[0]?.count || 0);
+	const total = Number(totalResult[0]?.count ?? 0);
 
 	// Get paginated product IDs
 	const productIdsResult = await db
@@ -241,6 +291,15 @@ export async function getProductVariantsGroupedByProductWithStock(
 	}
 
 	// 2. Fetch full details for these products
+	// Build stock filter conditions
+	const stockFilters = [
+		eq(productVariantStock.organizationId, orgIdValidated),
+		isNull(productVariantStock.deletedAt),
+	];
+	if (locationId) {
+		stockFilters.push(eq(productVariantStock.locationId, locationId));
+	}
+
 	const rows = await db
 		.select({
 			productId: product.id,
@@ -260,23 +319,22 @@ export async function getProductVariantsGroupedByProductWithStock(
 				),
 		})
 		.from(product)
-		.innerJoin(productVariant, eq(productVariant.productId, product.id))
+		.innerJoin(
+			productVariant,
+			and(
+				eq(productVariant.productId, product.id),
+				eq(productVariant.organizationId, orgIdValidated),
+				isNull(productVariant.deletedAt),
+			),
+		)
 		.leftJoin(
 			productVariantStock,
 			and(
 				eq(productVariantStock.productVariantId, productVariant.id),
-				eq(productVariantStock.organizationId, orgIdValidated),
-				locationId ? eq(productVariantStock.locationId, locationId) : undefined,
+				...stockFilters,
 			),
 		)
-		.where(
-			and(
-				inArray(product.id, pageProductIds),
-				eq(product.organizationId, orgIdValidated),
-				eq(productVariant.organizationId, orgIdValidated),
-				locationId ? eq(productVariantStock.locationId, locationId) : undefined,
-			),
-		)
+		.where(inArray(product.id, pageProductIds))
 		.groupBy(
 			product.id,
 			product.name,
@@ -305,19 +363,22 @@ export async function getProductVariantsGroupedByProductWithStock(
 		id: row.productId,
 		name: row.productName,
 		translations: row.productTranslations,
-		variants: [createVariant(row)],
+		variants: row.variantId ? [createVariant(row)] : [],
 	});
 
-	const productMap = new Map(
-		rows.map((row) => [row.productId, createProduct(row)]),
-	);
+	// Group variants by product
+	const productMap = new Map<string, ReturnType<typeof createProduct>>();
 
-	rows.forEach((row) => {
-		const existing = productMap.get(row.productId);
-		if (existing && existing.variants[0].id !== row.variantId) {
-			existing.variants.push(createVariant(row));
+	for (const row of rows) {
+		if (!productMap.has(row.productId)) {
+			productMap.set(row.productId, createProduct(row));
+		} else if (row.variantId) {
+			const existing = productMap.get(row.productId);
+			if (!existing?.variants.some((v) => v.id === row.variantId)) {
+				existing?.variants.push(createVariant(row));
+			}
 		}
-	});
+	}
 
 	// Ensure we preserve the order of pageProductIds
 	const orderedData = pageProductIds
