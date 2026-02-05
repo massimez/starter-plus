@@ -319,7 +319,7 @@ export async function getProductVariantsGroupedByProductWithStock(
 				),
 		})
 		.from(product)
-		.innerJoin(
+		.leftJoin(
 			productVariant,
 			and(
 				eq(productVariant.productId, product.id),
