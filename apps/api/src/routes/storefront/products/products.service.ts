@@ -45,6 +45,7 @@ export async function getStorefrontProducts(params: {
 		eq(product.organizationId, organizationId),
 
 		eq(product.status, "active"),
+		isNull(product.deletedAt),
 	];
 
 	if (q) {
@@ -178,6 +179,7 @@ export async function getStorefrontProduct(params: {
 				eq(product.id, productId),
 				eq(product.organizationId, organizationId),
 				eq(product.status, "active"),
+				isNull(product.deletedAt),
 			),
 		)
 		.limit(1);

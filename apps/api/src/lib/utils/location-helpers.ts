@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { location } from "@/lib/db/schema";
 
@@ -13,6 +13,7 @@ export async function getDefaultLocation(organizationId: string) {
 			eq(location.organizationId, organizationId),
 			eq(location.isDefault, true),
 			eq(location.isActive, true),
+			isNull(location.deletedAt),
 		),
 	});
 
@@ -25,6 +26,7 @@ export async function getDefaultLocation(organizationId: string) {
 		where: and(
 			eq(location.organizationId, organizationId),
 			eq(location.isActive, true),
+			isNull(location.deletedAt),
 		),
 	});
 

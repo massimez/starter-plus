@@ -290,7 +290,7 @@ export default function ProductPage({ params }: ProductPageProps) {
 							{productData.name}
 						</h1>
 
-						<div className="flex hidden items-center gap-4">
+						<div className="hidden items-center gap-4">
 							<div className="flex items-center gap-0.5">
 								{[1, 2, 3, 4, 5].map((star) => (
 									<Star

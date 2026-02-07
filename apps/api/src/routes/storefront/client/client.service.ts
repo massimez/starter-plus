@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { user } from "@/lib/db/schema";
 import { client } from "@/lib/db/schema/store/client";
@@ -19,6 +19,7 @@ export async function getMyClient(userId: string, organizationId: string) {
 				and(
 					eq(client.userId, userId),
 					eq(client.organizationId, organizationId),
+					isNull(client.deletedAt),
 				),
 			);
 
@@ -86,7 +87,11 @@ export async function updateMyClient(
 		.select()
 		.from(client)
 		.where(
-			and(eq(client.userId, userId), eq(client.organizationId, organizationId)),
+			and(
+				eq(client.userId, userId),
+				eq(client.organizationId, organizationId),
+				isNull(client.deletedAt),
+			),
 		);
 
 	if (!existingClient) {

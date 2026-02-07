@@ -1,4 +1,4 @@
-import { and, desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { generateOrderNumber } from "@/helpers/generate-order-number";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
@@ -328,7 +328,11 @@ export async function getStorefrontOrders(params: {
 		.select()
 		.from(order)
 		.where(
-			and(eq(order.organizationId, organizationId), eq(order.userId, userId)),
+			and(
+				eq(order.organizationId, organizationId),
+				eq(order.userId, userId),
+				isNull(order.deletedAt),
+			),
 		)
 		.orderBy(desc(order.createdAt))
 		.limit(limit)
@@ -347,6 +351,7 @@ export async function getStorefrontOrder(params: {
 	const conditions = [
 		eq(order.id, orderId),
 		eq(order.organizationId, organizationId),
+		isNull(order.deletedAt),
 	];
 
 	if (userId) {
@@ -364,7 +369,7 @@ export async function getStorefrontOrder(params: {
 	const items = await db
 		.select()
 		.from(orderItem)
-		.where(eq(orderItem.orderId, orderId));
+		.where(and(eq(orderItem.orderId, orderId), isNull(orderItem.deletedAt)));
 
 	return {
 		...foundOrder[0],

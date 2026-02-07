@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import { db } from "@/lib/db";
 import { productCollection } from "@/lib/db/schema/store/product";
 
@@ -15,6 +15,7 @@ export async function getStorefrontCollections(params: {
 				eq(productCollection.organizationId, organizationId),
 				eq(productCollection.isActive, true),
 				eq(productCollection.isVisible, true),
+				isNull(productCollection.deletedAt),
 			),
 		)
 		.orderBy(asc(productCollection.sortOrder));

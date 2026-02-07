@@ -1,4 +1,4 @@
-import { and, desc, eq, or, sql } from "drizzle-orm";
+import { and, desc, eq, isNull, or, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import { getAuditData } from "@/lib/utils/audit";
@@ -53,6 +53,7 @@ export async function validateCoupon(code: string, organizationId: string) {
 		where: and(
 			eq(schema.bonusCoupon.code, code),
 			eq(schema.bonusCoupon.organizationId, organizationId),
+			isNull(schema.bonusCoupon.deletedAt),
 		),
 		with: {
 			reward: true,
@@ -180,6 +181,7 @@ export async function getUserCoupons(
 	const conditions = [
 		eq(schema.bonusCoupon.userId, userId),
 		eq(schema.bonusCoupon.organizationId, organizationId),
+		isNull(schema.bonusCoupon.deletedAt),
 	];
 
 	if (!includeUsed) {
@@ -236,6 +238,7 @@ export async function getCoupon(couponId: string, organizationId: string) {
 		where: and(
 			eq(schema.bonusCoupon.id, couponId),
 			eq(schema.bonusCoupon.organizationId, organizationId),
+			isNull(schema.bonusCoupon.deletedAt),
 		),
 		with: {
 			reward: true,

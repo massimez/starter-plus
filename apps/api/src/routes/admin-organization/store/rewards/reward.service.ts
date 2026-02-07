@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, sql } from "drizzle-orm";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/db/schema";
 import type { TRewardType } from "@/lib/db/schema/helpers/types";
@@ -128,6 +128,7 @@ export async function listRewards(bonusProgramId: string) {
 		where: and(
 			eq(schema.reward.bonusProgramId, bonusProgramId),
 			eq(schema.reward.isActive, true),
+			isNull(schema.reward.deletedAt),
 		),
 		orderBy: [asc(schema.reward.sortOrder), desc(schema.reward.createdAt)],
 	});
@@ -157,6 +158,7 @@ export async function getAvailableRewards(
 		where: and(
 			eq(schema.reward.bonusProgramId, bonusProgramId),
 			eq(schema.reward.isActive, true),
+			isNull(schema.reward.deletedAt),
 		),
 		orderBy: [asc(schema.reward.sortOrder)],
 	});
@@ -233,7 +235,10 @@ export async function redeemReward(
 	return await (tx || db).transaction(async (trx) => {
 		// Get reward
 		const reward = await trx.query.reward.findFirst({
-			where: eq(schema.reward.id, rewardId),
+			where: and(
+				eq(schema.reward.id, rewardId),
+				isNull(schema.reward.deletedAt),
+			),
 		});
 
 		if (!reward) {
@@ -388,6 +393,7 @@ export async function getReward(rewardId: string, organizationId: string) {
 		where: and(
 			eq(schema.reward.id, rewardId),
 			eq(schema.reward.organizationId, organizationId),
+			isNull(schema.reward.deletedAt),
 		),
 	});
 
