@@ -66,14 +66,6 @@ export function ProductEditForm({
 	const { data: collectionsResponse, isLoading: isLoadingCollections } =
 		useProductCollections(selectedLanguage);
 
-	console.log("ProductEditForm debug:", {
-		selectedLanguage,
-		collectionsResponse,
-		isLoadingCollections,
-		flatLength: collectionsResponse?.flat?.length,
-	});
-
-	const [deletedVariantIds, setDeletedVariantIds] = useState<string[]>([]);
 	const [editingLanguage, setEditingLanguage] = useState(selectedLanguage);
 
 	// Keep a stable reference to the original variant IDs from the database
@@ -84,17 +76,6 @@ export function ProductEditForm({
 				[],
 		),
 	);
-
-	const handleVariantRemove = (variantId: string) => {
-		// Only track for deletion if this variant was in the original data from database
-		const existsInDatabase = originalVariantIdsRef.current.has(variantId);
-		if (existsInDatabase) {
-			setDeletedVariantIds((prev) => {
-				const updated = [...prev, variantId];
-				return updated;
-			});
-		}
-	};
 
 	const form = useForm<ProductFormValues>({
 		// biome-ignore lint/suspicious/noExplicitAny: zodResolver type inference issue with complex schema
@@ -137,16 +118,27 @@ export function ProductEditForm({
 		}
 	}, [initialValues?.id, form]);
 
+	// Calculate deleted variants by comparing original IDs with current form IDs
+	// This covers both explicit deletions and implicit removals (e.g. from VariantOptions)
+	const handleSubmit = (values: ProductFormValues) => {
+		const currentIds = new Set(
+			values.variants?.map((v) => v.id).filter(Boolean) as string[],
+		);
+
+		const calculatedDeletedIds = Array.from(
+			originalVariantIdsRef.current,
+		).filter((id) => !currentIds.has(id));
+
+		return onSubmit(values, calculatedDeletedIds);
+	};
+
 	return (
 		<Form {...form}>
 			<form
-				onSubmit={form.handleSubmit(
-					(values) => onSubmit(values, deletedVariantIds),
-					(errors) => {
-						console.error("Form validation errors:", errors);
-						toast.error("Please check the form for errors");
-					},
-				)}
+				onSubmit={form.handleSubmit(handleSubmit, (errors) => {
+					console.error("Form validation errors:", errors);
+					toast.error("Please check the form for errors");
+				})}
 				className="space-y-8 pb-10"
 			>
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -350,10 +342,7 @@ export function ProductEditForm({
 						/>
 
 						{/* Variants */}
-						<VariantsBlock
-							onVariantRemove={handleVariantRemove}
-							selectedLanguage={editingLanguage}
-						/>
+						<VariantsBlock selectedLanguage={editingLanguage} />
 
 						{/* Media */}
 						<Card>

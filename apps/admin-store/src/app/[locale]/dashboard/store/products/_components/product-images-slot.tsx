@@ -28,14 +28,14 @@ export const ProductImagesSlot: SlotComponent<ProductFormValues> = ({
 			initialImages: (formValues?.images as FileMetadata[] | undefined) ?? [],
 
 			onUpdateImages: async (images) => {
+				// Always update the form state to keep it in sync
+				setValue("images", images);
+
 				if (formValues?.id) {
 					await updateProduct({
 						productId: formValues.id,
 						data: { images },
 					});
-				} else {
-					// For new products, set the images in the form immediately
-					setValue("images", images);
 				}
 			},
 		});
