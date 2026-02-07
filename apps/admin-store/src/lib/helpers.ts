@@ -128,11 +128,13 @@ export function formatDateTime(input: Date | string | number): string {
 export function formatCurrency(
 	amount: number,
 	currency = "USD",
-	locale = "en-US",
+	_locale = "en-US",
 ): string {
-	return new Intl.NumberFormat(locale, {
+	return new Intl.NumberFormat("fr-DZ", {
 		style: "currency",
 		currency: currency || "USD",
+		minimumFractionDigits: currency === "DZD" ? 0 : 2,
+		maximumFractionDigits: currency === "DZD" ? 0 : 2,
 	}).format(amount || 0);
 }
 

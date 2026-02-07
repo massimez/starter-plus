@@ -24,6 +24,8 @@ const shippingAddressSchema = z.object({
 	state: z.string().min(1),
 	country: z.string().optional(),
 	postalCode: z.string().optional(),
+	latitude: z.number().optional(),
+	longitude: z.number().optional(),
 });
 
 const orderItemSchema = z.object({

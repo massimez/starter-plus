@@ -280,19 +280,19 @@ export const OrderCard = ({
 					<div className="grid grid-cols-2 gap-3 rounded-lg bg-muted/50 p-3">
 						<div className="space-y-1">
 							<p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
-								Total Amount
-							</p>
-							<p className="font-bold text-lg">
-								{formatCurrency(Number.parseFloat(order.totalAmount))}
-							</p>
-						</div>
-						<div className="space-y-1">
-							<p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
 								Items
 							</p>
 							<p className="flex items-center gap-1 font-bold text-lg">
 								<Package className="h-4 w-4 text-muted-foreground" />
 								{itemCount}
+							</p>
+						</div>
+						<div className="space-y-1">
+							<p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
+								Total Amount
+							</p>
+							<p className="font-bold text-lg">
+								{formatCurrency(Number.parseFloat(order.totalAmount))}
 							</p>
 						</div>
 					</div>
@@ -322,12 +322,24 @@ export const OrderCard = ({
 								<p className="mb-1 font-medium text-muted-foreground text-xs uppercase tracking-wide">
 									Shipping Address
 								</p>
-								<p className="text-sm leading-relaxed">
+								<a
+									href={
+										order.shippingAddress.latitude &&
+										order.shippingAddress.longitude
+											? `https://www.google.com/maps/search/?api=1&query=${order.shippingAddress.latitude},${order.shippingAddress.longitude}`
+											: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+													`${order.shippingAddress.street}, ${order.shippingAddress.city}, ${order.shippingAddress.state} ${order.shippingAddress.zipCode}`,
+												)}`
+									}
+									target="_blank"
+									rel="noopener noreferrer"
+									className="block text-sm leading-relaxed hover:text-primary hover:underline"
+								>
 									{order.shippingAddress.street}
 									<br />
 									{order.shippingAddress.city}, {order.shippingAddress.state}{" "}
 									{order.shippingAddress.zipCode}
-								</p>
+								</a>
 							</div>
 						</div>
 					)}

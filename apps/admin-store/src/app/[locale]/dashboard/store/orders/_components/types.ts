@@ -30,6 +30,8 @@ export type TAddress = {
 	country?: string;
 	zipCode?: string;
 	address?: string;
+	latitude?: number;
+	longitude?: number;
 };
 export interface OrderItem {
 	id: string;

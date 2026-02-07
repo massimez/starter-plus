@@ -13,6 +13,7 @@ import Image from "next/image";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "@/i18n/routing";
 import { useSession } from "@/lib/auth-client";
+import { useFormatPrice } from "@/lib/hooks/use-format-price";
 import { useOrder } from "@/lib/hooks/use-storefront";
 
 interface OrderItem {
@@ -30,7 +31,7 @@ export default function OrderSuccessPage() {
 	const orderId = searchParams.get("orderId");
 	const orderNumber = searchParams.get("orderNumber");
 	const { data: session } = useSession();
-
+	const { formatPrice } = useFormatPrice();
 	// const { data: org } = useOrganization();
 	// const organizationId = org?.id;
 
@@ -94,10 +95,7 @@ export default function OrderSuccessPage() {
 							<div className="text-left sm:text-right">
 								<p className="text-muted-foreground text-sm">Total Amount</p>
 								<p className="font-bold md:text-2xl">
-									{new Intl.NumberFormat("en-US", {
-										style: "currency",
-										currency: orderDetails.currency || "USD",
-									}).format(Number(orderDetails.totalAmount))}
+									{formatPrice(Number(orderDetails.totalAmount))}
 								</p>
 							</div>
 						)}
@@ -195,10 +193,7 @@ export default function OrderSuccessPage() {
 											</div>
 											<div className="text-right">
 												<p className="font-semibold text-sm">
-													{new Intl.NumberFormat("en-US", {
-														style: "currency",
-														currency: orderDetails.currency || "USD",
-													}).format(Number(item.unitPrice))}
+													{formatPrice(Number(item.unitPrice))}
 												</p>
 												<p className="text-muted-foreground text-xs">
 													per item
@@ -213,38 +208,26 @@ export default function OrderSuccessPage() {
 									<div className="flex justify-between text-sm">
 										<span className="text-muted-foreground">Subtotal</span>
 										<span className="font-medium">
-											{new Intl.NumberFormat("en-US", {
-												style: "currency",
-												currency: orderDetails.currency || "USD",
-											}).format(Number(orderDetails.subtotal || 0))}
+											{formatPrice(Number(orderDetails.subtotal || 0))}
 										</span>
 									</div>
 									<div className="flex justify-between text-sm">
 										<span className="text-muted-foreground">Shipping</span>
 										<span className="font-medium">
-											{new Intl.NumberFormat("en-US", {
-												style: "currency",
-												currency: orderDetails.currency || "USD",
-											}).format(Number(orderDetails.shippingAmount || 0))}
+											{formatPrice(Number(orderDetails.shippingAmount || 0))}
 										</span>
 									</div>
 									<div className="flex justify-between text-sm">
 										<span className="text-muted-foreground">Tax</span>
 										<span className="font-medium">
-											{new Intl.NumberFormat("en-US", {
-												style: "currency",
-												currency: orderDetails.currency || "USD",
-											}).format(Number(orderDetails.taxAmount || 0))}
+											{formatPrice(Number(orderDetails.taxAmount || 0))}
 										</span>
 									</div>
 									<div className="border-t pt-2">
 										<div className="flex justify-between">
 											<span className="font-semibold">Total</span>
 											<span className="font-bold text-lg">
-												{new Intl.NumberFormat("en-US", {
-													style: "currency",
-													currency: orderDetails.currency || "USD",
-												}).format(Number(orderDetails.totalAmount))}
+												{formatPrice(Number(orderDetails.totalAmount))}
 											</span>
 										</div>
 									</div>

@@ -28,6 +28,7 @@ import {
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { useRouter } from "@/i18n/routing";
+import { useFormatPrice } from "@/lib/hooks/use-format-price";
 import { OrderStatusSheet } from "../features/cart/checkout/order-status-sheet";
 
 interface Order {
@@ -53,6 +54,7 @@ export function OrderHistory({ orders, isLoadingOrders }: OrderHistoryProps) {
 	const [sortBy, setSortBy] = useState<string>("newest");
 	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 	const [sheetOpen, setSheetOpen] = useState(false);
+	const { formatPrice } = useFormatPrice();
 
 	const statusConfig = useMemo(
 		() => ({
@@ -246,11 +248,7 @@ export function OrderHistory({ orders, isLoadingOrders }: OrderHistoryProps) {
 														{t("totalAmount")}
 													</p>
 													<p className="font-bold text-xl tracking-tight">
-														{new Intl.NumberFormat(locale, {
-															style: "currency",
-															currency: order.currency || "USD",
-															currencyDisplay: "symbol",
-														}).format(Number(order.totalAmount))}
+														{formatPrice(Number(order.totalAmount))}
 													</p>
 												</div>
 												<div className="rounded-full bg-muted p-2 transition-colors group-hover:bg-primary group-hover:text-primary-foreground">

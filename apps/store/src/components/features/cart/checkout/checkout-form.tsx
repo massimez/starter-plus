@@ -250,7 +250,11 @@ export function CheckoutForm({
 			const payload = {
 				locationId,
 				currency,
-				shippingAddress: data.shippingAddress,
+				shippingAddress: {
+					...data.shippingAddress,
+					latitude: data.shippingAddress.lat,
+					longitude: data.shippingAddress.lng,
+				},
 				customerEmail: data.customerInfo.email,
 				customerPhone: data.customerInfo.phone,
 				customerFullName: data.customerInfo.fullName,

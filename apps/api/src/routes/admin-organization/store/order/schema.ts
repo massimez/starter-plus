@@ -6,6 +6,8 @@ export const shippingAddressSchema = z.object({
 	state: z.string().min(1),
 	country: z.string().min(1),
 	postalCode: z.string().min(1),
+	latitude: z.number().optional(),
+	longitude: z.number().optional(),
 });
 
 export const orderItemSchema = z.object({

@@ -54,6 +54,7 @@ const LANGUAGE_OPTIONS = [
 ];
 
 const CURRENCY_OPTIONS = [
+	{ value: "DZD", label: "DZD (DA)" },
 	{ value: "USD", label: "USD ($)" },
 	{ value: "EUR", label: "EUR (€)" },
 	{ value: "GBP", label: "GBP (£)" },

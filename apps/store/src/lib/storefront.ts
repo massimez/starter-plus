@@ -108,6 +108,8 @@ export const storefrontClient = {
 			state: string;
 			country?: string;
 			postalCode?: string;
+			latitude?: number;
+			longitude?: number;
 		};
 		items: Array<{
 			productVariantId: string;
